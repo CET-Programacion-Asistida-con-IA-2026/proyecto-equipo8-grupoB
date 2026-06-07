@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║               GUMMY ✿ TU ESPACIO COZY                       ║
+  ║         Chicas en Tec · Grupo 8B                            ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║  ESTRUCTURA DE ARCHIVOS:                                     ║
+  ║    index.html  ← este archivo (estructura)                   ║
+  ║    style.css   ← todos los estilos visuales                  ║
+  ║    script.js   ← toda la lógica e interactividad             ║
+  ║                                                              ║
+  ║  PARA REEMPLAZAR SPRITES / IMÁGENES:                         ║
+  ║    · Gummy:  buscá el bloque <svg id="gummy-svg"> y          ║
+  ║              reemplazalo por <img src="tu-gummy.png">         ║
+  ║    · Fondo:  en style.css buscá #scene-bg                    ║
+  ║    · Plantas: en script.js buscá la función plantImageHTML()  ║
+  ╚══════════════════════════════════════════════════════════════╝
+-->
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- ── TÍTULO DE LA PESTAÑA ─────────────────────────────────── -->
+  <title>Gummy ✿ Tu espacio cozy</title>
+
+  <!-- ── FUENTES DE GOOGLE ────────────────────────────────────────
+       Nunito     → texto general (redondita y legible)
+       Fredoka One → títulos y carteles grandes
+       Para cambiar la fuente: reemplazá los nombres acá y en style.css
+  ──────────────────────────────────────────────────────────────── -->
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+
+  <!-- ── HOJA DE ESTILOS EXTERNA ──────────────────────────────── -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<!-- ── CLASE day/night: el JS la cambia sola según la hora ─────── -->
+<body class="day">
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PANTALLA DE CARGA
+     Se muestra al entrar y desaparece al cargar la página.
+     Para cambiar el texto de carga: editá .loading-text
+     Para cambiar el tiempo: buscá setTimeout en script.js → "LOADING"
+═════════════════════════════════════════════════════════════════ -->
+<div id="loading-overlay">
+  <div class="loading-text">✿ Gummy te espera ✿</div>
+  <div class="loading-bounce">
+    <span></span><span></span><span></span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     LLUVIA
+     El JS la activa aleatoriamente. Las gotitas se generan en script.js.
+     Para cambiar la frecuencia: buscá "shouldRain" en script.js
+═════════════════════════════════════════════════════════════════ -->
+<div id="rain-container"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     ESCENA DE FONDO (FIJA, DETRÁS DE TODO)
+     Contiene: cielo día/noche, estrellas, sol/luna, ventana, piso, plantas.
+     Para reemplazar por una imagen tuya:
+       · En style.css, buscá #scene-bg y agregá:
+         background-image: url('tu-fondo.png');
+         background-size: cover;
+═════════════════════════════════════════════════════════════════ -->
+<div id="scene">
+  <div id="scene-bg"></div>
+
+  <div id="scene-content">
+
+    <!-- Estrellas: se generan dinámicamente en script.js → "Generate stars" -->
+    <div id="stars-container"></div>
+
+    <!-- Sol de día / Luna de noche: cambia con CSS según clase .day / .night -->
+    <div id="celestial"></div>
+
+    <!-- Ventana decorativa en el fondo
+         Para cambiar su tamaño: buscá #window-frame en style.css
+         Para cambiar su posición: left / top en style.css -->
+    <div id="window-frame">
+      <div class="window-pane"></div>
+    </div>
+
+    <!-- Plantas del alféizar de la ventana (decorativas, no las de tareas)
+         Para cambiar los emojis o poner imágenes: editá los span de abajo
+         Para cambiar posición: editá el style="left:..." inline -->
+    <div class="windowsill-plant" style="left:calc(50% - 120px); font-size:28px; animation-delay:0s;">🌿</div>
+    <div class="windowsill-plant" style="left:calc(50% + 60px);  font-size:24px; animation-delay:1.2s;">🪴</div>
+    <div class="windowsill-plant" style="left:calc(50% - 60px);  font-size:20px; animation-delay:0.6s;">🌱</div>
+
+    <!-- Piso / zócalo inferior del fondo -->
+    <div id="floor"></div>
+
+  </div>
+</div><!-- fin #scene -->
+
+<!-- ═══════════════════════════════════════════════════════════════
+     GUIRNALDA DE LUCES (fija arriba de todo)
+     Los colores de las lamparitas se configuran en script.js → "GARLAND"
+     El cable se dibuja automáticamente con SVG según el ancho de pantalla.
+═════════════════════════════════════════════════════════════════ -->
+<div class="garland">
+  <svg viewBox="0 0 1200 60" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <path id="garland-path" class="garland-wire" d=""/>
+    <g id="garland-bulbs"></g>
+  </svg>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     CONTROLES DE SONIDO (arriba a la derecha, siempre visibles)
+     🔔 = efectos de sonido (clicks, teclas)
+     🎵 = música de fondo (abre el selector de pistas)
+     Para agregar pistas: buscá "PISTAS DE MÚSICA" en script.js
+═════════════════════════════════════════════════════════════════ -->
+<div class="sound-controls">
+  <button class="sound-btn" id="sfx-btn" title="Efectos de sonido">🔔</button>
+  <button class="sound-btn" id="music-btn" title="Música">🎵</button>
+
+  <!-- Selector de pistas: se abre al clickear el botón de música
+       Para agregar una pista: agregá un <button class="track-btn" data-track="3">
+       y en script.js sumá las notas correspondientes en trackNotes[]
+       data-track="-1" siempre significa "sin música" -->
+  <div class="track-selector" id="track-selector">
+    <button class="track-btn active" data-track="0">☕ Café Cozy</button>
+    <button class="track-btn"        data-track="1">🌧️ Lluvia & Jazz</button>
+    <button class="track-btn"        data-track="2">🍂 Otoño Suave</button>
+    <button class="track-btn"        data-track="-1"
+            style="border-top:1.5px solid var(--caramel-light); margin-top:2px; padding-top:8px">
+      🔇 Ninguna
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     APP — CONTENEDOR PRINCIPAL
+     Está encima del fondo con z-index mayor.
+     Cada sección ocupa al menos 100vh de altura.
+═════════════════════════════════════════════════════════════════ -->
+<div id="app">
+
+  <!-- ─────────────────────────────────────────────────────────────
+       SECCIÓN 1: BIENVENIDA + PANEL DE GUMMY
+       Layout: dos columnas (tarjeta bienvenida | panel Gummy)
+       En mobile pasan a una columna (ver style.css → @media)
+  ────────────────────────────────────────────────────────────── -->
+  <section class="section" id="section-welcome">
+    <div class="welcome-layout">
+
+      <!-- TARJETA DE BIENVENIDA ───────────────────────────────────
+           .reveal = aparece con animación al entrar en pantalla
+           Para cambiar los saludos que se escriben solos:
+             buscá "greetings" en script.js
+           Para cambiar las frases motivacionales:
+             buscá "quotes" en script.js -->
+      <div class="card welcome-card reveal">
+        <div class="greeting-line">
+          <!-- El texto se escribe letra a letra con JS -->
+          <span id="typed-greeting"></span><span class="cursor-blink"></span>
+        </div>
+
+        <!-- Frase motivacional que rota cada 5 segundos -->
+        <div class="motivational-quote" id="motivational-quote">
+          "Cada pequeño paso cuenta. ¡Hoy es un buen día para empezar! 🌱"
+        </div>
+
+        <!-- Badges decorativos
+             Para cambiar el texto o agregar más: editá los .deco-badge -->
+        <div class="welcome-decorations">
+          <div class="deco-badge">🌿 Tu espacio</div>
+          <div class="deco-badge">✨ Tu ritmo</div>
+          <div class="deco-badge">💛 Tu futuro</div>
+        </div>
+      </div><!-- fin welcome-card -->
+
+      <!-- PANEL DE GUMMY ──────────────────────────────────────────
+           Compuesto de dos partes unidas visualmente:
+           1. .gummy-frame  → el personaje
+           2. .gummy-chat   → el chat con IA
+
+           Para reemplazar el SVG por tu propio dibujo:
+             Eliminá todo el bloque <svg id="gummy-svg">...</svg>
+             y poné en su lugar: <img id="gummy-img" src="tu-gummy.png">
+             Luego en script.js buscá "GUMMY ANIMATIONS" y
+             reemplazá gummySvg.style.transform por gummyImg.style.transform
+      ────────────────────────────────────────────────────────────── -->
+      <div class="gummy-panel reveal" style="transition-delay:0.15s">
+
+        <!-- Marco superior con el personaje -->
+        <div class="gummy-frame">
+          <div class="gummy-frame-label">✦ Gummy, tu consejera ✦</div>
+
+          <!-- Contenedor clickeable de Gummy
+               Las reacciones se definen en script.js → "GUMMY ANIMATIONS" -->
+          <div id="gummy-wrapper">
+
+            <!-- ══════════════════════════════════════════════════
+                 PERSONAJE GUMMY — SVG INLINE
+                 ══════════════════════════════════════════════════
+                 Grupos con id que el JS controla para cambiar expresión:
+                   #eyes-normal  → ojos normales (estado idle)
+                   #eyes-happy   → ojos de arco (hover / click)
+                   #eyes-sleep   → ojos cerrados (inactiva)
+                   #eyes-study   → ojos con anteojos (scroll)
+                   #gummy-book   → libro en manos (estado study)
+                   #gummy-zzz    → letras Z flotando (estado sleep)
+                   #gummy-hearts → corazones (click)
+                   #mouth-smile  → boca sonriente
+                   #mouth-sleep  → boca neutral para dormir
+
+                 PARA REEMPLAZAR POR TU IMAGEN:
+                   Borrá todo el <svg>...</svg> y poné:
+                   <img id="gummy-img" src="sprites/gummy-idle.png"
+                        style="width:160px; height:180px; object-fit:contain">
+                   Luego en script.js adaptá setGummyState() para
+                   cambiar el src en lugar de mostrar/ocultar grupos SVG.
+            ══════════════════════════════════════════════════════ -->
+            <svg id="gummy-svg" viewBox="0 0 160 180" xmlns="http://www.w3.org/2000/svg">
+              <!-- Cuerpo -->
+              <ellipse cx="80" cy="130" rx="45" ry="40" fill="#F9D4A0"/>
+              <!-- Cabeza -->
+              <ellipse cx="80" cy="82"  rx="42" ry="40" fill="#F9D4A0"/>
+              <!-- Oreja izquierda -->
+              <ellipse id="ear-l" cx="52" cy="45" rx="12" ry="24" fill="#F9D4A0" transform="rotate(-8 52 45)"/>
+              <ellipse            cx="52" cy="45" rx="7"  ry="17" fill="#FFBCBC" transform="rotate(-8 52 45)"/>
+              <!-- Oreja derecha -->
+              <ellipse id="ear-r" cx="108" cy="45" rx="12" ry="24" fill="#F9D4A0" transform="rotate(8 108 45)"/>
+              <ellipse            cx="108" cy="45" rx="7"  ry="17" fill="#FFBCBC" transform="rotate(8 108 45)"/>
+              <!-- Cachetes -->
+              <ellipse id="cheek-l" cx="58"  cy="90" rx="10" ry="7" fill="#FFBCBC" opacity="0.6"/>
+              <ellipse id="cheek-r" cx="102" cy="90" rx="10" ry="7" fill="#FFBCBC" opacity="0.6"/>
+
+              <!-- ── OJOS (el JS muestra/oculta según el estado) ── -->
+              <g id="gummy-eyes">
+                <g id="eyes-normal">
+                  <ellipse cx="68" cy="80" rx="7" ry="8" fill="#3A1E08"/>
+                  <ellipse cx="92" cy="80" rx="7" ry="8" fill="#3A1E08"/>
+                  <circle  cx="70" cy="77" r="2.5" fill="white"/>
+                  <circle  cx="94" cy="77" r="2.5" fill="white"/>
+                </g>
+                <g id="eyes-happy" style="display:none">
+                  <path d="M61 80 Q68 73 75 80" stroke="#3A1E08" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                  <path d="M85 80 Q92 73 99 80" stroke="#3A1E08" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                </g>
+                <g id="eyes-sleep" style="display:none">
+                  <path d="M61 82 Q68 78 75 82" stroke="#3A1E08" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                  <path d="M85 82 Q92 78 99 82" stroke="#3A1E08" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                </g>
+                <g id="eyes-study" style="display:none">
+                  <ellipse cx="68" cy="80" rx="7" ry="8" fill="#3A1E08"/>
+                  <ellipse cx="92" cy="80" rx="7" ry="8" fill="#3A1E08"/>
+                  <circle  cx="70" cy="77" r="2.5" fill="white"/>
+                  <circle  cx="94" cy="77" r="2.5" fill="white"/>
+                  <!-- Anteojos -->
+                  <rect x="57" y="72" width="22" height="16" rx="6" fill="none" stroke="#7A4A1E" stroke-width="2"/>
+                  <rect x="81" y="72" width="22" height="16" rx="6" fill="none" stroke="#7A4A1E" stroke-width="2"/>
+                  <line x1="79" y1="78" x2="81"  y2="78" stroke="#7A4A1E" stroke-width="2"/>
+                  <line x1="57" y1="78" x2="52"  y2="76" stroke="#7A4A1E" stroke-width="2"/>
+                  <line x1="103" y1="78" x2="108" y2="76" stroke="#7A4A1E" stroke-width="2"/>
+                </g>
+              </g>
+
+              <!-- Nariz -->
+              <ellipse cx="80" cy="90" rx="4" ry="3" fill="#E8A898"/>
+
+              <!-- ── BOCA ── -->
+              <g id="gummy-mouth">
+                <path id="mouth-smile" d="M72 97 Q80 104 88 97" stroke="#C87878" stroke-width="2" fill="none" stroke-linecap="round"/>
+                <path id="mouth-sleep" d="M74 97 Q80 96 86 97"  stroke="#C87878" stroke-width="2" fill="none" stroke-linecap="round" style="display:none"/>
+              </g>
+
+              <!-- ── EXTRAS SEGÚN ESTADO ── -->
+              <g id="gummy-book" style="display:none">
+                <rect x="50" y="140" width="60" height="35" rx="4" fill="#7AB648"/>
+                <rect x="50" y="140" width="30" height="35" rx="4" fill="#5A8A28"/>
+                <line x1="80" y1="140" x2="80" y2="175" stroke="#3A1E08" stroke-width="1.5"/>
+                <line x1="58" y1="150" x2="72" y2="150" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+                <line x1="58" y1="156" x2="72" y2="156" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+                <line x1="88" y1="150" x2="102" y2="150" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+              </g>
+              <g id="gummy-zzz" style="display:none">
+                <text x="112" y="62" font-size="14" font-family="Fredoka One" fill="#C8853A" opacity="0.8">z</text>
+                <text x="122" y="52" font-size="11" font-family="Fredoka One" fill="#C8853A" opacity="0.6">z</text>
+                <text x="130" y="44" font-size="9"  font-family="Fredoka One" fill="#C8853A" opacity="0.4">z</text>
+              </g>
+              <g id="gummy-hearts" style="display:none">
+                <text x="110" y="55" font-size="14">💗</text>
+                <text x="28"  y="60" font-size="11">💕</text>
+                <text x="118" y="75" font-size="10">🩷</text>
+              </g>
+
+              <!-- Lazo / bufanda -->
+              <ellipse cx="80" cy="118" rx="14" ry="6"  fill="#C8853A"/>
+              <ellipse cx="69" cy="118" rx="8"  ry="5"  fill="#E8A85A" transform="rotate(-15 69 118)"/>
+              <ellipse cx="91" cy="118" rx="8"  ry="5"  fill="#E8A85A" transform="rotate(15 91 118)"/>
+
+              <!-- Brazos -->
+              <ellipse id="arm-l" cx="38"  cy="130" rx="10" ry="18" fill="#F9D4A0" transform="rotate(15 38 130)"/>
+              <ellipse id="arm-r" cx="122" cy="130" rx="10" ry="18" fill="#F9D4A0" transform="rotate(-15 122 130)"/>
+
+              <!-- Pies -->
+              <ellipse cx="65" cy="168" rx="14" ry="8" fill="#F9D4A0"/>
+              <ellipse cx="95" cy="168" rx="14" ry="8" fill="#F9D4A0"/>
+            </svg><!-- fin gummy-svg -->
+
+          </div><!-- fin gummy-wrapper -->
+
+          <!-- Etiqueta de estado debajo de Gummy (ej: "¡Hola! 🐰", "zzz... 😴") -->
+          <div class="gummy-state-label" id="gummy-state-label">¡Hola! 🐰</div>
+        </div><!-- fin gummy-frame -->
+
+        <!-- CHAT CON IA ──────────────────────────────────────────
+             La lógica del chat está en script.js → "GUMMY AI CHAT"
+             El sistema prompt (personalidad de Gummy) también está ahí.
+             Para cambiar qué dice Gummy: buscá "system:" en script.js -->
+        <div class="gummy-chat">
+          <!-- Historial de mensajes (se llena dinámicamente) -->
+          <div class="chat-messages" id="chat-messages">
+            <!-- Mensaje inicial de bienvenida -->
+            <div class="chat-msg gummy">
+              ¡Hola! Soy Gummy 🐰✨ Contame, ¿en qué te ayudo hoy?
+              Puedo buscarte oportunidades laborales o simplemente escucharte 💛
+            </div>
+          </div>
+
+          <!-- Fila de input + botón enviar -->
+          <div class="chat-input-row">
+            <input  type="text"
+                    class="chat-input"
+                    id="chat-input"
+                    placeholder="Escribile a Gummy..."
+                    autocomplete="off"/>
+            <button class="chat-send-btn" id="chat-send-btn">➤</button>
+          </div>
+        </div><!-- fin gummy-chat -->
+
+      </div><!-- fin gummy-panel -->
+
+    </div><!-- fin welcome-layout -->
+  </section><!-- fin section-welcome -->
+
+  <!-- ─────────────────────────────────────────────────────────────
+       SECCIÓN 2: INVERNADERO DE HABILIDADES
+       Layout: dos columnas (plantas | tareas)
+       Las plantas y tareas se generan dinámicamente desde script.js
+       Para cambiar las tareas de ejemplo: buscá "let tasks" en script.js
+  ────────────────────────────────────────────────────────────── -->
+  <section class="section" id="section-greenhouse">
+    <div class="card greenhouse-card reveal">
+
+      <!-- Título de sección
+           Para cambiar el emoji o texto: editá directamente acá -->
+      <div class="section-title">🌿 Tu invernadero de habilidades</div>
+
+      <div class="greenhouse-layout">
+        <!-- Área de plantas (el JS pone una planta por cada tarea) -->
+        <div class="plants-area">
+          <div class="plants-row" id="plants-row">
+            <!-- Las plantas se generan en script.js → renderPlants() -->
+          </div>
+        </div>
+
+        <!-- Área de tareas (lista expandible con subtareas) -->
+        <div class="tasks-area" id="tasks-area">
+          <!-- Las tareas se generan en script.js → renderTasks() -->
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────────
+       SECCIÓN 3: MAPA DE RUTA LABORAL
+       Post-its arrastrables con snap a grilla.
+       Para cambiar el contenido inicial: buscá "let postits" en script.js
+       Para cambiar el tamaño de los post-its: buscá POSTIT_W y POSTIT_H
+  ────────────────────────────────────────────────────────────── -->
+  <section class="section" id="section-roadmap">
+    <div class="card roadmap-card reveal">
+      <div class="section-title">📌 Mapa de ruta laboral</div>
+
+      <!-- Los post-its se generan en script.js → renderPostits() -->
+      <div class="postits-container" id="postits-container"></div>
+
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────────
+       FOOTER
+       Para cambiar el texto: editá directamente acá
+  ────────────────────────────────────────────────────────────── -->
+  <footer class="section" id="section-footer">
+    <div class="footer-inner">
+      <div class="footer-emoji">🐰✿</div>
+      <div class="footer-logo">Chicas en Tec</div>
+      <div class="footer-sub">Grupo 8B · Con amor y código 💛</div>
+    </div>
+  </footer>
+
+</div><!-- fin #app -->
+
+<!-- ── SCRIPT PRINCIPAL ─────────────────────────────────────────── -->
+<script src="script.js"></script>
+
+</body>
+</html>
