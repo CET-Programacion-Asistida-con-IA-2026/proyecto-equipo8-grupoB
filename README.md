@@ -1,19 +1,35 @@
-## Grupo A/B - Equipo {numero}
+## Grupo B - Equipo 8
 _Curso de Programación Asistida con IA - Chicas en Tecnología_ 🚀
-
-```⚠️ Dejar la opción correcta entre Grupo A (Grupo de 17 a 19hs) y Grupo B (Grupo de 19 a 21hs) y agregar el número de equipo ⚠️```
 
 En este repositorio, se presenta el sitio web realizado durante el curso de programación frontend de CET.
 
 ### 📄 Entregas
 **Entrega #1**: planificación de la solución y primeros resultados que obtengamos con la IA:
 
-📝 Edición del Archivo README incluyendo:
-- Definición de la problemática que eligieron abordar
-- Relación con los *Objetivos de Desarrollo Sostenible (ODS)*[^1]
-- Explicación de la solución tecnológica que están desarrollando
-> [!TIP]
-> Aprovechen los [formatos del README](https://docs.github.com/es/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax) para escribir diferentes secciones
+Problemática y ODS: Muchos jóvenes sienten frustración, ansiedad y desmotivación durante la búsqueda laboral.
+El proceso suele ser largo, repetitivo y emocionalmente agotador, especialmente para quienes buscan su primer empleo o no tienen experiencia previa.
+Las plataformas actuales ayudan a encontrar ofertas, pero no acompañan al usuario en su crecimiento personal ni lo motivan a mantener constancia.
+ODS 3 - Bienestar y Salud y ODS 8 - Trabajo decente y crecimiento económico.
+
+Diseñado para:
+Jóvenes de 18 a 30 años:
+- estudiantes
+- personas buscando su primer empleo
+- freelancers
+- diseñadores, artistas y desarrolladores junior
+
+Objetivo a crear: Una web para organizarse, sentirse motivado y encontrar oportunidades laborales de una forma más personalizada y con un seguimiento.
+
+Funcionalidades principales: 
+
+- Tracker laboral
+
+- Gamificación
+
+- Acompañante virtual
+
+- Recomendaciones laborales/becas/pasantías
+
 
 🎨 Moodboard
 
