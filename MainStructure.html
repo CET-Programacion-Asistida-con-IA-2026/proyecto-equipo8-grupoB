@@ -5,15 +5,15 @@
   ║         Chicas en Tec · Grupo 8B                            ║
   ╠══════════════════════════════════════════════════════════════╣
   ║  ESTRUCTURA DE ARCHIVOS:                                     ║
-  ║    index.html  ← este archivo (estructura)                   ║
-  ║    style.css   ← todos los estilos visuales                  ║
-  ║    script.js   ← toda la lógica e interactividad             ║
+  ║    MainStructure.html  ← este archivo (estructura)           ║
+  ║    MainStyle.css       ← todos los estilos visuales          ║
+  ║    MainJS.js           ← toda la lógica e interactividad     ║
   ║                                                              ║
   ║  PARA REEMPLAZAR SPRITES / IMÁGENES:                         ║
   ║    · Gummy:  buscá el bloque <svg id="gummy-svg"> y          ║
   ║              reemplazalo por <img src="tu-gummy.png">         ║
-  ║    · Fondo:  en style.css buscá #scene-bg                    ║
-  ║    · Plantas: en script.js buscá la función plantImageHTML()  ║
+  ║    · Fondo:  en MainStyle.css buscá #scene-bg                ║
+  ║    · Plantas: en MainJS.js buscá la función plantImageHTML()  ║
   ╚══════════════════════════════════════════════════════════════╝
 -->
 <html lang="es">
@@ -32,7 +32,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
 
   <!-- ── HOJA DE ESTILOS EXTERNA ──────────────────────────────── -->
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="MainStyle.css">
 </head>
 
 <!-- ── CLASE day/night: el JS la cambia sola según la hora ─────── -->
@@ -402,7 +402,7 @@
 </div><!-- fin #app -->
 
 <!-- ── SCRIPT PRINCIPAL ─────────────────────────────────────────── -->
-<script src="script.js"></script>
+<script src="MainJS.js"></script>
 
 </body>
 </html>
