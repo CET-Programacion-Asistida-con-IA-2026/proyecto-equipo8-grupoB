@@ -1,51 +1,137 @@
-## Grupo B - Equipo 8
-_Curso de Programación Asistida con IA - Chicas en Tecnología_ 🚀
+# 🌱 JobQuest - Compañero Gamificado para la Búsqueda Laboral
 
-En este repositorio, se presenta el sitio web realizado durante el curso de programación frontend de CET.
+## 📌 Sobre el Proyecto
 
-### 📄 Entregas
-**Entrega #1**: planificación de la solución y primeros resultados que obtengamos con la IA:
+**JobQuest** es una plataforma web diseñada para transformar la búsqueda laboral en una experiencia más organizada, motivadora y personalizada.
 
-Problemática y ODS: Muchos jóvenes sienten frustración, ansiedad y desmotivación durante la búsqueda laboral.
-El proceso suele ser largo, repetitivo y emocionalmente agotador, especialmente para quienes buscan su primer empleo o no tienen experiencia previa.
-Las plataformas actuales ayudan a encontrar ofertas, pero no acompañan al usuario en su crecimiento personal ni lo motivan a mantener constancia.
-ODS 3 - Bienestar y Salud y ODS 8 - Trabajo decente y crecimiento económico.
+Muchos jóvenes experimentan frustración, ansiedad y desmotivación al buscar empleo. El proceso suele ser largo, repetitivo y emocionalmente agotador, especialmente para estudiantes, freelancers y personas que buscan su primera oportunidad laboral.
 
-Diseñado para:
-Jóvenes de 18 a 30 años:
-- estudiantes
-- personas buscando su primer empleo
-- freelancers
-- diseñadores, artistas y desarrolladores junior
+Nuestro objetivo no es solo ayudar a encontrar ofertas de trabajo, sino también acompañar al usuario durante su crecimiento profesional, brindándole herramientas para mantenerse organizado, motivado y constante en el camino hacia sus metas.
 
-Objetivo a crear: Una web para organizarse, sentirse motivado y encontrar oportunidades laborales de una forma más personalizada y con un seguimiento.
+Este proyecto contribuye a los siguientes Objetivos de Desarrollo Sostenible (ODS):
 
-Funcionalidades principales: 
+* **ODS 3:** Salud y Bienestar
+* **ODS 8:** Trabajo Decente y Crecimiento Económico
+  
+---
 
-- Tracker laboral
+## 🎯 Público Objetivo
 
-- Gamificación
+JobQuest está orientado a jóvenes de entre **18 y 30 años**, incluyendo:
 
-- Acompañante virtual
+* Estudiantes
+* Personas en búsqueda de su primer empleo
+* Freelancers
+* Diseñadores junior
+* Artistas junior
+* Desarrolladores junior
 
-- Recomendaciones laborales/becas/pasantías
+---
 
+## ✨ Funcionalidades Principales
 
-🎨 Moodboard
+### 📊 Tracker Laboral
 
-🧩 Archivos generados con asistencia de IA: ```index.html```, ```style.css```, ```script.js```
+Permite organizar y realizar un seguimiento del proceso de búsqueda de empleo.
 
+* Registro de postulaciones
+* Seguimiento del estado de cada aplicación
+* Gestión de entrevistas y fechas importantes
+* Visualización del progreso personal
 
-**Entrega #2 (Final)**: se esperan modificaciones en el código respecto a la entrega anterior, que pueden incluir nuevos archivos o extensión de los existentes (debe haber al menos un archivo de cada lenguaje visto - HTML, CSS y Javascript)
+### 🎮 Sistema de Gamificación
 
-💡 Es una buena idea llevar un registro de lo que cambiamos. Por ejemplo
+Convierte la búsqueda laboral en una experiencia más dinámica y motivadora.
+
+* Sistema de experiencia (XP)
+* Logros y recompensas
+* Niveles de progreso
+* Desafíos diarios y semanales
+
+### 🤖 Acompañante Virtual
+
+Un asistente digital que brinda apoyo durante el proceso.
+
+* Consejos personalizados
+* Recordatorios y seguimiento
+* Mensajes motivacionales
+* Orientación para mantener hábitos saludables de búsqueda laboral
+
+### 🚀 Recomendaciones de Oportunidades
+
+Centraliza oportunidades relevantes para cada usuario.
+
+* Empleos
+* Pasantías
+* Becas
+* Programas para jóvenes profesionales
+   
+---
+
+## 🛠️ Tecnologías Utilizadas
+
+Este proyecto fue desarrollado utilizando tecnologías web fundamentales:
+
+* **HTML5** para la estructura del sitio.
+* **CSS3** para el diseño visual y la experiencia de usuario.
+* **JavaScript** para la interactividad y funcionalidades dinámicas.
+  
+---
+
+## 🎨 Objetivos de Diseño
+
+La plataforma busca transmitir una sensación de acompañamiento, tranquilidad y progreso constante durante la búsqueda laboral.
+
+Principios de diseño:
+
+* Simplicidad de uso
+* Accesibilidad
+* Personalización
+* Motivación continua
+* Experiencia amigable y acogedora
+
+Moodboard: https://docs.google.com/presentation/d/1UjQiz-wYJNU3N1T9IKiMgU8IXMzhrv2LxaeFUtCaS8o/edit?usp=sharing 
+
+---
+
+## 📂 Estructura del Proyecto
+
+```plaintext
+project/
+│
+├── index.html
+├── css/
+│   └── styles.css
+│
+├── js/
+│   └── script.js
+│
+├── assets/
+│   ├── images/
+│   └── icons/
+│
+└── README.md
 ```
-- Agregamos Bootstrap para el carrousel de imágenes...
-- Modificamos el texto de la sección de bienvenida...
-- Transformamos los textos sobre redes sociales en links...
-```
 
-Ahora si, ¡A programar! 🚀
+---
 
+## 🚀 Mejoras Futuras
 
-[^1]: Los Objetivos de Desarrollo Sostenible u Objetivos Globales, también conocidos como Agenda 2030, son 17 objetivos globales interconectados diseñados para ser un «plan para lograr un futuro mejor y más sostenible para todos». Más información en https://www.un.org/sustainabledevelopment/es/objetivos-de-desarrollo-sostenible/
+* Sistema de cuentas y perfiles de usuario
+* Integración con inteligencia artificial
+* Estadísticas avanzadas de progreso
+* Comunidad y networking entre usuarios
+* Aplicación móvil
+* Integración con plataformas laborales externas
+
+---
+
+## 👥 Equipo
+
+Proyecto desarrollado con el objetivo de generar un impacto positivo en la experiencia de búsqueda laboral de los jóvenes, combinando organización, bienestar emocional y oportunidades de crecimiento profesional.
+
+---
+
+## 💡 Nuestra Visión
+
+Creemos que buscar trabajo no debería ser una experiencia solitaria ni desmotivadora. JobQuest busca acompañar a cada usuario en su recorrido profesional, ayudándolo a mantenerse enfocado, motivado y preparado para alcanzar nuevas oportunidades.
