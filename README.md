@@ -9,7 +9,7 @@ Muchos jóvenes experimentan frustración, ansiedad y desmotivación al buscar e
 Nuestro objetivo no es solo ayudar a encontrar ofertas de trabajo, sino también acompañar al usuario durante su crecimiento profesional, brindándole herramientas para mantenerse organizado, motivado y constante en el camino hacia sus metas.
 
 Este proyecto contribuye a los siguientes Objetivos de Desarrollo Sostenible (ODS):
-
+  
 * **ODS 3:** Salud y Bienestar
 * **ODS 8:** Trabajo Decente y Crecimiento Económico
   
@@ -22,9 +22,8 @@ JobQuest está orientado a jóvenes de entre **18 y 30 años**, incluyendo:
 * Estudiantes
 * Personas en búsqueda de su primer empleo
 * Freelancers
-* Diseñadores junior
-* Artistas junior
-* Desarrolladores junior
+* Personas que buscan organizarse
+* Personas que buscan motivarse
 
 ---
 
@@ -39,14 +38,6 @@ Permite organizar y realizar un seguimiento del proceso de búsqueda de empleo.
 * Gestión de entrevistas y fechas importantes
 * Visualización del progreso personal
 
-### 🎮 Sistema de Gamificación
-
-Convierte la búsqueda laboral en una experiencia más dinámica y motivadora.
-
-* Sistema de experiencia (XP)
-* Logros y recompensas
-* Niveles de progreso
-* Desafíos diarios y semanales
 
 ### 🤖 Acompañante Virtual
 
@@ -72,8 +63,8 @@ Centraliza oportunidades relevantes para cada usuario.
 
 Este proyecto fue desarrollado utilizando tecnologías web fundamentales:
 
-* **HTML5** para la estructura del sitio.
-* **CSS3** para el diseño visual y la experiencia de usuario.
+* **HTML** para la estructura del sitio.
+* **CSS** para el diseño visual y la experiencia de usuario.
 * **JavaScript** para la interactividad y funcionalidades dinámicas.
   
 ---
@@ -131,7 +122,7 @@ project/
 Proyecto desarrollado con el objetivo de generar un impacto positivo en la experiencia de búsqueda laboral de los jóvenes, combinando organización, bienestar emocional y oportunidades de crecimiento profesional.
 
 ---
-
+   
 ## 💡 Nuestra Visión
 
 Creemos que buscar trabajo no debería ser una experiencia solitaria ni desmotivadora. JobQuest busca acompañar a cada usuario en su recorrido profesional, ayudándolo a mantenerse enfocado, motivado y preparado para alcanzar nuevas oportunidades.
