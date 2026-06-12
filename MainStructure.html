@@ -84,30 +84,12 @@
       <div class="window-pane"></div>
     </div>
 
-    <!-- Plantas del alféizar de la ventana (decorativas, no las de tareas)
-         Para cambiar los emojis o poner imágenes: editá los span de abajo
-         Para cambiar posición: editá el style="left:..." inline -->
-    <div class="windowsill-plant" style="left:calc(50% - 120px); font-size:28px; animation-delay:0s;">🌿</div>
-    <div class="windowsill-plant" style="left:calc(50% + 60px);  font-size:24px; animation-delay:1.2s;">🪴</div>
-    <div class="windowsill-plant" style="left:calc(50% - 60px);  font-size:20px; animation-delay:0.6s;">🌱</div>
-
     <!-- Piso / zócalo inferior del fondo -->
     <div id="floor"></div>
-
+   
   </div>
 </div><!-- fin #scene -->
 
-<!-- ═══════════════════════════════════════════════════════════════
-     GUIRNALDA DE LUCES (fija arriba de todo)
-     Los colores de las lamparitas se configuran en script.js → "GARLAND"
-     El cable se dibuja automáticamente con SVG según el ancho de pantalla.
-═════════════════════════════════════════════════════════════════ -->
-<div class="garland">
-  <svg viewBox="0 0 1200 60" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-    <path id="garland-path" class="garland-wire" d=""/>
-    <g id="garland-bulbs"></g>
-  </svg>
-</div>
 
 <!-- ═══════════════════════════════════════════════════════════════
      CONTROLES DE SONIDO (arriba a la derecha, siempre visibles)
