@@ -14,7 +14,7 @@
 ║   8.  Scroll reveal (aparición de secciones)                     ║
 ║   9.  Saludo animado letra a letra                               ║
 ║  10.  Frases motivacionales rotativas                            ║
-║  11.  Gummy — sistema de estados y animaciones                   ║
+║  11.  Gummy — sistema de estados y animaciones (PNG)             ║
 ║  12.  Gummy — reacciones a eventos (hover, click, scroll)        ║
 ║  13.  Corazones voladores (efecto al hacer click en Gummy)       ║
 ║  14.  Chat con IA (API de Anthropic)                             ║
@@ -30,7 +30,7 @@
 ╚══════════════════════════════════════════════════════════════════╝
 */
 
-   
+
 /* ================================================================
    1. AUDIO — EFECTOS DE SONIDO
    ================================================================
@@ -48,13 +48,11 @@
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;   // se crea al primer click (requerimiento del navegador)
 
-let sfxEnabled   = true;   // efectos de sonido activados
-let musicEnabled = true;   // música de fondo activada
-let currentTrack = 0;      // pista actual (0, 1, 2 → ver sección 2)
-                           // -1 = ninguna música
-let musicGain      = null; // nodo de ganancia (volumen) de la música
+let sfxEnabled    = true;   // efectos de sonido activados
+let musicEnabled  = true;   // música de fondo activada
+let currentTrack  = 0;      // pista actual (0, 1, 2 → ver sección 2) / -1 = ninguna
+let musicGain     = null;   // nodo de ganancia (volumen) de la música
 let musicLoopActive = false; // token único para controlar qué loop está activo
-                             // evita que dos loops suenen al mismo tiempo
 
 // Crea (o reutiliza) el contexto de audio
 function getAudioCtx() {
@@ -69,10 +67,10 @@ function playClick() {
   if (!sfxEnabled) return;
   try {
     const ctx = getAudioCtx();
-    const o = ctx.createOscillator(); // genera la onda
-    const g = ctx.createGain();       // controla el volumen
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
     o.connect(g);
-    g.connect(ctx.destination);       // sale por los parlantes
+    g.connect(ctx.destination);
 
     o.frequency.setValueAtTime(880, ctx.currentTime);
     o.frequency.exponentialRampToValueAtTime(1320, ctx.currentTime + 0.08);
@@ -141,12 +139,11 @@ function playType() {
 
 // Detiene la música actual con fade-out suave
 function stopMusic() {
-  musicLoopActive = false; // invalida el token del loop actual → se detiene solo
+  musicLoopActive = false;
 
   if (musicGain) {
     try {
       const ctx = getAudioCtx();
-      // Fade-out en 0.2 segundos para que no corte abruptamente
       musicGain.gain.setTargetAtTime(0, ctx.currentTime, 0.2);
       setTimeout(() => {
         try { musicGain.disconnect(); } catch(e) {}
@@ -161,18 +158,13 @@ function stopMusic() {
 // Arranca la música de la pista currentTrack
 function playCozyBg() {
   if (!musicEnabled || currentTrack === -1) return;
-  stopMusic(); // primero frena cualquier cosa que esté sonando
+  stopMusic();
 
   try {
     const ctx = getAudioCtx();
-
-    // Token único: si se llama otra vez a playCozyBg() antes de que
-    // termine este loop, el nuevo token reemplaza al viejo y el loop viejo
-    // para en la próxima nota (condición if musicLoopActive !== myToken).
     const myToken = Symbol();
     musicLoopActive = myToken;
 
-    // Nodo de ganancia para esta pista — arranca en silencio y sube gradualmente
     const newGain = ctx.createGain();
     newGain.gain.value = 0;
     newGain.connect(ctx.destination);
@@ -180,56 +172,44 @@ function playCozyBg() {
     musicGain = newGain;
 
     // ── NOTAS DE CADA PISTA ────────────────────────────────────
-    // Para cambiar el carácter musical editá los arrays:
-    //   Más notas = más variado; menos notas = más repetitivo y meditativo
     const trackNotes = [
-      [261, 294, 329, 349, 392, 440, 494],   // 0: Café Cozy (escala completa, alegre)
-      [220, 261, 294, 329, 392],              // 1: Lluvia & Jazz (pentatónica, melancólica)
-      [196, 220, 261, 294, 329],              // 2: Otoño Suave (graves, tranquilo)
+      [261, 294, 329, 349, 392, 440, 494],   // 0: Café Cozy
+      [220, 261, 294, 329, 392],              // 1: Lluvia & Jazz
+      [196, 220, 261, 294, 329],              // 2: Otoño Suave
     ];
     const notes = trackNotes[currentTrack] || trackNotes[0];
 
-    // ── LOOP DE NOTAS ──────────────────────────────────────────
-    // Programa cada nota con un pequeño adelanto para que no haya
-    // interrupciones (técnica de "lookahead scheduling").
     let time = ctx.currentTime + 0.1;
 
     const scheduleNote = () => {
-      // Si ya hay un nuevo loop activo, este se detiene solo
       if (musicLoopActive !== myToken) return;
 
       const o  = ctx.createOscillator();
       const g2 = ctx.createGain();
 
-      // Pista 1 usa 'triangle' para dar sensación jazzera
       o.type = currentTrack === 1 ? 'triangle' : 'sine';
       o.connect(g2);
       g2.connect(newGain);
 
-      // Nota aleatoria de la escala de la pista
       const note = notes[Math.floor(Math.random() * notes.length)];
       o.frequency.setValueAtTime(note, time);
 
-      // Duración aleatoria entre 0.5 y 1.2 segundos
       const dur = 0.5 + Math.random() * 0.7;
 
-      // Envolvente ADSR simplificada (ataque → sostenido → caída)
       g2.gain.setValueAtTime(0, time);
-      g2.gain.linearRampToValueAtTime(0.18, time + 0.04);     // ataque
-      g2.gain.setTargetAtTime(0, time + dur - 0.12, 0.06);    // caída
+      g2.gain.linearRampToValueAtTime(0.18, time + 0.04);
+      g2.gain.setTargetAtTime(0, time + dur - 0.12, 0.06);
 
       o.start(time);
       o.stop(time + dur + 0.1);
 
-      // Siguiente nota a ~55% de la duración actual (superposición suave)
       time += dur * 0.55;
 
-      // Programa el siguiente scheduleNote justo antes de que se necesite
       const delay = Math.max(0, (time - ctx.currentTime) * 1000 - 150);
       setTimeout(scheduleNote, delay);
     };
 
-    scheduleNote(); // arranca el loop
+    scheduleNote();
   } catch(e) {}
 }
 
@@ -243,7 +223,6 @@ document.getElementById('sfx-btn').addEventListener('click', () => {
   sfxEnabled = !sfxEnabled;
   document.getElementById('sfx-btn').classList.toggle('muted', !sfxEnabled);
   document.getElementById('sfx-btn').textContent = sfxEnabled ? '🔔' : '🔕';
-  // No reproduce click si se acaba de silenciar
 });
 
 // ── Botón de música (🎵 / 🔇) — abre/cierra el selector ───────
@@ -251,48 +230,39 @@ const musicBtn      = document.getElementById('music-btn');
 const trackSelector = document.getElementById('track-selector');
 
 musicBtn.addEventListener('click', (e) => {
-  e.stopPropagation(); // evita que el click llegue al document y cierre el menú
+  e.stopPropagation();
   trackSelector.classList.toggle('open');
 });
 
 // ── Botones de pista dentro del selector ──────────────────────
-// Cada botón tiene data-track="0", "1", "2" o "-1" (ninguna).
-// Al clickear: frena la pista anterior y arranca la nueva inmediatamente.
 document.querySelectorAll('.track-btn').forEach(btn => {
   btn.addEventListener('click', (e) => {
     e.stopPropagation();
     const track = parseInt(btn.dataset.track);
 
-    // Marcar botón activo
     document.querySelectorAll('.track-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     trackSelector.classList.remove('open');
 
     if (track === -1) {
-      // Opción "Ninguna" → silenciar completamente
       currentTrack  = -1;
       musicEnabled  = false;
       stopMusic();
       musicBtn.classList.add('muted');
       musicBtn.textContent = '🔇';
     } else {
-      // Cambiar a la pista seleccionada
       currentTrack  = track;
       musicEnabled  = true;
       musicBtn.classList.remove('muted');
       musicBtn.textContent = '🎵';
-      // Marca que ya hubo interacción (requerimiento del navegador para audio)
       window._musicStarted = true;
-      playCozyBg(); // arranca inmediatamente
+      playCozyBg();
     }
     playClick();
   });
 });
 
-// Cierra el selector si se hace click en cualquier otro lado
 document.addEventListener('click', () => trackSelector.classList.remove('open'));
-
-// Sonido de tecla en cualquier input de la página
 document.addEventListener('keydown', () => playType());
 
 
@@ -303,155 +273,74 @@ document.addEventListener('keydown', () => playType());
    al <body>. CSS cambia el cielo, las estrellas y el sol/luna.
 
    Para cambiar los rangos de día/noche:
-     isNight = h < 6 || h >= 20   ← antes de las 6am o desde las 8pm
-     Podés ajustar esos números a tu gusto.
-
+     isNight = h < 6 || h >= 20
    Para cambiar la probabilidad de lluvia:
-     Math.random() < 0.25   ← 25% de probabilidad
-     Aumentá el número para que llueva más seguido (máximo 1.0 = siempre)
+     Math.random() < 0.25  ← 25% de probabilidad
 ================================================================ */
 function setDayNight() {
   const h = new Date().getHours();
-  const isNight = h < 6 || h >= 20; // noche: antes de las 6am o desde las 8pm
+  const isNight = h < 6 || h >= 20;
 
   document.body.classList.toggle('night', isNight);
   document.body.classList.toggle('day',   !isNight);
 
-  // Lluvia aleatoria (solo de día, 25% de probabilidad)
   const shouldRain = Math.random() < 0.25;
   document.getElementById('rain-container')
     .classList.toggle('raining', shouldRain && !isNight);
 }
 
-setDayNight();                       // aplicar al cargar
-setInterval(setDayNight, 60000);     // revisar cada minuto
+setDayNight();
+setInterval(setDayNight, 60000);
 
 
 /* ================================================================
    5. GENERACIÓN DINÁMICA DE ESTRELLAS Y LLUVIA
    ================================================================
-   Las estrellas y las gotas de lluvia se crean con JS para poder
-   tener posiciones y velocidades aleatorias sin repetir código HTML.
-
    Para cambiar la cantidad de estrellas: editá el 60 del loop
    Para cambiar la cantidad de gotas:     editá el 80 del loop
 ================================================================ */
 
 // ── Estrellas ─────────────────────────────────────────────────
-// Se generan en #stars-container (dentro del fondo fijo).
-// CSS las hace visibles solo con la clase .night en body.
 const starsContainer = document.getElementById('stars-container');
 for (let i = 0; i < 60; i++) {
   const s = document.createElement('div');
   s.className = 'star';
   s.style.cssText = [
     `left:${Math.random() * 100}%`,
-    `top:${Math.random() * 60}%`,                // solo en la mitad superior
+    `top:${Math.random() * 60}%`,
     `width:${2 + Math.random() * 3}px`,
     `height:${2 + Math.random() * 3}px`,
-    `animation-delay:${Math.random() * 3}s`,     // parpadeo desincronizado
+    `animation-delay:${Math.random() * 3}s`,
   ].join(';');
   starsContainer.appendChild(s);
 }
 
 // ── Gotas de lluvia ───────────────────────────────────────────
-// Se generan en #rain-container. CSS las anima cayendo.
 const rainContainer = document.getElementById('rain-container');
 for (let i = 0; i < 80; i++) {
   const d = document.createElement('div');
   d.className = 'raindrop';
-  const h = 20 + Math.random() * 60; // largo de la gota (px)
+  const h = 20 + Math.random() * 60;
   d.style.cssText = [
     `left:${Math.random() * 100}%`,
     `height:${h}px`,
-    `animation-duration:${0.6 + Math.random() * 0.8}s`, // velocidad de caída
-    `animation-delay:${Math.random() * 2}s`,             // inicio desincronizado
+    `animation-duration:${0.6 + Math.random() * 0.8}s`,
+    `animation-delay:${Math.random() * 2}s`,
   ].join(';');
   rainContainer.appendChild(d);
 }
 
 
 /* ================================================================
-   6. GUIRNALDA DE LUCES
-   ================================================================
-   Dibuja el cable ondulado (path SVG) y las lamparitas (círculo +
-   elipse) con colores alternados y animación de parpadeo.
-
-   Para cambiar los colores de las lamparitas:
-     Editá el array colors[] abajo.
-   Para cambiar el tamaño de las lamparitas:
-     Editá los atributos r (radio del círculo) y rx/ry (de la elipse).
-   Para cambiar la densidad de lamparitas:
-     Cambiá el divisor 80 en segs = Math.floor(vw / 80)
-     Número mayor = menos lamparitas; menor = más.
-================================================================ */
-(function buildGarland() {
-  const vw   = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-  const segs = Math.floor(vw / 80) + 2; // cantidad de puntos del cable
-  const spacing = vw / (segs - 1);
-
-  // Cable ondulado usando curvas cuadráticas (Q)
-  let d = `M 0 8`;
-  for (let i = 1; i < segs; i++) {
-    const x   = i * spacing;
-    const cpx = (i - 0.5) * spacing;    // punto de control = mitad entre dos puntos
-    d += ` Q ${cpx} 48 ${x} 8`;         // 48 = cuánto cae el cable en el medio
-  }
-  document.querySelector('#garland-path').setAttribute('d', d);
-
-  // ── Lamparitas ──────────────────────────────────────────────
-  // Para cambiar los colores: editá este array
-  const colors = ['#FFD700', '#FF6B6B', '#7AB648', '#64B5F6', '#CE93D8', '#FFB74D'];
-  const bulbs  = document.getElementById('garland-bulbs');
-
-  for (let i = 0; i < segs; i++) {
-    const x   = i * spacing;
-    const col = colors[i % colors.length];
-
-    // Punto de conexión (círculo pequeño donde el cable toca)
-    const ci = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    ci.setAttribute('cx', x);
-    ci.setAttribute('cy', 8);
-    ci.setAttribute('r', 5);
-    ci.setAttribute('fill', col);
-    ci.style.cssText = `
-      filter: drop-shadow(0 0 4px ${col}99);
-      animation: twinkle ${1.5 + Math.random() * 2}s infinite alternate;
-      animation-delay: ${Math.random() * 2}s
-    `;
-    bulbs.appendChild(ci);
-
-    // Cuerpo de la lamparita (elipse colgando)
-    const ellipse = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
-    ellipse.setAttribute('cx', x);
-    ellipse.setAttribute('cy', 16);
-    ellipse.setAttribute('rx', 4.5);
-    ellipse.setAttribute('ry', 6);
-    ellipse.setAttribute('fill', col);
-    ellipse.style.cssText = `
-      filter: drop-shadow(0 0 6px ${col}BB);
-      animation: twinkle ${1.5 + Math.random() * 2}s infinite alternate;
-      animation-delay: ${Math.random() * 2}s
-    `;
-    bulbs.appendChild(ellipse);
-  }
-})();
-
-
-/* ================================================================
    7. PARALLAX AL SCROLLEAR
    ================================================================
-   El fondo se mueve más lento que el contenido cuando scrolleás,
-   dando sensación de profundidad.
-
    Para cambiar la intensidad del parallax:
-     Editá el 0.12 → más grande = más efecto (0 = sin efecto)
+     Editá el 0.12 → más grande = más efecto
 ================================================================ */
 window.addEventListener('scroll', () => {
   const scrollY      = window.scrollY;
   const sceneContent = document.getElementById('scene-content');
   if (sceneContent) {
-    // Se mueve un 12% de lo que se scrollea (más lento que el contenido)
     sceneContent.style.transform = `translateY(${scrollY * 0.12}px)`;
   }
 });
@@ -460,15 +349,6 @@ window.addEventListener('scroll', () => {
 /* ================================================================
    8. SCROLL REVEAL — APARICIÓN DE SECCIONES
    ================================================================
-   IntersectionObserver detecta cuando un elemento .reveal entra
-   en el viewport y le agrega la clase .visible, que dispara la
-   animación CSS de fade + zoom.
-
-   Para cambiar qué tan visible tiene que estar el elemento
-   antes de disparar la animación:
-     threshold: 0.12   ← 12% del elemento visible
-     Aumentá para que espere más antes de aparecer.
-
    Para agregar la animación a un elemento nuevo:
      Solo agregá la clase "reveal" en el HTML.
 ================================================================ */
@@ -485,13 +365,8 @@ revealEls.forEach(el => observer.observe(el));
 /* ================================================================
    9. SALUDO ANIMADO LETRA A LETRA
    ================================================================
-   Escribe el saludo de bienvenida simulando que se escribe solo.
-   Se elige uno al azar de la lista al cargar la página.
-
-   Para cambiar o agregar saludos:
-     Editá el array greetings[] abajo.
-   Para cambiar la velocidad de escritura:
-     Editá el 55 y el 40 en setTimeout (milisegundos por letra)
+   Para cambiar o agregar saludos: editá el array greetings[]
+   Para cambiar la velocidad: editá el 55 y el 40 (ms por letra)
 ================================================================ */
 const greetings = [
   '¡Hola, explorador! 👋',
@@ -499,7 +374,7 @@ const greetings = [
   '¡Bienvenido de vuelta! 🌿',
   '¡Hola, campeón! 🏆',
 ];
-
+  
 const greet   = greetings[Math.floor(Math.random() * greetings.length)];
 const typedEl = document.getElementById('typed-greeting');
 let ti = 0;
@@ -507,24 +382,17 @@ let ti = 0;
 function typeChar() {
   if (ti < greet.length) {
     typedEl.textContent += greet[ti++];
-    // Velocidad levemente aleatoria para que parezca más natural
     setTimeout(typeChar, 55 + Math.random() * 40);
   }
 }
-setTimeout(typeChar, 600); // espera un poco antes de empezar
+setTimeout(typeChar, 600);
 
 
 /* ================================================================
    10. FRASES MOTIVACIONALES ROTATIVAS
    ================================================================
-   Cambia la frase cada 5 segundos con un fade suave.
-
-   Para cambiar o agregar frases:
-     Editá el array quotes[] abajo.
-   Para cambiar el intervalo:
-     Editá el 5000 del setInterval (milisegundos)
-   Para cambiar la velocidad del fade:
-     En style.css buscá .motivational-quote y editá transition: opacity
+   Para cambiar o agregar frases: editá el array quotes[]
+   Para cambiar el intervalo: editá el 5000 (ms)
 ================================================================ */
 const quotes = [
   '"Cada pequeño paso cuenta. ¡Hoy es un buen día para empezar! 🌱"',
@@ -539,74 +407,83 @@ const quoteEl = document.getElementById('motivational-quote');
 let qi = 0;
 
 setInterval(() => {
-  quoteEl.classList.add('fading');        // CSS lo hace transparente
+  quoteEl.classList.add('fading');
   setTimeout(() => {
-    qi = (qi + 1) % quotes.length;       // siguiente frase en loop
+    qi = (qi + 1) % quotes.length;
     quoteEl.textContent = quotes[qi];
-    quoteEl.classList.remove('fading');  // vuelve a ser visible
-  }, 500); // espera a que termine el fade-out (500ms = transition en CSS)
+    quoteEl.classList.remove('fading');
+  }, 500);
 }, 5000);
 
 
 /* ================================================================
-   11. GUMMY — SISTEMA DE ESTADOS Y ANIMACIONES
+   11. GUMMY — SISTEMA DE ESTADOS Y ANIMACIONES (PNG)
    ================================================================
    Gummy tiene 5 estados posibles:
-     'idle'  → saltitos suaves (por defecto)
-     'hover' → sonrisa, ojos felices (al pasar el mouse)
-     'happy' → salta, corazones, cachetes rosados (al clickear)
-     'sleep' → ojos cerrados, ZZZs, movimiento lento (inactiva 15s)
-     'study' → anteojos, libro, leve balanceo (al scrollear)
+     'idle'  → alterna entre MainPetIdle1.png y MainPetIdle2.png (saltitos)
+     'hover' → usa animación idle con label de saludo
+     'happy' → MainPetPat.png + salta (al clickear / recibir respuesta IA)
+     'sleep' → animación idle con movimiento lento y label zzz
+     'study' → MainPetStudy.png con leve balanceo (al scrollear / chat)
 
-   PARA ADAPTAR CON TU PROPIO SPRITE (PNG/GIF):
-     Si usás una imagen en lugar del SVG, reemplazá las líneas que
-     muestran/ocultan grupos SVG por cambios de src:
-       const gummyImg = document.getElementById('gummy-img');
-       // En setGummyState(), en lugar de setGummyEyes() etc:
-       gummyImg.src = `sprites/gummy-${state}.png`;
-     O si usás un spritesheet:
-       gummyImg.style.backgroundPosition = spritePositions[state];
+   SPRITES USADOS:
+     MainPetIdle1.png  → frame 1 del idle (se alterna con frame 2)
+     MainPetIdle2.png  → frame 2 del idle
+     MainPetPat.png    → al acariciar / recibir mimos
+     MainPetStudy.png  → al scrollear o mientras el chat piensa
 
+   PARA AGREGAR MÁS SPRITES:
+     Agregá el .png en la carpeta y referencialo en el objeto SPRITES.
+
+   Para cambiar la velocidad de alternancia idle:
+     Editá el 700 en startIdleAnim() (milisegundos)
    Para cambiar cuánto tiempo hasta que se duerme:
      Editá el 15000 en resetIdleTimer() (milisegundos)
    Para cambiar cuánto dura el estado happy:
      Editá el 2500 en setGummyState() → caso 'happy'
 ================================================================ */
 
-let gummyState    = 'idle';  // estado actual
-let idleTimer     = null;    // timer para detectar inactividad
-let gummyBounceT  = 0;       // tiempo acumulado para la animación (seno)
+let gummyState   = 'idle';  // estado actual
+let idleTimer    = null;    // timer para detectar inactividad
+let gummyBounceT = 0;       // tiempo acumulado para la animación
 
 const gummyWrapper = document.getElementById('gummy-wrapper');
-const gummySvg     = document.getElementById('gummy-svg');
 
-// ── Cambia qué grupo de ojos es visible ───────────────────────
-// Los grupos #eyes-normal, #eyes-happy, etc. están en el SVG del HTML.
-// Si usás PNG, reemplazá esta función por un cambio de imagen.
-function setGummyEyes(state) {
-  ['normal', 'happy', 'sleep', 'study'].forEach(s => {
-    const el = document.getElementById('eyes-' + s);
-    if (el) el.style.display = 'none';
-  });
-  const target = document.getElementById('eyes-' + state);
-  if (target) target.style.display = '';
-  else document.getElementById('eyes-normal').style.display = ''; // fallback
+// Referencia a la <img> de la mascota en el HTML
+// ── IMPORTANTE: tu <img> debe tener id="MainPet" ──────────────
+const mainPet = document.getElementById('MainPet');
+
+// ── Sprites disponibles ────────────────────────────────────────
+// Cambiá los valores si tus archivos tienen otra ruta o nombre.
+const SPRITES = {
+  idle1: 'MainPetIdle1.png',
+  idle2: 'MainPetIdle2.png',
+  pat:   'MainPetPat.png',
+  study: 'MainPetStudy.png',
+};
+
+// ── Animación idle: alterna entre idle1 e idle2 ───────────────
+let idleFrame    = 0;
+let idleInterval = null;
+
+function startIdleAnim() {
+  stopIdleAnim(); // evita crear dos intervals al mismo tiempo
+  const frames = [SPRITES.idle1, SPRITES.idle2];
+  idleInterval = setInterval(() => {
+    idleFrame = (idleFrame + 1) % frames.length;
+    mainPet.src = frames[idleFrame];
+  }, 700); // ms entre frames — editá para ir más rápido o lento
 }
 
-// ── Cambia entre boca sonriente y boca neutral ────────────────
-function setGummyMouth(smile) {
-  document.getElementById('mouth-smile').style.display = smile ? ''     : 'none';
-  document.getElementById('mouth-sleep').style.display = smile ? 'none' : '';
+function stopIdleAnim() {
+  clearInterval(idleInterval);
+  idleInterval = null;
 }
 
-// ── Muestra/oculta los extras según el estado ─────────────────
-// #gummy-book  → libro en manos (study)
-// #gummy-zzz   → letras Z flotando (sleep)
-// #gummy-hearts → corazones (happy)
-function showGummyExtras(state) {
-  document.getElementById('gummy-book').style.display   = state === 'study' ? '' : 'none';
-  document.getElementById('gummy-zzz').style.display    = state === 'sleep' ? '' : 'none';
-  document.getElementById('gummy-hearts').style.display = state === 'happy' ? '' : 'none';
+// ── Cambia a un sprite fijo (para estados no-idle) ────────────
+function setGummySprite(src) {
+  stopIdleAnim();      // frena la alternancia idle
+  mainPet.src = src;
 }
 
 // ── Cambia el estado completo de Gummy ────────────────────────
@@ -621,90 +498,72 @@ function setGummyState(state) {
     study: 'Estudiando 📚',
     hover: '¡Hola! 👋',
   };
-  document.getElementById('gummy-state-label').textContent = labels[state] || '🐰';
+  const labelEl = document.getElementById('gummy-state-label');
+  if (labelEl) labelEl.textContent = labels[state] || '🐰';
 
-  // Configurar expresión y extras según el estado
-  if (state === 'happy') {
-    setGummyEyes('happy');
-    setGummyMouth(true);
-    document.getElementById('cheek-l').setAttribute('opacity', '0.9'); // cachetes muy rosas
-    document.getElementById('cheek-r').setAttribute('opacity', '0.9');
-    showGummyExtras('happy');
-    // Vuelve a idle automáticamente después de 2.5 segundos
+  if (state === 'idle' || state === 'hover' || state === 'sleep') {
+    // Estos tres estados usan la animación de dos frames
+    startIdleAnim();
+
+  } else if (state === 'happy') {
+    // Sprite de mimo — vuelve a idle automáticamente
+    setGummySprite(SPRITES.pat);
     setTimeout(() => {
       if (gummyState === 'happy') setGummyState('idle');
     }, 2500);
 
-  } else if (state === 'sleep') {
-    setGummyEyes('sleep');
-    setGummyMouth(false);
-    document.getElementById('cheek-l').setAttribute('opacity', '0.4');
-    document.getElementById('cheek-r').setAttribute('opacity', '0.4');
-    showGummyExtras('sleep');
-
   } else if (state === 'study') {
-    setGummyEyes('study'); // pone anteojos
-    setGummyMouth(true);
-    document.getElementById('cheek-l').setAttribute('opacity', '0.5');
-    document.getElementById('cheek-r').setAttribute('opacity', '0.5');
-    showGummyExtras('study');
-
-  } else if (state === 'hover') {
-    setGummyEyes('happy');
-    setGummyMouth(true);
-    document.getElementById('cheek-l').setAttribute('opacity', '0.7');
-    document.getElementById('cheek-r').setAttribute('opacity', '0.7');
-    showGummyExtras('idle'); // sin extras en hover
-
-  } else {
-    // idle (default)
-    setGummyEyes('normal');
-    setGummyMouth(true);
-    document.getElementById('cheek-l').setAttribute('opacity', '0.6');
-    document.getElementById('cheek-r').setAttribute('opacity', '0.6');
-    showGummyExtras('idle');
+    // Sprite de estudio
+    setGummySprite(SPRITES.study);
   }
 }
 
 // ── Animación continua (requestAnimationFrame) ────────────────
-// Se ejecuta ~60 veces por segundo y aplica el movimiento del estado actual.
+// Aplica movimiento con CSS transform según el estado actual.
+// El sprite se controla por separado (arriba); acá solo se mueve.
+//
 // Para cambiar la intensidad del rebote:
 //   idle:  * 4  → más grande = salta más
 //   happy: * 8  → más grande = salta más alto
-// Para cambiar la velocidad:
+// Para cambiar la velocidad del bounce:
 //   gummyBounceT += 0.05  → más grande = más rápido
 function animateGummy() {
   gummyBounceT += 0.05;
 
-  if (gummyState === 'idle') {
+  if (gummyState === 'idle' || gummyState === 'hover') {
     const bounce = Math.sin(gummyBounceT) * 4;
-    gummySvg.style.transform = `translateY(${bounce}px)`;
+    mainPet.style.transform = `translateY(${bounce}px)`;
 
   } else if (gummyState === 'sleep') {
     const bounce = Math.sin(gummyBounceT * 0.4) * 2;
-    gummySvg.style.transform = `translateY(${bounce}px) rotate(${bounce * 0.5}deg)`;
+    mainPet.style.transform = `translateY(${bounce}px) rotate(${bounce * 0.5}deg)`;
 
   } else if (gummyState === 'happy') {
     const bounce = Math.abs(Math.sin(gummyBounceT * 2)) * 8;
-    gummySvg.style.transform = `translateY(-${bounce}px)`;
+    mainPet.style.transform = `translateY(-${bounce}px)`;
 
   } else if (gummyState === 'study') {
-    gummySvg.style.transform = `rotate(${Math.sin(gummyBounceT * 0.5) * 1.5}deg)`;
+    mainPet.style.transform = `rotate(${Math.sin(gummyBounceT * 0.5) * 1.5}deg)`;
+
+  } else {
+    mainPet.style.transform = '';
   }
 
-  requestAnimationFrame(animateGummy); // se llama a sí misma en loop
+  requestAnimationFrame(animateGummy);
 }
-animateGummy(); // arrancar el loop de animación
+
+// Arrancar en idle + loop de animación
+setGummyState('idle');
+animateGummy();
 
 
 /* ================================================================
    12. GUMMY — REACCIONES A EVENTOS DEL USUARIO
    ================================================================
    Timer de inactividad: si el usuario no hace nada durante 15 segundos,
-   Gummy se queda dormida.
+   Gummy se queda dormida (sigue con idle animado pero label zzz).
 ================================================================ */
 
-// Reinicia el timer de inactividad cada vez que el usuario hace algo
 function resetIdleTimer() {
   clearTimeout(idleTimer);
   idleTimer = setTimeout(() => {
@@ -712,17 +571,17 @@ function resetIdleTimer() {
   }, 15000); // 15 segundos sin actividad → duerme
 }
 
-// Al pasar el mouse por encima → saluda
+// Pasar el mouse → saluda (sin cambiar sprite)
 gummyWrapper.addEventListener('mouseenter', () => {
-  if (gummyState !== 'sleep') setGummyState('hover');
+  if (gummyState !== 'sleep' && gummyState !== 'happy') setGummyState('hover');
 });
 
-// Al sacar el mouse → vuelve a idle
+// Sacar el mouse → vuelve a idle
 gummyWrapper.addEventListener('mouseleave', () => {
   if (gummyState === 'hover') setGummyState('idle');
 });
 
-// Al hacer click en Gummy → se pone muy feliz y salen corazones
+// Click en Gummy → mimo + corazones
 gummyWrapper.addEventListener('click', () => {
   setGummyState('happy');
   spawnHearts(gummyWrapper);
@@ -730,8 +589,7 @@ gummyWrapper.addEventListener('click', () => {
   resetIdleTimer();
 });
 
-// Al scrollear → se pone a estudiar
-// Vuelve a idle 1.5 segundos después de dejar de scrollear
+// Scrollear → study (vuelve a idle 1.5s después de parar)
 document.addEventListener('scroll', () => {
   if (gummyState !== 'happy') setGummyState('study');
   resetIdleTimer();
@@ -741,18 +599,16 @@ document.addEventListener('scroll', () => {
   }, 1500);
 });
 
-// Cualquier movimiento del mouse o tecla reinicia el timer de sueño
 document.addEventListener('mousemove', resetIdleTimer);
 document.addEventListener('keydown',   resetIdleTimer);
 
-resetIdleTimer(); // arrancar el timer al cargar la página
+resetIdleTimer();
 
 
 /* ================================================================
    13. CORAZONES VOLADORES
    ================================================================
    Al hacer click en Gummy, 5 corazones vuelan desde su posición.
-   Se crean como divs temporales y se eliminan solos.
 
    Para cambiar los emojis: editá el array hearts[]
    Para cambiar la cantidad: editá el 5 del loop
@@ -761,7 +617,7 @@ resetIdleTimer(); // arrancar el timer al cargar la página
 function spawnHearts(el) {
   const rect = el.getBoundingClientRect();
   const cx   = rect.left + rect.width  / 2;
-  const cy   = rect.top  + rect.height / 3; // sale del tercio superior
+  const cy   = rect.top  + rect.height / 3;
 
   const hearts = ['💗', '💕', '🩷', '💖', '❤️'];
 
@@ -769,12 +625,11 @@ function spawnHearts(el) {
     const h = document.createElement('div');
     h.className = 'heart-particle';
     h.textContent = hearts[i % hearts.length];
-    // Posición aleatoria alrededor del centro de Gummy
     h.style.left         = (cx + (Math.random() - 0.5) * 50) + 'px';
     h.style.top          = (cy + (Math.random() - 0.5) * 30) + 'px';
-    h.style.animationDelay = (i * 0.1) + 's'; // escalonados
+    h.style.animationDelay = (i * 0.1) + 's';
     document.body.appendChild(h);
-    setTimeout(() => h.remove(), 1200); // limpieza automática
+    setTimeout(() => h.remove(), 1200);
   }
 }
 
@@ -782,38 +637,29 @@ function spawnHearts(el) {
 /* ================================================================
    14. CHAT CON IA — API DE ANTHROPIC
    ================================================================
-   Gummy usa la API de Claude para responder mensajes.
-   El "system prompt" define su personalidad y comportamiento.
-
    PARA CAMBIAR LA PERSONALIDAD DE GUMMY:
      Editá el texto dentro de system: `...` en sendChat().
-     Podés hacerla más seria, más divertida, cambiar el idioma, etc.
 
    PARA CAMBIAR EL MODELO:
-     Editá model: 'claude-sonnet-4-20250514'
-     Otros modelos disponibles: 'claude-haiku-4-5-20251001' (más rápido)
+     Editá model: 'claude-sonnet-4-6'
+     Alternativa más rápida: 'claude-haiku-4-5-20251001'
 
    PARA CAMBIAR LA LONGITUD MÁXIMA DE RESPUESTA:
-     Editá max_tokens: 1000 (más = respuestas más largas, pero más lentas)
-
-   NOTA: Esta app llama a la API directamente desde el navegador.
-   En producción deberías usar un backend para no exponer la API key.
+     Editá max_tokens: 1000
 ================================================================ */
 
 const chatMessages = document.getElementById('chat-messages');
 const chatInput    = document.getElementById('chat-input');
 const chatSendBtn  = document.getElementById('chat-send-btn');
 
-// Agrega un mensaje al historial visible
 function addMsg(text, who) {
   const div = document.createElement('div');
-  div.className = `chat-msg ${who}`; // 'gummy' o 'user'
+  div.className = `chat-msg ${who}`;
   div.textContent = text;
   chatMessages.appendChild(div);
-  chatMessages.scrollTop = chatMessages.scrollHeight; // scroll al final
+  chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-// Agrega la burbuja de "Gummy está escribiendo..." (tres puntitos)
 function addLoading() {
   const div = document.createElement('div');
   div.className = 'chat-msg gummy loading';
@@ -824,10 +670,9 @@ function addLoading() {
   return div;
 }
 
-// Envía el mensaje del usuario a la API y muestra la respuesta
 async function sendChat() {
   const text = chatInput.value.trim();
-  if (!text) return; // ignorar si el input está vacío
+  if (!text) return;
 
   addMsg(text, 'user');
   chatInput.value = '';
@@ -842,12 +687,11 @@ async function sendChat() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model:      'claude-sonnet-4-20250514',
+        model:      'claude-sonnet-4-6',
         max_tokens: 1000,
 
         // ── PERSONALIDAD DE GUMMY ─────────────────────────────
         // Editá este texto para cambiar cómo responde Gummy.
-        // Podés cambiar: nombre, idioma, tono, temas que maneja, etc.
         system: `Sos Gummy 🐰, una conejita estudiosa, tierna, alegre y muy empática.
 Sos la asistente y amiga virtual de la app. Tu misión es ayudar a estudiantes,
 personas buscando su primer empleo, freelancers y creativos junior.
@@ -870,7 +714,6 @@ nivel de experiencia y ubicación. Luego sugerí roles y consejos prácticos.`,
 
     const data  = await response.json();
     loading.remove();
-    // Concatena todos los bloques de texto de la respuesta
     const reply = data.content?.map(c => c.text || '').join('') || '¡Ups! Algo salió mal 🐰';
     addMsg(reply, 'gummy');
 
@@ -883,10 +726,8 @@ nivel de experiencia y ubicación. Luego sugerí roles y consejos prácticos.`,
   setTimeout(() => setGummyState('idle'), 2000);
 }
 
-// Botón enviar
 chatSendBtn.addEventListener('click', sendChat);
 
-// Enter para enviar, cualquier otra tecla para sonido de tipeo
 chatInput.addEventListener('keydown', e => {
   if (e.key === 'Enter') sendChat();
   else playType();
@@ -896,52 +737,28 @@ chatInput.addEventListener('keydown', e => {
 /* ================================================================
    15. PLANTAS — CONFIGURACIÓN DE SPRITES PNG
    ================================================================
-   Cada tarea tiene una planta asociada que crece según el progreso.
-
    ESTRUCTURA DE ARCHIVOS PARA TUS PNG:
      plants/
-       plant1/
-         stage0.png  ← 0% completado (semilla / tierra)
-         stage1.png  ← ~20%          (brote)
-         stage2.png  ← ~45%          (planta chica)
-         stage3.png  ← ~70%          (planta mediana)
-         stage4.png  ← ~95-100%      (planta grande / florecida)
-       plant2/
-         stage0.png ... stage4.png
-       plant3/
-         stage0.png ... stage4.png
+       plant1/ stage0.png ... stage4.png
+       plant2/ stage0.png ... stage4.png
+       plant3/ stage0.png ... stage4.png
 
-   PARA USAR TUS PNG:
-     Reemplazá el contenido de la función plantImageHTML() con:
-       return `<img
-         src="plants/plant${plantType}/stage${stage}.png"
-         class="plant-img"
-         alt="planta ${plantType} etapa ${stage}"
-       >`;
-     y borrá todo el SVG placeholder que hay adentro.
+   PARA USAR TUS PNG, reemplazá plantImageHTML() con:
+     return `<img src="plants/plant${plantType}/stage${stage}.png"
+                  class="plant-img" alt="planta">`;
 
    PARA CAMBIAR LOS UMBRALES DE CRECIMIENTO:
-     Editá STAGE_THRESHOLDS []. El índice corresponde al stage:
+     Editá STAGE_THRESHOLDS[]:
        stage 0 = desde  0%
        stage 1 = desde 20%
        stage 2 = desde 45%
        stage 3 = desde 70%
        stage 4 = desde 95%
-
-   PARA AGREGAR MÁS TIPOS DE PLANTA:
-     Cambiá PLANT_TYPES al número total que tenés,
-     y creá las carpetas correspondientes.
 ================================================================ */
 
-// ── Cantidad de tipos de planta disponibles ───────────────────
-// Las nuevas tareas eligen un tipo al azar entre 1 y este número.
-const PLANT_TYPES = 3;
-
-// ── Umbrales de porcentaje para cada etapa ────────────────────
-// Cuando el % de completado supera el umbral, la planta sube de stage.
+const PLANT_TYPES      = 3;
 const STAGE_THRESHOLDS = [0, 20, 45, 70, 95];
 
-// Devuelve el número de stage (0-4) según el porcentaje
 function getStage(pct) {
   let stage = 0;
   for (let i = STAGE_THRESHOLDS.length - 1; i >= 0; i--) {
@@ -950,23 +767,15 @@ function getStage(pct) {
   return stage;
 }
 
-// ── Genera el HTML de la imagen de la planta ──────────────────
-// AHORA: SVG placeholder animado (simula crecimiento)
-// DESPUÉS: reemplazá todo por:
-//   return `<img src="plants/plant${plantType}/stage${stage}.png" class="plant-img" alt="planta">`;
 function plantImageHTML(plantType, stage) {
-  // Color distinto para cada tipo de planta
-  // Para cambiar colores: editá este array (uno por tipo)
-  const colors = ['#7AB648', '#E8A85A', '#C8853A'];
-  const col    = colors[(plantType - 1) % colors.length];
-
-  // Altura del tallo según el stage (en px dentro del SVG)
-  const heights    = [8, 22, 40, 58, 76];
-  const h          = heights[stage];
-  const showFlower = stage >= 3; // flor aparece en stage 3 y 4
-  const showLeaves = stage >= 2; // hojas aparecen en stage 2+
-  const potH       = 28;         // altura de la maceta
-  const totalH     = 100;        // alto total del SVG
+  const colors  = ['#7AB648', '#E8A85A', '#C8853A'];
+  const col     = colors[(plantType - 1) % colors.length];
+  const heights = [8, 22, 40, 58, 76];
+  const h       = heights[stage];
+  const showFlower = stage >= 3;
+  const showLeaves = stage >= 2;
+  const potH    = 28;
+  const totalH  = 100;
   const stemBottom = totalH - potH;
   const stemTop    = stemBottom - h;
 
@@ -977,34 +786,22 @@ function plantImageHTML(plantType, stage) {
     class="plant-img"
     style="transition: all 0.6s cubic-bezier(.22,.68,0,1.2)"
   >
-    <!-- Maceta -->
     <rect x="16" y="${totalH - potH}" width="32" height="${potH - 6}" rx="4" fill="#C8853A"/>
     <rect x="12" y="${totalH - potH}" width="40" height="8"          rx="4" fill="#A0622A"/>
-    <!-- Tierra -->
     <ellipse cx="32" cy="${totalH - potH + 5}" rx="14" ry="4" fill="#5A3010"/>
-
-    <!-- Stage 0: solo un brote debajo de la tierra -->
     ${stage === 0
       ? `<circle cx="32" cy="${stemBottom - 4}" r="4" fill="#5A8A28" opacity="0.6"/>`
-      : ''
-    }
-
-    <!-- Stage 1+: tallo -->
+      : ''}
     ${stage > 0
       ? `<line x1="32" y1="${stemBottom}" x2="32" y2="${stemTop}"
                stroke="${col}" stroke-width="3" stroke-linecap="round"/>`
-      : ''
-    }
-
-    <!-- Stage 2+: hojas -->
+      : ''}
     ${showLeaves ? `
       <ellipse cx="22" cy="${stemTop + h * 0.4}" rx="10" ry="6"
                fill="${col}" transform="rotate(-25 22 ${stemTop + h * 0.4})" opacity="0.85"/>
       <ellipse cx="42" cy="${stemTop + h * 0.6}" rx="10" ry="6"
                fill="${col}" transform="rotate(25 42 ${stemTop + h * 0.6})" opacity="0.85"/>
     ` : ''}
-
-    <!-- Stage 3-4: flor -->
     ${showFlower
       ? `<circle cx="32" cy="${stemTop}" r="${stage === 4 ? 11 : 8}"
                  fill="${stage === 4 ? '#FFD700' : '#FFB3C6'}" opacity="0.9"/>
@@ -1021,18 +818,12 @@ function plantImageHTML(plantType, stage) {
 /* ================================================================
    16. TAREAS — DATOS INICIALES Y CÁLCULO DE PORCENTAJE
    ================================================================
-   Cada tarea es un objeto con:
-     id        → número único (Date.now() para las nuevas)
+   Cada tarea:
+     id        → número único
      name      → nombre editable
      plantType → tipo de planta (1, 2 o 3)
      subtasks  → array de { text: string, done: boolean }
      _expanded → (interno) si el acordeón está abierto
-
-   PARA CAMBIAR LAS TAREAS DE EJEMPLO:
-     Editá el array tasks[] abajo.
-     Podés tener tantas como quieras.
-   PARA CAMBIAR LAS SUBTAREAS DE EJEMPLO:
-     Editá los arrays subtasks[] dentro de cada tarea.
 ================================================================ */
 let tasks = [
   {
@@ -1066,8 +857,6 @@ let tasks = [
   },
 ];
 
-// Calcula el porcentaje de completado de una tarea (0-100)
-// basado en cuántas subtareas están tildadas.
 function getTaskPct(task) {
   if (!task.subtasks.length) return 0;
   return Math.round(
@@ -1078,10 +867,6 @@ function getTaskPct(task) {
 
 /* ================================================================
    17. TAREAS — RENDERIZADO DE PLANTAS
-   ================================================================
-   Dibuja una planta por cada tarea en la fila del invernadero.
-   Al hacer click en una planta, se hace scroll y se expande
-   la tarea correspondiente en la lista de la derecha.
 ================================================================ */
 function renderPlants() {
   const row = document.getElementById('plants-row');
@@ -1091,9 +876,9 @@ function renderPlants() {
     const pct   = getTaskPct(task);
     const stage = getStage(pct);
 
-    const div       = document.createElement('div');
-    div.className   = 'plant-pot interactive';
-    div.innerHTML   = `
+    const div     = document.createElement('div');
+    div.className = 'plant-pot interactive';
+    div.innerHTML = `
       <div class="plant-svg-wrap">
         ${plantImageHTML(task.plantType, stage)}
       </div>
@@ -1101,7 +886,6 @@ function renderPlants() {
       <div class="plant-pct">${pct}%</div>
     `;
 
-    // Click en planta → scroll y expande la tarea correspondiente
     div.addEventListener('click', () => {
       const taskEl = document.getElementById(`task-${task.id}`);
       if (taskEl) {
@@ -1115,7 +899,6 @@ function renderPlants() {
     row.appendChild(div);
   });
 
-  // Botón de agregar nueva tarea (al final de las plantas)
   const addBtn     = document.createElement('button');
   addBtn.className = 'add-plant-btn interactive';
   addBtn.innerHTML = '+<span>Nueva tarea</span>';
@@ -1126,20 +909,11 @@ function renderPlants() {
 
 /* ================================================================
    18. TAREAS — RENDERIZADO DE LISTA Y SUBTAREAS
-   ================================================================
-   renderTasks()    → dibuja la lista completa de tareas.
-   renderSubtasks() → dibuja las subtareas de UNA tarea (sin cerrar el acordeón).
-   renderAll()      → llama a ambas (se usa solo cuando cambia la estructura).
-
-   IMPORTANTE: tildar/agregar/eliminar subtareas NO llama a renderAll()
-   para que el acordeón no se cierre. Solo actualiza lo mínimo necesario.
 ================================================================ */
 
-// Dibuja la lista completa de tareas preservando cuáles estaban expandidas
 function renderTasks() {
   const area = document.getElementById('tasks-area');
 
-  // Guardar qué tareas estaban expandidas ANTES de limpiar el DOM
   const expanded = new Set(
     [...area.querySelectorAll('.task-item.expanded')].map(el => el.id)
   );
@@ -1152,7 +926,6 @@ function renderTasks() {
     div.className = 'task-item';
     div.id        = `task-${task.id}`;
 
-    // Restaurar estado expandido (desde el DOM anterior o desde task._expanded)
     if (expanded.has(`task-${task.id}`) || task._expanded) {
       div.classList.add('expanded');
       task._expanded = true;
@@ -1173,20 +946,17 @@ function renderTasks() {
       <div class="subtasks-area" id="subtasks-${task.id}"></div>
     `;
 
-    // Flecha para expandir/colapsar
     div.querySelector('.task-expand-btn').addEventListener('click', () => {
       div.classList.toggle('expanded');
       task._expanded = div.classList.contains('expanded');
       playClick();
     });
 
-    // Editar nombre → actualiza las plantas en tiempo real
     div.querySelector('.task-name-input').addEventListener('input', e => {
       task.name = e.target.value;
       renderPlants();
     });
 
-    // Eliminar tarea → reconstruye todo (cambia la cantidad de plantas)
     div.querySelector('[data-del]').addEventListener('click', () => {
       tasks = tasks.filter(t => t.id !== task.id);
       renderAll();
@@ -1194,51 +964,42 @@ function renderTasks() {
     });
 
     area.appendChild(div);
-    renderSubtasks(task); // llenar las subtareas de esta tarea
+    renderSubtasks(task);
   });
 }
 
-// Dibuja (o redibuja) solo las subtareas de UNA tarea
-// Se llama sin tocar el resto de la lista para no cerrar acordeones
 function renderSubtasks(task) {
   const area = document.getElementById(`subtasks-${task.id}`);
   if (!area) return;
   area.innerHTML = '';
 
   task.subtasks.forEach((sub, si) => {
-    const row       = document.createElement('div');
-    row.className   = 'subtask-row';
-    row.innerHTML   = `
+    const row     = document.createElement('div');
+    row.className = 'subtask-row';
+    row.innerHTML = `
       <input type="checkbox" class="subtask-check interactive" ${sub.done ? 'checked' : ''}/>
       <input class="subtask-input" value="${sub.text}" placeholder="Subtarea..."/>
       <button class="task-action-btn interactive" title="Eliminar subtarea">✕</button>
     `;
 
-    // Tildar/destildar → actualiza SOLO la barra de progreso y las plantas
-    // (sin re-renderizar la lista → el acordeón permanece abierto)
     row.querySelector('.subtask-check').addEventListener('change', e => {
       sub.done = e.target.checked;
-
-      // Actualizar solo la barra y el % de esta tarea
       renderPlants();
       const newPct = getTaskPct(task);
       const pctEl  = document.querySelector(`#task-${task.id} .task-pct-display`);
       const fillEl = document.querySelector(`#task-${task.id} .task-progress-fill`);
-      if (pctEl)  pctEl.textContent   = newPct + '%';
-      if (fillEl) fillEl.style.width  = newPct + '%';
-
+      if (pctEl)  pctEl.textContent  = newPct + '%';
+      if (fillEl) fillEl.style.width = newPct + '%';
       playClick();
     });
 
-    // Editar texto de la subtarea
     row.querySelector('.subtask-input').addEventListener('input', e => {
       sub.text = e.target.value;
     });
 
-    // Eliminar subtarea → redibuja solo las subtareas de esta tarea
     row.querySelector('.task-action-btn').addEventListener('click', () => {
       task.subtasks.splice(si, 1);
-      renderSubtasks(task);   // solo esta tarea, acordeón no se cierra
+      renderSubtasks(task);
       renderPlants();
       const newPct = getTaskPct(task);
       const pctEl  = document.querySelector(`#task-${task.id} .task-pct-display`);
@@ -1251,15 +1012,13 @@ function renderSubtasks(task) {
     area.appendChild(row);
   });
 
-  // Botón de agregar subtarea
   const addBtn     = document.createElement('button');
   addBtn.className = 'add-subtask-btn interactive';
   addBtn.textContent = '+ Agregar subtarea';
   addBtn.addEventListener('click', () => {
     task.subtasks.push({ text: '', done: false });
     task._expanded = true;
-    renderSubtasks(task); // solo esta tarea
-    // Foco automático en el nuevo input
+    renderSubtasks(task);
     const inputs = document.querySelectorAll(`#subtasks-${task.id} .subtask-input`);
     if (inputs.length) inputs[inputs.length - 1].focus();
     playClick();
@@ -1268,20 +1027,17 @@ function renderSubtasks(task) {
   area.appendChild(addBtn);
 }
 
-// Reconstruye plantas + lista completa (solo para agregar/eliminar tareas)
 function renderAll() {
   renderPlants();
   renderTasks();
 }
 
-// Agrega una nueva tarea con planta aleatoria y abre su acordeón
 function addTask() {
-  const id        = Date.now(); // id único basado en timestamp
-  const plantType = Math.floor(Math.random() * PLANT_TYPES) + 1; // planta al azar
+  const id        = Date.now();
+  const plantType = Math.floor(Math.random() * PLANT_TYPES) + 1;
   tasks.push({ id, name: 'Nueva tarea', plantType, subtasks: [] });
   renderAll();
 
-  // Hacer scroll y abrir el acordeón de la tarea nueva
   setTimeout(() => {
     const el = document.getElementById(`task-${id}`);
     if (el) {
@@ -1293,33 +1049,23 @@ function addTask() {
   playClick();
 }
 
-// Primer renderizado al cargar la página
 renderAll();
 
 
 /* ================================================================
    19. POST-ITS — CONFIGURACIÓN DE GRILLA
    ================================================================
-   Los post-its se posicionan en una grilla invisible.
-   Al soltar un post-it, hace snap al slot más cercano disponible.
-
-   PARA CAMBIAR EL TAMAÑO DE LOS POST-ITS:
-     Editá POSTIT_W (ancho) y POSTIT_H (alto) en píxeles.
-     También actualizá .postit en style.css con los mismos valores.
-
-   PARA CAMBIAR EL ESPACIO ENTRE ELLOS:
-     Editá POSTIT_GAP.
-
-   PARA CAMBIAR EL PADDING INTERNO DEL CONTENEDOR:
-     Editá POSTIT_PAD.
+   Para cambiar el tamaño de los post-its:
+     Editá POSTIT_W (ancho) y POSTIT_H (alto) en px.
+     También actualizá .postit en el CSS con los mismos valores.
+   Para cambiar el espacio entre ellos: editá POSTIT_GAP.
 ================================================================ */
 
-const POSTIT_W   = 190; // ancho de cada post-it en px
-const POSTIT_H   = 175; // alto de cada post-it en px
-const POSTIT_GAP = 20;  // espacio entre post-its en px
-const POSTIT_PAD = 16;  // padding del contenedor en px
+const POSTIT_W   = 190;
+const POSTIT_H   = 175;
+const POSTIT_GAP = 20;
+const POSTIT_PAD = 16;
 
-// Calcula cuántas columnas caben según el ancho actual del contenedor
 function getGridCols() {
   const container = document.getElementById('postits-container');
   if (!container) return 3;
@@ -1327,9 +1073,6 @@ function getGridCols() {
   return Math.max(1, Math.floor((w + POSTIT_GAP) / (POSTIT_W + POSTIT_GAP)));
 }
 
-// Convierte un número de slot a coordenadas (x, y) en el contenedor
-// slot 0 = primera columna, primera fila
-// slot 1 = segunda columna, primera fila, etc.
 function slotToXY(slot, cols) {
   const col = slot % cols;
   const row = Math.floor(slot / cols);
@@ -1339,14 +1082,11 @@ function slotToXY(slot, cols) {
   };
 }
 
-// Asigna slots a los post-its si no tienen, resolviendo conflictos
 function assignSlots() {
   postits.forEach((p, i) => {
-    if (p.slot === undefined) p.slot = i; // asignar en orden si es nuevo
+    if (p.slot === undefined) p.slot = i;
   });
 
-  // Resolver conflictos: si dos post-its tienen el mismo slot,
-  // el que aparece segundo en el array se mueve al siguiente libre
   const used   = new Map();
   const sorted = [...postits].sort((a, b) => (a.slot ?? 0) - (b.slot ?? 0));
   let nextFree = 0;
@@ -1363,35 +1103,19 @@ function assignSlots() {
 /* ================================================================
    20. POST-ITS — DATOS INICIALES Y COLORES
    ================================================================
-   Cada post-it es un objeto con:
-     id    → número único
-     title → texto del título
-     body  → texto del cuerpo
-     color → índice del color (0-4, ver postitColors[])
-     slot  → posición en la grilla (se asigna automáticamente)
-
-   PARA CAMBIAR LOS POST-ITS DE EJEMPLO:
-     Editá el array postits[] abajo.
-
-   PARA CAMBIAR LOS COLORES DISPONIBLES:
-     Editá postitColors[]. Cada objeto tiene:
-       bg  → color de fondo (hex)
-       cls → clase CSS (debés agregarla también en style.css)
+   Para agregar un color:
+     1. Sumá un objeto en postitColors[]
+     2. Agregá .postit-nombre { background: #HEX; } en el CSS
 ================================================================ */
 
-// ── Colores disponibles para los post-its ─────────────────────
-// Para agregar un color:
-//   1. Sumá un objeto aquí
-//   2. Agregá .postit-nombre { background: #HEXCOLOR; } en style.css
 const postitColors = [
-  { bg: '#FFF176', cls: 'postit-yellow' }, // amarillo
-  { bg: '#FFCCBC', cls: 'postit-peach'  }, // durazno
-  { bg: '#C8E6C9', cls: 'postit-mint'   }, // verde menta
-  { bg: '#E1BEE7', cls: 'postit-lilac'  }, // lila
-  { bg: '#B3E5FC', cls: 'postit-sky'    }, // celeste
+  { bg: '#FFF176', cls: 'postit-yellow' },
+  { bg: '#FFCCBC', cls: 'postit-peach'  },
+  { bg: '#C8E6C9', cls: 'postit-mint'   },
+  { bg: '#E1BEE7', cls: 'postit-lilac'  },
+  { bg: '#B3E5FC', cls: 'postit-sky'    },
 ];
 
-// ── Post-its iniciales de ejemplo ─────────────────────────────
 let postits = [
   { id: 1, title: 'Primera etapa 🎯',  body: 'Crear CV actualizado y portfolio con 2-3 proyectos propios', color: 0, slot: 0 },
   { id: 2, title: 'Networking 🤝',     body: 'Conectar con 5 personas del área en LinkedIn esta semana',   color: 1, slot: 1 },
@@ -1401,39 +1125,29 @@ let postits = [
 
 /* ================================================================
    21. POST-ITS — RENDERIZADO Y DRAG & DROP CON SNAP
-   ================================================================
-   Funcionamiento del drag:
-   1. mousedown → guarda el offset entre el cursor y la esquina del post-it
-   2. mousemove → mueve el post-it libre siguiendo el cursor
-   3. mouseup   → calcula el slot más cercano disponible y anima el snap
-
-   El snap garantiza que los post-its siempre queden ordenados
-   en la grilla, sin importar dónde los sueltes.
 ================================================================ */
 
-let dragging  = null; // post-it que se está arrastrando { id, el, data }
-let dragOffX  = 0;    // offset horizontal cursor → esquina izquierda
-let dragOffY  = 0;    // offset vertical cursor → esquina superior
+let dragging = null;
+let dragOffX = 0;
+let dragOffY = 0;
 
-// Dibuja todos los post-its en sus posiciones de grilla
 function renderPostits() {
   const container = document.getElementById('postits-container');
   assignSlots();
 
   const cols = getGridCols();
-  const rows = Math.ceil((postits.length + 1) / cols); // +1 = botón agregar
+  const rows = Math.ceil((postits.length + 1) / cols);
 
-  // Ajustar altura del contenedor para que quepan todos los post-its
   container.style.minHeight = (POSTIT_PAD * 2 + rows * (POSTIT_H + POSTIT_GAP)) + 'px';
   container.innerHTML = '';
 
   postits.forEach(p => {
     const { x, y } = slotToXY(p.slot, cols);
 
-    const div       = document.createElement('div');
-    div.className   = `postit ${postitColors[p.color].cls}`;
-    div.id          = `postit-${p.id}`;
-    div.draggable   = false; // usamos nuestro propio drag, no el nativo
+    const div     = document.createElement('div');
+    div.className = `postit ${postitColors[p.color].cls}`;
+    div.id        = `postit-${p.id}`;
+    div.draggable = false;
     div.style.position = 'absolute';
     div.style.width    = POSTIT_W + 'px';
     div.style.left     = x + 'px';
@@ -1452,9 +1166,7 @@ function renderPostits() {
       </div>
     `;
 
-    // ── Iniciar drag ──────────────────────────────────────────
     div.addEventListener('mousedown', e => {
-      // No arrastrar si se está usando el textarea, botones o puntos de color
       if (
         e.target.tagName === 'TEXTAREA' ||
         e.target.tagName === 'BUTTON'   ||
@@ -1462,46 +1174,38 @@ function renderPostits() {
       ) return;
 
       e.preventDefault();
-
-      // Calcular offset: distancia del cursor a la esquina del post-it
       const divRect = div.getBoundingClientRect();
       dragOffX = e.clientX - divRect.left;
       dragOffY = e.clientY - divRect.top;
-
       dragging = { id: p.id, el: div, data: p };
       div.classList.add('dragging');
       div.style.zIndex     = 100;
-      div.style.transition = 'none'; // sin transición durante el drag
+      div.style.transition = 'none';
     });
 
-    // ── Eliminar post-it ──────────────────────────────────────
     div.querySelector('.postit-delete').addEventListener('click', () => {
       postits = postits.filter(pp => pp.id !== p.id);
-      // Renumerar slots para que no queden huecos en la grilla
       postits.forEach((pp, i) => { pp.slot = i; });
       renderPostits();
       playClick();
     });
 
-    // ── Cambiar color ─────────────────────────────────────────
     div.querySelectorAll('.postit-color-dot').forEach(dot => {
       dot.addEventListener('click', e => {
-        p.color     = parseInt(dot.dataset.color);
+        p.color       = parseInt(dot.dataset.color);
         div.className = `postit ${postitColors[p.color].cls}`;
-        div.style.position = 'absolute'; // preservar posicionamiento
+        div.style.position = 'absolute';
         playClick();
         e.stopPropagation();
       });
     });
 
-    // ── Editar texto ──────────────────────────────────────────
     div.querySelector('.postit-title-input').addEventListener('input', e => { p.title = e.target.value; });
     div.querySelector('.postit-body-input').addEventListener('input',  e => { p.body  = e.target.value; });
 
     container.appendChild(div);
   });
 
-  // ── Botón "Nueva nota" en el siguiente slot libre ─────────
   const nextSlot      = postits.length;
   const { x: bx, y: by } = slotToXY(nextSlot, cols);
   const addBtn        = document.createElement('button');
@@ -1511,20 +1215,13 @@ function renderPostits() {
   addBtn.style.top       = by + 'px';
   addBtn.style.width     = POSTIT_W + 'px';
   addBtn.style.minHeight = POSTIT_H + 'px';
-  addBtn.innerHTML   = '+<span>Nueva nota</span>';
+  addBtn.innerHTML       = '+<span>Nueva nota</span>';
 
   addBtn.addEventListener('click', () => {
     const id   = Date.now();
     const slot = postits.length;
-    postits.push({
-      id,
-      title: '',
-      body:  '',
-      color: Math.floor(Math.random() * postitColors.length),
-      slot,
-    });
+    postits.push({ id, title: '', body: '', color: Math.floor(Math.random() * postitColors.length), slot });
     renderPostits();
-    // Foco en el título del nuevo post-it
     setTimeout(() => {
       const el = document.getElementById(`postit-${id}`);
       if (el) el.querySelector('.postit-title-input').focus();
@@ -1535,22 +1232,16 @@ function renderPostits() {
   container.appendChild(addBtn);
 }
 
-// ── Mover post-it libremente mientras se arrastra ─────────────
 document.addEventListener('mousemove', e => {
   if (!dragging) return;
-
   const container     = document.getElementById('postits-container');
   const containerRect = container.getBoundingClientRect();
-
-  // Posición relativa al contenedor, descontando el offset del grab
   const x = e.clientX - containerRect.left - dragOffX;
   const y = e.clientY - containerRect.top  - dragOffY;
-
   dragging.el.style.left = x + 'px';
   dragging.el.style.top  = y + 'px';
 });
 
-// ── Soltar post-it y hacer snap al slot más cercano ───────────
 document.addEventListener('mouseup', () => {
   if (!dragging) return;
 
@@ -1558,33 +1249,23 @@ document.addEventListener('mouseup', () => {
   const x    = parseFloat(dragging.el.style.left);
   const y    = parseFloat(dragging.el.style.top);
 
-  // Slots ocupados por los OTROS post-its (no el que se está soltando)
   const occupiedSlots = new Set(
-    postits
-      .filter(p => p.id !== dragging.data.id)
-      .map(p => p.slot)
+    postits.filter(p => p.id !== dragging.data.id).map(p => p.slot)
   );
 
-  // Buscar el slot libre más cercano al punto de suelta
-  let bestSlot = dragging.data.slot; // fallback: vuelve a su slot original
+  let bestSlot = dragging.data.slot;
   let bestDist = Infinity;
 
   for (let s = 0; s <= postits.length; s++) {
-    if (occupiedSlots.has(s)) continue; // saltar slots ocupados
-
+    if (occupiedSlots.has(s)) continue;
     const { x: sx, y: sy } = slotToXY(s, cols);
-    const dist = Math.hypot(x - sx, y - sy); // distancia euclidiana
-    if (dist < bestDist) {
-      bestDist = dist;
-      bestSlot = s;
-    }
+    const dist = Math.hypot(x - sx, y - sy);
+    if (dist < bestDist) { bestDist = dist; bestSlot = s; }
   }
 
-  // Asignar el nuevo slot al post-it
   dragging.data.slot = bestSlot;
   const { x: snapX, y: snapY } = slotToXY(bestSlot, cols);
 
-  // Animar el snap con transición bounce
   dragging.el.style.transition = 'left 0.35s cubic-bezier(.22,.68,0,1.5), top 0.35s cubic-bezier(.22,.68,0,1.5)';
   dragging.el.style.left       = snapX + 'px';
   dragging.el.style.top        = snapY + 'px';
@@ -1594,10 +1275,8 @@ document.addEventListener('mouseup', () => {
 
   const droppedEl = dragging.el;
   setTimeout(() => droppedEl.classList.remove('dropped'), 400);
-
   dragging = null;
 
-  // Recalcular altura del contenedor por si cambió de fila
   const container = document.getElementById('postits-container');
   const rows = Math.ceil((postits.length + 1) / getGridCols());
   container.style.minHeight = (POSTIT_PAD * 2 + rows * (POSTIT_H + POSTIT_GAP)) + 'px';
@@ -1605,16 +1284,11 @@ document.addEventListener('mouseup', () => {
   playClick();
 });
 
-// Primer renderizado al cargar la página
 renderPostits();
 
 
 /* ================================================================
    22. HOVER INTERACTIVO GLOBAL
-   ================================================================
-   Todos los elementos con clase .interactive se agrandan levemente
-   al pasar el mouse por encima. Se excluyen los post-its y tareas
-   porque tienen sus propios efectos hover en CSS.
 ================================================================ */
 document.addEventListener('mouseover', e => {
   const el = e.target.closest('.interactive');
@@ -1633,12 +1307,6 @@ document.addEventListener('mouseout', e => {
 /* ================================================================
    23. PANTALLA DE CARGA + ARRANQUE DE MÚSICA
    ================================================================
-   La pantalla de carga desaparece 1.2 segundos después de que
-   la página terminó de cargar.
-
-   La música no puede arrancar automáticamente (política del navegador:
-   requiere interacción del usuario primero). Se arranca al primer click.
-
    Para cambiar el tiempo de la pantalla de carga:
      Editá el 1200 del setTimeout (milisegundos)
 ================================================================ */
@@ -1646,18 +1314,15 @@ window.addEventListener('load', () => {
   setTimeout(() => {
     document.getElementById('loading-overlay').classList.add('hidden');
 
-    // Arrancar música al primer click en la página
-    // (el navegador bloquea el audio antes de una interacción del usuario)
     document.addEventListener('click', () => {
       if (musicEnabled && !window._musicStarted) {
         window._musicStarted = true;
         playCozyBg();
       }
-    }, { once: true }); // { once: true } → se ejecuta una sola vez
+    }, { once: true });
   }, 1200);
 });
 
-// Sonido de click en cualquier botón o elemento interactivo
 document.addEventListener('click', e => {
   if (e.target.closest('button') || e.target.closest('.interactive')) {
     playClick();

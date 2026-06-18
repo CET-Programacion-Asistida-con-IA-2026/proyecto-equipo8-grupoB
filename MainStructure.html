@@ -38,6 +38,13 @@
 <!-- ── CLASE day/night: el JS la cambia sola según la hora ─────── -->
 <body class="day">
 
+  <nav class="top-navbar">
+  <a href="#section-welcome">🏠 Inicio</a>
+  <a href="#section-greenhouse">🌿 Habilidades</a>
+  <a href="#section-roadmap">📌 Ruta</a>
+  <a href="#section-footer">💛 Contacto</a>
+</nav>
+
 <!-- ═══════════════════════════════════════════════════════════════
      PANTALLA DE CARGA
      Se muestra al entrar y desaparece al cargar la página.
@@ -178,116 +185,13 @@
                Las reacciones se definen en script.js → "GUMMY ANIMATIONS" -->
           <div id="gummy-wrapper">
 
-            <!-- ══════════════════════════════════════════════════
-                 PERSONAJE GUMMY — SVG INLINE
-                 ══════════════════════════════════════════════════
-                 Grupos con id que el JS controla para cambiar expresión:
-                   #eyes-normal  → ojos normales (estado idle)
-                   #eyes-happy   → ojos de arco (hover / click)
-                   #eyes-sleep   → ojos cerrados (inactiva)
-                   #eyes-study   → ojos con anteojos (scroll)
-                   #gummy-book   → libro en manos (estado study)
-                   #gummy-zzz    → letras Z flotando (estado sleep)
-                   #gummy-hearts → corazones (click)
-                   #mouth-smile  → boca sonriente
-                   #mouth-sleep  → boca neutral para dormir
+    <img
+        id="MainPet"
+        src="MainPetIdle1.png"
+        alt="MainPet"
+    />
 
-                 PARA REEMPLAZAR POR TU IMAGEN:
-                   Borrá todo el <svg>...</svg> y poné:
-                   <img id="gummy-img" src="sprites/gummy-idle.png"
-                        style="width:160px; height:180px; object-fit:contain">
-                   Luego en script.js adaptá setGummyState() para
-                   cambiar el src en lugar de mostrar/ocultar grupos SVG.
-            ══════════════════════════════════════════════════════ -->
-            <svg id="gummy-svg" viewBox="0 0 160 180" xmlns="http://www.w3.org/2000/svg">
-              <!-- Cuerpo -->
-              <ellipse cx="80" cy="130" rx="45" ry="40" fill="#F9D4A0"/>
-              <!-- Cabeza -->
-              <ellipse cx="80" cy="82"  rx="42" ry="40" fill="#F9D4A0"/>
-              <!-- Oreja izquierda -->
-              <ellipse id="ear-l" cx="52" cy="45" rx="12" ry="24" fill="#F9D4A0" transform="rotate(-8 52 45)"/>
-              <ellipse            cx="52" cy="45" rx="7"  ry="17" fill="#FFBCBC" transform="rotate(-8 52 45)"/>
-              <!-- Oreja derecha -->
-              <ellipse id="ear-r" cx="108" cy="45" rx="12" ry="24" fill="#F9D4A0" transform="rotate(8 108 45)"/>
-              <ellipse            cx="108" cy="45" rx="7"  ry="17" fill="#FFBCBC" transform="rotate(8 108 45)"/>
-              <!-- Cachetes -->
-              <ellipse id="cheek-l" cx="58"  cy="90" rx="10" ry="7" fill="#FFBCBC" opacity="0.6"/>
-              <ellipse id="cheek-r" cx="102" cy="90" rx="10" ry="7" fill="#FFBCBC" opacity="0.6"/>
-
-              <!-- ── OJOS (el JS muestra/oculta según el estado) ── -->
-              <g id="gummy-eyes">
-                <g id="eyes-normal">
-                  <ellipse cx="68" cy="80" rx="7" ry="8" fill="#3A1E08"/>
-                  <ellipse cx="92" cy="80" rx="7" ry="8" fill="#3A1E08"/>
-                  <circle  cx="70" cy="77" r="2.5" fill="white"/>
-                  <circle  cx="94" cy="77" r="2.5" fill="white"/>
-                </g>
-                <g id="eyes-happy" style="display:none">
-                  <path d="M61 80 Q68 73 75 80" stroke="#3A1E08" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-                  <path d="M85 80 Q92 73 99 80" stroke="#3A1E08" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-                </g>
-                <g id="eyes-sleep" style="display:none">
-                  <path d="M61 82 Q68 78 75 82" stroke="#3A1E08" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-                  <path d="M85 82 Q92 78 99 82" stroke="#3A1E08" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-                </g>
-                <g id="eyes-study" style="display:none">
-                  <ellipse cx="68" cy="80" rx="7" ry="8" fill="#3A1E08"/>
-                  <ellipse cx="92" cy="80" rx="7" ry="8" fill="#3A1E08"/>
-                  <circle  cx="70" cy="77" r="2.5" fill="white"/>
-                  <circle  cx="94" cy="77" r="2.5" fill="white"/>
-                  <!-- Anteojos -->
-                  <rect x="57" y="72" width="22" height="16" rx="6" fill="none" stroke="#7A4A1E" stroke-width="2"/>
-                  <rect x="81" y="72" width="22" height="16" rx="6" fill="none" stroke="#7A4A1E" stroke-width="2"/>
-                  <line x1="79" y1="78" x2="81"  y2="78" stroke="#7A4A1E" stroke-width="2"/>
-                  <line x1="57" y1="78" x2="52"  y2="76" stroke="#7A4A1E" stroke-width="2"/>
-                  <line x1="103" y1="78" x2="108" y2="76" stroke="#7A4A1E" stroke-width="2"/>
-                </g>
-              </g>
-
-              <!-- Nariz -->
-              <ellipse cx="80" cy="90" rx="4" ry="3" fill="#E8A898"/>
-
-              <!-- ── BOCA ── -->
-              <g id="gummy-mouth">
-                <path id="mouth-smile" d="M72 97 Q80 104 88 97" stroke="#C87878" stroke-width="2" fill="none" stroke-linecap="round"/>
-                <path id="mouth-sleep" d="M74 97 Q80 96 86 97"  stroke="#C87878" stroke-width="2" fill="none" stroke-linecap="round" style="display:none"/>
-              </g>
-
-              <!-- ── EXTRAS SEGÚN ESTADO ── -->
-              <g id="gummy-book" style="display:none">
-                <rect x="50" y="140" width="60" height="35" rx="4" fill="#7AB648"/>
-                <rect x="50" y="140" width="30" height="35" rx="4" fill="#5A8A28"/>
-                <line x1="80" y1="140" x2="80" y2="175" stroke="#3A1E08" stroke-width="1.5"/>
-                <line x1="58" y1="150" x2="72" y2="150" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-                <line x1="58" y1="156" x2="72" y2="156" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-                <line x1="88" y1="150" x2="102" y2="150" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-              </g>
-              <g id="gummy-zzz" style="display:none">
-                <text x="112" y="62" font-size="14" font-family="Fredoka One" fill="#C8853A" opacity="0.8">z</text>
-                <text x="122" y="52" font-size="11" font-family="Fredoka One" fill="#C8853A" opacity="0.6">z</text>
-                <text x="130" y="44" font-size="9"  font-family="Fredoka One" fill="#C8853A" opacity="0.4">z</text>
-              </g>
-              <g id="gummy-hearts" style="display:none">
-                <text x="110" y="55" font-size="14">💗</text>
-                <text x="28"  y="60" font-size="11">💕</text>
-                <text x="118" y="75" font-size="10">🩷</text>
-              </g>
-
-              <!-- Lazo / bufanda -->
-              <ellipse cx="80" cy="118" rx="14" ry="6"  fill="#C8853A"/>
-              <ellipse cx="69" cy="118" rx="8"  ry="5"  fill="#E8A85A" transform="rotate(-15 69 118)"/>
-              <ellipse cx="91" cy="118" rx="8"  ry="5"  fill="#E8A85A" transform="rotate(15 91 118)"/>
-
-              <!-- Brazos -->
-              <ellipse id="arm-l" cx="38"  cy="130" rx="10" ry="18" fill="#F9D4A0" transform="rotate(15 38 130)"/>
-              <ellipse id="arm-r" cx="122" cy="130" rx="10" ry="18" fill="#F9D4A0" transform="rotate(-15 122 130)"/>
-
-              <!-- Pies -->
-              <ellipse cx="65" cy="168" rx="14" ry="8" fill="#F9D4A0"/>
-              <ellipse cx="95" cy="168" rx="14" ry="8" fill="#F9D4A0"/>
-            </svg><!-- fin gummy-svg -->
-
-          </div><!-- fin gummy-wrapper -->
+</div>
 
           <!-- Etiqueta de estado debajo de Gummy (ej: "¡Hola! 🐰", "zzz... 😴") -->
           <div class="gummy-state-label" id="gummy-state-label">¡Hola! 🐰</div>

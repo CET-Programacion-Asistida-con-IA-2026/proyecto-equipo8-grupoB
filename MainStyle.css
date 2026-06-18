@@ -15,7 +15,1303 @@
 ║   9.  Sección 1: Bienvenida y Gummy                              ║
 ║  10.  Sección 2: Invernadero de habilidades                      ║
 ║  11.  Sección 3: Mapa de ruta (post-its)                         ║
+║  12.  Footer                                                     ║/*
+╔══════════════════════════════════════════════════════════════════╗
+║                    GUMMY ✿ STYLE.CSS                            ║
+║              Chicas en Tec · Grupo 8B                           ║
+╠══════════════════════════════════════════════════════════════════╣
+║  ÍNDICE DE SECCIONES:                                            ║
+║   1.  Variables de color y tipografía  ← EMPEZÁ AQUÍ            ║
+║   2.  Reset y base                                               ║
+║   3.  Cursor personalizado                                       ║
+║   4.  Animaciones de scroll (reveal)                             ║
+║   5.  Guirnalda de luces                                         ║
+║   6.  Controles de sonido                                        ║
+║   7.  Escena de fondo (cielo, ventana, lluvia, piso)             ║
+║   8.  Layout principal y tarjetas                                ║
+║   9.  Sección 1: Bienvenida y Gummy                              ║
+║  10.  Sección 2: Invernadero de habilidades                      ║
+║  11.  Sección 3: Mapa de ruta (post-its)                         ║
 ║  12.  Footer                                                     ║
+║  13.  Efectos especiales (corazones, loading)                    ║
+║  14.  Responsive (mobile)                                        ║
+╚══════════════════════════════════════════════════════════════════╝
+*/
+
+
+/* ================================================================
+   1. VARIABLES DE COLOR Y TIPOGRAFÍA
+   ================================================================
+   ▶ Todas las modificaciones de color empezá acá.
+   ▶ Usá estas variables en cualquier lado con: var(--nombre)
+
+   PALETA ACTUAL:
+     Crema    #F5ECD7   → fondo de tarjetas
+     Caramelo #C8853A   → color principal / botones
+     Verde    #7AB648   → progreso / plantas
+     Blanco   #FFFDF7   → texto claro
+     Marrón   #4A2C0A   → texto oscuro / madera
+================================================================ */
+:root {
+  /* ── Familia principal de colores ─────────────────────────── */
+  --cream:          #F5ECD7;  /* crema — fondo de tarjetas       */
+  --caramel:        #C8853A;  /* caramelo — botones, accents     */
+  --caramel-dark:   #8B5A2B;  /* caramelo oscuro — hover, madera */
+  --caramel-light:  #E8A85A;  /* caramelo claro — bordes suaves  */
+  --brown-dark:     #4A2C0A;  /* marrón oscuro — texto principal */
+  --white:          #FFFDF7;  /* blanco cálido — texto sobre oscuro */
+
+  /* ── Color de acento: plantas y progreso ──────────────────── */
+  --green:          #7AB648;
+  --green-dark:     #5A8A28;
+  --green-light:    #A8D878;
+
+  /* ── Colores de texto ─────────────────────────────────────── */
+  --text-dark:      #3A1E08;  /* texto sobre fondo claro         */
+  --text-light:     #FFFDF7;  /* texto sobre fondo oscuro        */
+
+  /* ── Sombra estándar ─────────────────────────────────────── */
+  --shadow:         rgba(74, 44, 10, 0.18);
+
+  /* ── Fuentes
+        Para cambiarlas: reemplazá los nombres acá Y en el <link> del HTML
+  ──────────────────────────────────────────────────────────── */
+  --font-body:    'Nunito', sans-serif;      /* texto general     */
+  --font-display: 'Fredoka One', cursive;    /* títulos / carteles */
+}
+
+
+/* ================================================================
+   2. RESET Y BASE
+   ================================================================
+   Borra márgenes y padding por defecto del navegador.
+   Aplica scroll suave entre secciones.
+================================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth; /* Scroll suave al navegar entre secciones */
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--caramel-dark);
+  color: var(--text-dark);
+  overflow-x: hidden; /* evita scroll horizontal */
+  /* ── Cursor personalizado (círculo marrón con punto blanco) ──
+     Para cambiar el cursor: modificá los atributos fill del SVG inline
+     o reemplazalo por: cursor: url('mi-cursor.png') 12 12, auto; */
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9' fill='%23C8853A' stroke='white' stroke-width='2.5'/%3E%3Ccircle cx='12' cy='12' r='3' fill='white'/%3E%3C/svg%3E") 12 12, auto;
+}
+
+
+/* ================================================================
+   3. CURSOR PERSONALIZADO PARA ELEMENTOS INTERACTIVOS
+   ================================================================
+   Cursor más oscuro cuando está sobre algo clickeable.
+   Para cambiar: editá los fill del SVG inline abajo.
+================================================================ */
+a, button, .interactive {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='11' fill='%238B5A2B' stroke='%23FFFDF7' stroke-width='2.5'/%3E%3Ccircle cx='14' cy='14' r='4' fill='%23FFFDF7'/%3E%3C/svg%3E") 14 14, pointer;
+}
+
+
+/* ================================================================
+   4. ANIMACIONES DE SCROLL (REVEAL)
+   ================================================================
+   Clases que el JS agrega/quita según si el elemento está en pantalla.
+   .reveal       → estado invisible (antes de entrar)
+   .reveal.visible → estado visible (al entrar en pantalla)
+
+   Para cambiar la velocidad de aparición: editá transition-duration
+   Para cambiar el efecto: editá transform (ej: translateX en vez de Y)
+================================================================ */
+.reveal {
+  opacity: 0;
+  transform: scale(0.92) translateY(24px);
+  transition:
+    opacity   0.7s cubic-bezier(.22,.68,0,1.2),
+    transform 0.7s cubic-bezier(.22,.68,0,1.2);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+
+/* ================================================================
+   5. GUIRNALDA DE LUCES (fija en la parte superior)
+   ================================================================
+   El SVG del cable y las lamparitas se generan desde script.js.
+   Para cambiar los colores de las lamparitas: buscá "bulb colors" en script.js
+   Para cambiar el ancho del cable: buscá .garland-wire abajo
+================================================================ */
+.garland {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 100;
+  pointer-events: none; /* no bloquea clicks */
+}
+.garland svg { width: 100%; height: 60px; }
+
+/* Cable de la guirnalda */
+.garland-wire {
+  stroke: var(--caramel-dark);
+  stroke-width: 2;
+  fill: none;
+}
+
+
+/* ================================================================
+   6. CONTROLES DE SONIDO (arriba a la derecha)
+   ================================================================
+   Botones circulares fijos.
+   .sound-btn.muted → estado silenciado (más oscuro y transparente)
+   .track-selector  → menú desplegable de pistas
+================================================================ */
+.sound-controls {
+  position: fixed;
+  top: 14px;
+  right: 18px;
+  z-index: 200;
+  display: flex;
+  gap: 8px;
+}
+
+.sound-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2.5px solid var(--cream);
+  background: var(--caramel);
+  color: var(--white);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s, background 0.2s;
+  box-shadow: 0 2px 8px var(--shadow);
+}
+.sound-btn:hover { transform: scale(1.12); background: var(--caramel-light); }
+.sound-btn.muted { background: var(--caramel-dark); opacity: 0.6; }
+
+/* Menú desplegable de pistas de música */
+.track-selector {
+  display: none;        /* oculto por defecto */
+  position: absolute;
+  top: 46px;
+  right: 0;
+  background: var(--cream);
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 4px 16px var(--shadow);
+  gap: 6px;
+  flex-direction: column;
+  min-width: 140px;
+}
+.track-selector.open { display: flex; } /* JS agrega .open al clickear */
+
+.track-btn {
+  background: var(--caramel-light);
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--brown-dark);
+  transition: background 0.2s, transform 0.15s;
+}
+.track-btn:hover  { background: var(--caramel); color: white; transform: scale(1.04); }
+.track-btn.active { background: var(--caramel-dark); color: white; }
+
+
+/* ================================================================
+   7. ESCENA DE FONDO (cielo, ventana, lluvia, piso)
+   ================================================================
+   El fondo es fijo (fixed) y está detrás de todo el contenido.
+   La clase .day / .night en <body> controla el cielo y estrellas.
+
+   PARA PONER TU PROPIO FONDO:
+     Reemplazá los gradientes de #scene-bg con:
+       background-image: url('tu-fondo.png');
+       background-size: cover;
+       background-position: center;
+     Y eliminá los degradados de body.day #scene-bg y body.night #scene-bg
+================================================================ */
+#scene {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+/* ── Fondo de cielo — cambia entre día y noche ───────────────── */
+#scene-bg {
+  position: absolute;
+  inset: 0;
+  transition: background 3s ease; /* transición suave día↔noche */
+}
+
+/* Cielo de DÍA (mañana / tarde):
+   Para cambiar los colores del cielo diurno: editá este gradiente */
+body.day #scene-bg {
+  background: linear-gradient(
+    180deg,
+    #FDECC8 0%,   /* cielo arriba — amarillo muy claro */
+    #F5D8A0 40%,  /* tono crema medio */
+    #E8C080 80%,  /* naranja suave */
+    #C8853A 100%  /* caramelo abajo (fusiona con el piso) */
+  );
+}
+
+/* Cielo de NOCHE:
+   Para cambiar los colores nocturnos: editá este gradiente */
+body.night #scene-bg {
+  background: linear-gradient(
+    180deg,
+    #1A1428 0%,   /* azul muy oscuro arriba */
+    #2D2048 40%,  /* violeta oscuro */
+    #3A2A30 80%,  /* gris cálido */
+    #4A2C0A 100%  /* marrón oscuro abajo */
+  );
+}
+
+/* ── Estrellas (solo visibles de noche) ──────────────────────── */
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background: white;
+  opacity: 0;
+  animation: twinkle 3s infinite alternate;
+  transition: opacity 2s;
+}
+body.night .star { opacity: 1; }
+
+@keyframes twinkle {
+  from { opacity: 0.4; transform: scale(0.8); }
+  to   { opacity: 1;   transform: scale(1.2); }
+}
+
+/* ── Sol (día) / Luna (noche) ────────────────────────────────── */
+#celestial {
+  position: absolute;
+  top: 60px;
+  right: 120px;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  transition: all 3s ease;
+}
+body.day #celestial {
+  background: radial-gradient(circle, #FFE680, #FFB300);
+  box-shadow: 0 0 40px #FFD70088, 0 0 80px #FFD70044;
+}
+body.night #celestial {
+  background: radial-gradient(circle at 30% 35%, #F5EFDA, #D4C89A);
+  box-shadow: 0 0 30px rgba(245, 239, 218, 0.3);
+}
+
+/* ── Ventana del fondo ────────────────────────────────────────
+   Para cambiar su tamaño: editá width y height
+   Para cambiar el grosor del marco: editá border
+   Para cambiar su posición: editá left y top ──────────────── */
+#window-frame {
+  position: absolute;
+  left: 50%;
+  top: 20px;
+  transform: translateX(-50%);
+  width: 340px;
+  height: 280px;
+  border: 18px solid #7A4A1E;
+  border-radius: 8px 8px 4px 4px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35), inset 0 0 20px rgba(0,0,0,0.1);
+}
+/* Travesaño vertical de la ventana */
+#window-frame::before {
+  content: '';
+  position: absolute;
+  left: 50%; top: 0;
+  width: 16px; height: 100%;
+  background: #7A4A1E;
+  transform: translateX(-50%);
+  z-index: 2;
+}
+/* Travesaño horizontal de la ventana */
+#window-frame::after {
+  content: '';
+  position: absolute;
+  left: 0; top: 50%;
+  width: 100%; height: 16px;
+  background: #7A4A1E;
+  transform: translateY(-50%);
+  z-index: 2;
+}
+.window-pane {
+  position: absolute;
+  inset: 0;
+  background: rgba(173, 216, 230, 0.25); /* vidrio azulado semitransparente */
+  z-index: 1;
+}
+
+/* ── Lluvia ───────────────────────────────────────────────────
+   Las gotitas se generan en script.js → "Generate rain"
+   Para cambiar la cantidad: buscá el loop "for (let i = 0; i < 80" ── */
+#rain-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  display: none;
+}
+#rain-container.raining { display: block; }
+
+.raindrop {
+  position: absolute;
+  top: -10px;
+  width: 2px;
+  background: linear-gradient(180deg, transparent, rgba(174, 214, 241, 0.6));
+  border-radius: 2px;
+  animation: fall linear infinite;
+}
+@keyframes fall {
+  to { transform: translateY(105vh); }
+}
+
+/* ── Piso / suelo de la escena ─────────────────────────────── */
+#floor {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 140px;
+  background: linear-gradient(180deg, #7A4A1E, #5A3010);
+  border-top: 8px solid #9A6030;
+}
+
+/* ── Plantas del alféizar (decorativas, no las de tareas) ──── */
+.windowsill-plant {
+  position: absolute;
+  bottom: 90px;
+  animation: sway 4s ease-in-out infinite;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
+}
+@keyframes sway {
+  0%, 100% { transform: rotate(-3deg); }
+  50%       { transform: rotate(3deg); }
+}
+
+/* ── Contenedor de escena con parallax ─────────────────────── */
+#scene-content {
+  position: absolute;
+  inset: 0;
+  will-change: transform; /* optimización de GPU para el parallax */
+}
+
+
+/* ================================================================
+   8. LAYOUT PRINCIPAL Y TARJETAS
+   ================================================================
+   #app     → wrapper de todo el contenido scrolleable
+   .section → cada sección ocupa al menos 100vh
+   .card    → tarjeta blanca redondeada con sombra y brillo
+================================================================ */
+#app {
+  position: relative;
+  z-index: 10; /* encima del fondo */
+  min-height: 100vh;
+}
+
+.section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px 60px;
+  position: relative;
+}
+
+/* Tarjeta base:
+   Para cambiar el radio de esquinas: editá border-radius
+   Para cambiar el fondo: editá background */
+.card {
+  background: var(--cream);
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 0 8px 32px var(--shadow), 0 2px 8px rgba(0,0,0,0.08);
+  position: relative;
+  overflow: hidden;
+}
+/* Brillo sutil sobre la tarjeta (efecto vidrio) */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+
+/* ================================================================
+   9. SECCIÓN 1: BIENVENIDA Y GUMMY
+================================================================ */
+
+/* ── Sección bienvenida — más padding arriba por la guirnalda ─ */
+#section-welcome {
+  padding-top: 100px;
+}
+
+/* ── Layout 2 columnas: bienvenida | Gummy ────────────────────
+   Para cambiar el ancho del panel de Gummy: editá 320px
+   Para cambiar el espacio entre columnas: editá gap ───────── */
+.welcome-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 28px;
+  max-width: 1100px;
+  width: 100%;
+  align-items: start;
+}
+
+.welcome-card {
+  padding: 48px 40px;
+}
+
+/* ── Título de saludo (animado letra a letra) ─────────────────
+   -webkit-text-stroke → borde blanco alrededor del texto
+   paint-order        → renderiza el relleno sobre el borde
+   Para cambiar tamaño mínimo/máximo: editá clamp(min, fluid, max) ── */
+.greeting-line {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 5vw, 3.8rem);
+  color: var(--caramel-dark);
+  line-height: 1.1;
+  -webkit-text-stroke: 3px white;
+  paint-order: stroke fill;
+  letter-spacing: 1px;
+}
+
+/* Cursor parpadeante del efecto de escritura */
+.cursor-blink {
+  display: inline-block;
+  width: 3px;
+  background: var(--caramel);
+  animation: blink 1s step-end infinite;
+  vertical-align: middle;
+  height: 1em;
+  margin-left: 2px;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ── Frase motivacional rotativa ─────────────────────────────
+   Las frases se definen en script.js → "quotes"
+   Para cambiar el tiempo entre frases: buscá setInterval en script.js ── */
+.motivational-quote {
+  margin-top: 20px;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--caramel-dark);
+  min-height: 2.5em;
+  font-style: italic;
+  transition: opacity 0.5s;
+}
+.motivational-quote.fading { opacity: 0; } /* JS agrega esta clase al rotar */
+
+/* ── Badges decorativos ───────────────────────────────────── */
+.welcome-decorations {
+  display: flex;
+  gap: 16px;
+  margin-top: 32px;
+  flex-wrap: wrap;
+}
+.deco-badge {
+  background: var(--caramel);
+  color: white;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 2.5px solid white;
+  box-shadow: 0 3px 10px var(--shadow);
+  transition: transform 0.2s;
+}
+.deco-badge:hover { transform: scale(1.08) rotate(-2deg); }
+
+/* ── Panel de Gummy (personaje + chat) ──────────────────────── */
+.gummy-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+/* Marco superior del personaje */
+.gummy-frame {
+  background: var(--cream);
+  border-radius: 24px 24px 0 0;
+  padding: 24px 20px 12px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 8px 32px var(--shadow);
+  border: 3px solid var(--caramel-light);
+  border-bottom: none; /* se une visualmente con el chat de abajo */
+  position: relative;
+}
+
+.gummy-frame-label {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--caramel-dark);
+  -webkit-text-stroke: 1.5px white;
+  paint-order: stroke fill;
+  margin-bottom: 8px;
+}
+
+/* Contenedor del SVG / imagen de Gummy
+   Para cambiar el tamaño de Gummy: editá width y height */
+#gummy-wrapper {
+  width: 160px;
+  height: 180px;
+  position: relative;
+  cursor: pointer;
+}
+   
+/* SVG de Gummy — se escala levemente al hover con CSS */
+#MainPet{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+
+  transition: transform .3s cubic-bezier(.22,.68,0,1.5);
+}
+#gummy-wrapper:hover  #gummy-img { transform: scale(1.08); }
+#gummy-wrapper:active #gummy-img { transform: scale(0.95); }
+
+/* Etiqueta de estado debajo de Gummy ("¡Hola! 🐰", "zzz...") */
+.gummy-state-label {
+  font-size: 0.75rem;
+  color: var(--caramel);
+  font-weight: 700;
+  margin-top: 4px;
+  min-height: 1.2em;
+  transition: opacity 0.3s;
+}
+
+/* ── Chat de Gummy ────────────────────────────────────────────
+   Se une visualmente al marco de arriba (border-radius solo abajo)
+   Para cambiar la altura del historial: editá max-height en .chat-messages ── */
+.gummy-chat {
+  background: var(--cream);
+  border-radius: 0 0 24px 24px;
+  width: 100%;
+  border: 3px solid var(--caramel-light);
+  border-top: none;
+  box-shadow: 0 8px 32px var(--shadow);
+  overflow: hidden;
+}
+
+.chat-messages {
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+/* Scrollbar del chat */
+.chat-messages::-webkit-scrollbar       { width: 4px; }
+.chat-messages::-webkit-scrollbar-track { background: transparent; }
+.chat-messages::-webkit-scrollbar-thumb { background: var(--caramel-light); border-radius: 4px; }
+
+/* Burbuja de mensaje base */
+.chat-msg {
+  max-width: 90%;
+  padding: 8px 12px;
+  border-radius: 14px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.4;
+  animation: popIn 0.3s cubic-bezier(.22,.68,0,1.3);
+}
+@keyframes popIn {
+  from { transform: scale(0.7); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+/* Mensaje de Gummy (izquierda) */
+.chat-msg.gummy {
+  background: var(--caramel-light);
+  color: var(--brown-dark);
+  border-radius: 14px 14px 14px 4px;
+  align-self: flex-start;
+}
+/* Mensaje del usuario (derecha) */
+.chat-msg.user {
+  background: var(--green);
+  color: white;
+  border-radius: 14px 14px 4px 14px;
+  align-self: flex-end;
+}
+/* Mensaje de carga (puntitos animados) */
+.chat-msg.loading {
+  background: var(--caramel-light);
+  align-self: flex-start;
+}
+
+/* Animación de puntitos "escribiendo" */
+.typing-dots span {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--caramel-dark);
+  margin: 0 2px;
+  animation: bounce 1.2s infinite;
+}
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30%           { transform: translateY(-6px); }
+}
+
+/* Fila de input + botón */
+.chat-input-row {
+  display: flex;
+  padding: 8px 10px;
+  gap: 6px;
+  border-top: 2px solid var(--caramel-light);
+  background: rgba(255,255,255,0.4);
+}
+
+.chat-input {
+  flex: 1;
+  border: 2px solid var(--caramel-light);
+  border-radius: 12px;
+  padding: 7px 12px;
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  font-weight: 600;
+  background: white;
+  color: var(--brown-dark);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.chat-input:focus { border-color: var(--caramel); }
+
+.chat-send-btn {
+  background: var(--caramel);
+  border: none;
+  border-radius: 10px;
+  width: 36px; height: 36px;
+  color: white;
+  font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.15s, background 0.2s;
+  box-shadow: 0 2px 6px var(--shadow);
+}
+.chat-send-btn:hover { transform: scale(1.12); background: var(--caramel-dark); }
+
+
+/* ================================================================
+   10. SECCIÓN 2: INVERNADERO DE HABILIDADES
+================================================================ */
+
+#section-greenhouse {
+  background: transparent;
+}
+
+/* Tarjeta del invernadero — full width hasta 1100px */
+.greenhouse-card {
+  max-width: 1100px;
+  width: 100%;
+}
+
+/* Título de sección compartido por todas las secciones */
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  color: var(--caramel-dark);
+  -webkit-text-stroke: 2px white;
+  paint-order: stroke fill;
+  margin-bottom: 28px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Layout 2 columnas: plantas | tareas ─────────────────────────
+   Para cambiar la proporción: editá grid-template-columns */
+.greenhouse-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+}
+
+/* ── Área de plantas ─────────────────────────────────────────── */
+.plants-area {
+  background: rgba(122, 182, 72, 0.12);
+  border-radius: 18px;
+  padding: 20px;
+  border: 2px solid rgba(122, 182, 72, 0.3);
+}
+
+/* Fila donde se ubican las plantas */
+.plants-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  min-height: 140px;
+  align-items: flex-end;
+  padding-bottom: 10px;
+  border-bottom: 3px solid var(--caramel-light);
+}
+
+/* Cada planta con su maceta y etiqueta */
+.plant-pot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  cursor: pointer;
+  transition: transform 0.2s;
+  position: relative;
+}
+.plant-pot:hover { transform: scale(1.08) translateY(-4px); }
+
+.plant-svg-wrap {
+  position: relative;
+}
+
+/* Imagen de la planta (SVG placeholder o tu PNG)
+   Para cambiar el tamaño: editá width y height */
+.plant-img {
+  display: block;
+  width: 64px;
+  height: 100px;
+  object-fit: contain;
+}
+
+.plant-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--caramel-dark);
+  text-align: center;
+  max-width: 60px;
+  word-break: break-word;
+  line-height: 1.2;
+}
+
+.plant-pct {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--green-dark);
+}
+
+/* Botón de agregar nueva planta/tarea */
+.add-plant-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 60px;
+  height: 100px;
+  border: 2.5px dashed var(--caramel-light);
+  border-radius: 12px;
+  background: rgba(200, 133, 58, 0.08);
+  color: var(--caramel);
+  font-size: 1.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+.add-plant-btn:hover { background: rgba(200,133,58,0.18); transform: scale(1.05); }
+.add-plant-btn span { font-size: 0.7rem; font-weight: 800; }
+
+/* ── Área de tareas (lista de la derecha) ─────────────────────── */
+.tasks-area {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Cada ítem de tarea */
+.task-item {
+  background: white;
+  border-radius: 14px;
+  border: 2px solid var(--caramel-light);
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+.task-item:hover { box-shadow: 0 4px 16px var(--shadow); }
+
+/* Header de la tarea (fila con flecha, nombre, %, botones) */
+.task-header {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  gap: 10px;
+  cursor: pointer;
+}
+
+/* Flecha que rota al expandir */
+.task-expand-btn {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  color: var(--caramel);
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+.task-item.expanded .task-expand-btn { transform: rotate(90deg); }
+
+/* Input editable con el nombre de la tarea */
+.task-name-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--brown-dark);
+  outline: none;
+  min-width: 0;
+}
+
+/* Porcentaje de completado */
+.task-pct-display {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--green-dark);
+  flex-shrink: 0;
+}
+
+/* Barra de progreso debajo del header */
+.task-progress-bar {
+  height: 6px;
+  background: #E8D8C0;
+  overflow: hidden;
+}
+.task-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--green), var(--green-light));
+  border-radius: 0 3px 3px 0;
+  transition: width 0.5s cubic-bezier(.22,.68,0,1.2); /* animación suave */
+}
+
+.task-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.task-action-btn {
+  background: none;
+  border: none;
+  font-size: 0.9rem;
+  color: var(--caramel);
+  padding: 2px 4px;
+  border-radius: 6px;
+  transition: background 0.15s, transform 0.15s;
+}
+.task-action-btn:hover { background: var(--cream); transform: scale(1.15); }
+
+/* Área de subtareas (oculta por defecto, visible al expandir) */
+.subtasks-area {
+  display: none;
+  padding: 8px 14px 12px 28px;
+  flex-direction: column;
+  gap: 6px;
+  border-top: 1.5px solid var(--caramel-light);
+  background: rgba(245, 236, 215, 0.5);
+}
+.task-item.expanded .subtasks-area { display: flex; }
+
+/* Fila de cada subtarea */
+.subtask-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.subtask-check {
+  width: 18px; height: 18px;
+  accent-color: var(--green); /* color del checkbox al tildar */
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.subtask-input {
+  flex: 1;
+  border: none;
+  border-bottom: 1.5px solid var(--caramel-light);
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--brown-dark);
+  outline: none;
+  padding: 2px 0;
+}
+.subtask-input:focus { border-bottom-color: var(--caramel); }
+.subtask-row .task-action-btn { font-size: 0.8rem; }
+
+/* Botón para agregar subtarea */
+.add-subtask-btn {
+  background: none;
+  border: none;
+  color: var(--caramel);
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+  text-align: left;
+  padding: 4px 0;
+  transition: color 0.15s;
+}
+.add-subtask-btn:hover { color: var(--caramel-dark); }
+
+
+/* ================================================================
+   11. SECCIÓN 3: MAPA DE RUTA LABORAL (POST-ITS)
+================================================================ */
+
+#section-roadmap {
+  background: transparent;
+  min-height: 100vh;
+}
+
+.roadmap-card {
+  max-width: 1100px;
+  width: 100%;
+  min-height: 520px;
+}
+
+/* Contenedor de los post-its (position: relative para que los
+   post-its absolute se posicionen correctamente dentro) */
+.postits-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  min-height: 420px;
+  padding: 16px;
+  position: relative;    /* ← IMPORTANTE: no cambiar */
+  align-items: flex-start;
+  align-content: flex-start;
+}
+
+/* ── Post-it individual ───────────────────────────────────────
+   Para cambiar el tamaño de los post-its también editá en script.js:
+     POSTIT_W → ancho en píxeles
+     POSTIT_H → alto en píxeles
+     POSTIT_GAP → espacio entre ellos
+     POSTIT_PAD → padding interno del contenedor ─────────────── */
+.postit {
+  width: 180px;
+  min-height: 160px;
+  border-radius: 4px 16px 16px 4px;
+  padding: 18px 14px 14px;
+  position: relative;
+  cursor: grab;
+  user-select: none;     /* evita selección de texto al arrastrar */
+  transition: transform 0.18s cubic-bezier(.22,.68,0,1.5), box-shadow 0.18s;
+  box-shadow: 3px 4px 18px rgba(0,0,0,0.13), 0 1px 4px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+/* Línea decorativa superior del post-it */
+.postit::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 6px;
+  border-radius: 4px 16px 0 0;
+  background: rgba(0,0,0,0.08);
+}
+
+/* Al pasar el mouse — se agranda y rota levemente */
+.postit:hover {
+  transform: scale(1.07) rotate(-1.5deg);
+  box-shadow: 6px 10px 28px rgba(0,0,0,0.22);
+  z-index: 10;
+}
+
+/* Al arrastrar */
+.postit.dragging {
+  cursor: grabbing;
+  transform: scale(1.12) rotate(3deg);
+  box-shadow: 10px 16px 40px rgba(0,0,0,0.3);
+  z-index: 100;
+  transition: none; /* sin transición durante el drag */
+}
+
+/* Al soltar — animación de rebote */
+.postit.dropped {
+  animation: boing 0.4s cubic-bezier(.22,.68,0,1.5);
+}
+@keyframes boing {
+  0%   { transform: scale(1.12) rotate(3deg); }
+  60%  { transform: scale(0.97) rotate(-0.5deg); }
+  100% { transform: scale(1)    rotate(0deg); }
+}
+
+/* Input del título del post-it */
+.postit-title-input {
+  background: transparent;
+  border: none;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  color: var(--brown-dark);
+  outline: none;
+  width: 100%;
+  resize: none;
+  min-height: 1.4em;
+}
+/* Input del cuerpo del post-it */
+.postit-body-input {
+  background: transparent;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--brown-dark);
+  outline: none;
+  flex: 1;
+  resize: none;
+  min-height: 60px;
+  line-height: 1.5;
+}
+.postit-title-input::placeholder,
+.postit-body-input::placeholder { color: rgba(74,44,10,0.35); }
+
+/* Botón de eliminar (X en la esquina) */
+.postit-delete {
+  position: absolute;
+  top: 8px; right: 10px;
+  background: none;
+  border: none;
+  font-size: 0.9rem;
+  color: rgba(74,44,10,0.35);
+  cursor: pointer;
+  transition: color 0.15s, transform 0.15s;
+  line-height: 1;
+}
+.postit-delete:hover { color: #E05252; transform: scale(1.2); }
+
+/* Puntos de color para cambiar el color del post-it */
+.postit-colors {
+  display: flex;
+  gap: 5px;
+  margin-top: 4px;
+}
+.postit-color-dot {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid rgba(255,255,255,0.6);
+  transition: transform 0.15s;
+}
+.postit-color-dot:hover { transform: scale(1.25); }
+
+/* Botón de agregar nuevo post-it */
+.add-postit-btn {
+  min-height: 160px;
+  border: 3px dashed var(--caramel-light);
+  border-radius: 16px;
+  background: rgba(200,133,58,0.06);
+  color: var(--caramel);
+  font-size: 2.5rem;
+  font-family: var(--font-display);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.2s, transform 0.15s;
+}
+.add-postit-btn span { font-size: 0.9rem; font-weight: 800; }
+.add-postit-btn:hover { background: rgba(200,133,58,0.14); transform: scale(1.04); }
+
+/* ── Colores de post-its ──────────────────────────────────────
+   Para cambiar los colores: editá los valores hexadecimales
+   Para agregar colores: agregá una clase nueva acá y en script.js → postitColors[] */
+.postit-yellow { background: #FFF176; }
+.postit-peach  { background: #FFCCBC; }
+.postit-mint   { background: #C8E6C9; }
+.postit-lilac  { background: #E1BEE7; }
+.postit-sky    { background: #B3E5FC; }
+
+
+/* ================================================================
+   12. FOOTER
+================================================================ */
+#section-footer {
+  min-height: unset; /* el footer no necesita 100vh */
+  padding: 40px 24px;
+  background: rgba(74, 44, 10, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: var(--cream);
+}
+.footer-logo {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  -webkit-text-stroke: 1.5px rgba(255,255,255,0.3);
+  paint-order: stroke fill;
+}
+.footer-sub   { font-size: 0.88rem; font-weight: 600; opacity: 0.7; }
+.footer-emoji { font-size: 1.8rem; }
+
+
+/* ================================================================
+   13. EFECTOS ESPECIALES
+================================================================ */
+
+/* ── Corazones que flotan al hacer click en Gummy ─────────────
+   Para cambiar la velocidad del vuelo: editá la duración de heartFly
+   Para cambiar qué tan alto suben: editá translateY(-60px) ────── */
+.heart-particle {
+  position: fixed;
+  pointer-events: none;
+  font-size: 1.2rem;
+  z-index: 9999;
+  animation: heartFly 0.9s forwards;
+}
+@keyframes heartFly {
+  0%   { opacity: 1; transform: translateY(0)     scale(1);   }
+  100% { opacity: 0; transform: translateY(-60px) scale(1.4); }
+}
+
+/* ── Pantalla de carga ────────────────────────────────────────
+   Para cambiar el color de fondo: editá background
+   Para cambiar el tiempo que tarda en desaparecer: en script.js → setTimeout ── */
+#loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--caramel);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.6s;
+}
+#loading-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loading-text {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  color: white;
+  -webkit-text-stroke: 2px rgba(255,255,255,0.3);
+}
+
+.loading-bounce {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+.loading-bounce span {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: white;
+  animation: bounce 0.8s infinite alternate;
+}
+.loading-bounce span:nth-child(2) { animation-delay: 0.15s; }
+.loading-bounce span:nth-child(3) { animation-delay: 0.30s; }
+
+/* ================================================================
+   NAVBAR SUPERIOR
+================================================================ */
+
+.top-navbar{
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  display: flex;
+  gap: 12px;
+
+  padding: 12px 20px;
+
+  background: rgba(245,236,215,0.9);
+  backdrop-filter: blur(10px);
+
+  border: 2px solid var(--caramel-light);
+  border-radius: 999px;
+
+  box-shadow: 0 4px 15px var(--shadow);
+
+  z-index: 300;
+}
+
+.top-navbar a{
+  text-decoration: none;
+  color: var(--brown-dark);
+  font-weight: 800;
+
+  padding: 8px 14px;
+  border-radius: 999px;
+
+  transition: all .25s ease;
+}
+
+.top-navbar a:hover{
+  background: var(--caramel);
+  color: white;
+  transform: translateY(-2px);
+}
+/* ================================================================
+   14. RESPONSIVE — MOBILE
+   ================================================================
+   A partir de 768px de ancho todo pasa a 1 columna.
+   Para cambiar el punto de quiebre: editá max-width: 768px
+================================================================ */
+@media (max-width: 768px) {
+  /* Bienvenida + Gummy van en columna */
+  .welcome-layout {
+    grid-template-columns: 1fr;
+  }
+  /* Gummy centrado */
+  .gummy-panel {
+    max-width: 340px;
+    margin: 0 auto;
+  }
+  /* Plantas y tareas van en columna */
+  .greenhouse-layout {
+    grid-template-columns: 1fr;
+  }
+  /* Título más chico */
+  .section-title {
+    font-size: 1.7rem;
+  }
+  /* Ventana del fondo más chica */
+  #window-frame {
+    width: 200px;
+    height: 160px;
+  }
+}
 ║  13.  Efectos especiales (corazones, loading)                    ║
 ║  14.  Responsive (mobile)                                        ║
 ╚══════════════════════════════════════════════════════════════════╝
