@@ -5,18 +5,19 @@
   ║         Chicas en Tec · Grupo 8B                            ║
   ╠══════════════════════════════════════════════════════════════╣
   ║  IMÁGENES REQUERIDAS (colocar en la misma carpeta):          ║
-  ║    ── MASCOTA GUMMY ──                                       ║
-  ║    gummy-idle1.png    gummy-idle2.png                        ║
-  ║    gummy-pat.png      gummy-study.png                        ║
-  ║    ── AVATARES DE PERFIL ──                                  ║
-  ║    avatar-bunny.png   avatar-cat.png   avatar-fox.png        ║
-  ║    avatar-panda.png   avatar-koala.png avatar-raccoon.png    ║
-  ║    avatar-cow.png     avatar-pig.png   avatar-octopus.png    ║
-  ║    avatar-butterfly.png                                      ║
-  ║    ── FONDOS DE SECCIÓN ──                                   ║
-  ║    bg-pattern-1.png    bg-pattern-2.png                      ║
-  ║    ── MARCOS LATERALES ──                                    ║
-  ║    frame-left.png      frame-right.png                       ║
+  ║    gummy-idle1.png  gummy-idle2.png  gummy-pat.png  gummy-study.png ║
+  ║    avatar-bunny.png  avatar-cat.png  avatar-fox.png  avatar-panda.png ║
+  ║    avatar-koala.png  avatar-raccoon.png  avatar-cow.png  avatar-pig.png ║
+  ║    avatar-octopus.png  avatar-butterfly.png                        ║
+  ║    bg-pattern-1.png  bg-pattern-2.png  frame-left.png  frame-right.png ║
+  ║    icon-home.png  icon-calendar.png  icon-goals.png  icon-profile.png ║
+  ║    icon-cv.png  icon-chat.png  icon-sfx.png  icon-sfx-muted.png    ║
+  ║    icon-music.png  icon-music-muted.png  icon-send.png  icon-add.png ║
+  ║    icon-expand.png  icon-delete.png  icon-check.png  icon-uncheck.png ║
+  ║    icon-save.png  icon-upload.png  icon-close.png                  ║
+  ║    icon-track-0.png  icon-track-1.png  icon-track-2.png  icon-track-off.png ║
+  ║    badge-space.png  badge-rhythm.png  badge-future.png            ║
+  ║    logo-jobquest.png  footer-emoji.png                           ║
   ╚══════════════════════════════════════════════════════════════╝
 -->
 <html lang="es">
@@ -36,7 +37,7 @@
 ═════════════════════════════════════════════════════════════════ -->
 <div id="login-screen">
   <div class="login-card reveal visible">
-    <div class="login-logo">🐰✿ JobQuest</div>
+    <div class="login-logo"><img src="logo-jobquest.png" alt="JobQuest" class="login-logo-img"></div>
     <div class="login-sub">Tu invernadero de crecimiento profesional</div>
 
     <div class="login-tabs">
@@ -82,12 +83,12 @@
 
 <!-- ── BARRA DE ATAJOS SUPERIOR (sticky) ──────────────────────── -->
 <nav class="top-navbar" id="top-navbar">
-  <a href="#section-inicio">🏠 Inicio</a>
-  <a href="#section-calendario">🗓️ Calendario</a>
-  <a href="#section-metas">🎯 Metas</a>
-  <a href="#section-perfil">🧺 Perfil</a>
-  <a href="#cv-upload">📄 CV</a>
-  <a href="#section-mascota">🐰 Chat</a>
+  <a href="#section-inicio"><img src="icon-home.png" alt="Inicio" class="nav-icon"> Inicio</a>
+  <a href="#section-calendario"><img src="icon-calendar.png" alt="Calendario" class="nav-icon"> Calendario</a>
+  <a href="#section-metas"><img src="icon-goals.png" alt="Metas" class="nav-icon"> Metas</a>
+  <a href="#section-perfil"><img src="icon-profile.png" alt="Perfil" class="nav-icon"> Perfil</a>
+  <a href="#cv-upload"><img src="icon-cv.png" alt="CV" class="nav-icon"> CV</a>
+  <a href="#section-mascota"><img src="icon-chat.png" alt="Chat" class="nav-icon"> Chat</a>
 </nav>
 
 <!-- ═══════════════════════════════════════════════════════════════
@@ -102,13 +103,15 @@
 
 <!-- CONTROLES DE SONIDO -->
 <div class="sound-controls">
-  <button class="sound-btn" id="sfx-btn" title="Efectos de sonido">🔔</button>
-  <button class="sound-btn" id="music-btn" title="Música">🎵</button>
+  <button class="sound-btn" id="sfx-btn" title="Efectos de sonido"><img src="icon-sfx.png" alt="Sonido" id="sfx-icon"></button>
+  <button class="sound-btn" id="music-btn" title="Música"><img src="icon-music.png" alt="Música" id="music-icon"></button>
   <div class="track-selector" id="track-selector">
-    <button class="track-btn active" data-track="0">☕ Café Cozy</button>
-    <button class="track-btn"        data-track="1">🌧️ Lluvia & Jazz</button>
-    <button class="track-btn"        data-track="2">🍂 Otoño Suave</button>
-    <button class="track-btn"        data-track="-1" style="border-top:1.5px solid var(--caramel-light); margin-top:2px; padding-top:8px">🔇 Ninguna</button>
+    <button class="track-btn active" data-track="0"><img src="icon-track-0.png" alt="Café" class="track-icon"> Café Cozy</button>
+    <button class="track-btn" data-track="1"><img src="icon-track-1.png" alt="Lluvia" class="track-icon"> Lluvia & Jazz</button>
+    <button class="track-btn" data-track="2"><img src="icon-track-2.png" alt="Otoño" class="track-icon"> Otoño Suave</button>
+    <button class="track-btn" data-track="-1" style="border-top:1.5px solid var(--caramel-light); margin-top:2px; padding-top:8px">
+      <img src="icon-track-off.png" alt="Sin música" class="track-icon"> Ninguna
+    </button>
   </div>
 </div>
 
@@ -127,7 +130,7 @@
   <section class="section bg-inicio" id="section-inicio">
     <div class="card welcome-card reveal">
       <div class="title-logo-row">
-        <span class="title-logo-emoji">🐰✿</span>
+        <img src="logo-jobquest.png" alt="JobQuest" class="title-logo-img">
         <span class="title-platform-name">JobQuest</span>
       </div>
       <div class="greeting-line">
@@ -137,9 +140,9 @@
         "Cada pequeño paso cuenta. ¡Hoy es un buen día para empezar! 🌱"
       </div>
       <div class="welcome-decorations">
-        <div class="deco-badge">🌿 Tu espacio</div>
-        <div class="deco-badge">✨ Tu ritmo</div>
-        <div class="deco-badge">💛 Tu futuro</div>
+        <div class="deco-badge"><img src="badge-space.png" alt="Tu espacio" class="badge-icon"> Tu espacio</div>
+        <div class="deco-badge"><img src="badge-rhythm.png" alt="Tu ritmo" class="badge-icon"> Tu ritmo</div>
+        <div class="deco-badge"><img src="badge-future.png" alt="Tu futuro" class="badge-icon"> Tu futuro</div>
       </div>
     </div>
   </section>
@@ -149,7 +152,7 @@
   ────────────────────────────────────────────────────────────── -->
   <section class="section bg-mascota" id="section-mascota">
     <div class="card mascota-card reveal">
-      <div class="section-title">🐰 Gummy, tu consejera</div>
+      <div class="section-title"><img src="icon-chat.png" alt="Chat" class="section-icon"> Gummy, tu consejera</div>
       <div class="mascota-layout">
         <div class="gummy-panel">
           <div class="gummy-frame">
@@ -168,7 +171,7 @@
           </div>
           <div class="chat-input-row">
             <input type="text" class="chat-input" id="chat-input" placeholder="Escribile a Gummy..." autocomplete="off"/>
-            <button class="chat-send-btn" id="chat-send-btn">➤</button>
+            <button class="chat-send-btn" id="chat-send-btn"><img src="icon-send.png" alt="Enviar"></button>
           </div>
         </div>
       </div>
@@ -205,7 +208,7 @@
   ────────────────────────────────────────────────────────────── -->
   <section class="section bg-calendario" id="section-calendario">
     <div class="card calendar-card reveal">
-      <div class="section-title">🗓️ Tu calendario</div>
+      <div class="section-title"><img src="icon-calendar.png" alt="Calendario" class="section-icon"> Tu calendario</div>
       <p class="calendar-subtitle">Entrevistas, fechas límite, eventos y recordatorios — todo en un solo lugar.</p>
       <div class="calendar-frame-wrap">
         <iframe class="calendar-iframe" src="https://calendar.google.com/calendar/embed?src=es.argentina%23holiday%40group.v.calendar.google.com&ctz=America%2FArgentina%2FBuenos_Aires" style="border:0" frameborder="0" scrolling="no"></iframe>
@@ -218,7 +221,7 @@
   ────────────────────────────────────────────────────────────── -->
   <section class="section bg-metas" id="section-metas">
     <div class="card metas-card reveal">
-      <div class="section-title">🎯 Tus metas</div>
+      <div class="section-title"><img src="icon-goals.png" alt="Metas" class="section-icon"> Tus metas</div>
 
       <div class="metas-progress-row">
         <div class="metas-progress-bar">
@@ -231,12 +234,12 @@
         <div class="metas-col">
           <div class="metas-col-title">☀️ Metas diarias</div>
           <div class="metas-list" id="metas-list-daily"></div>
-          <button class="add-meta-btn interactive" data-period="daily">+ Agregar meta diaria</button>
+          <button class="add-meta-btn interactive" data-period="daily"><img src="icon-add.png" alt="Agregar" class="btn-icon"> Agregar meta diaria</button>
         </div>
         <div class="metas-col">
           <div class="metas-col-title">📅 Metas semanales</div>
           <div class="metas-list" id="metas-list-weekly"></div>
-          <button class="add-meta-btn interactive" data-period="weekly">+ Agregar meta semanal</button>
+          <button class="add-meta-btn interactive" data-period="weekly"><img src="icon-add.png" alt="Agregar" class="btn-icon"> Agregar meta semanal</button>
         </div>
       </div>
 
@@ -252,7 +255,7 @@
   ────────────────────────────────────────────────────────────── -->
   <section class="section bg-perfil" id="section-perfil">
     <div class="card perfil-card reveal">
-      <div class="section-title">🧺 Tu ficha personal</div>
+      <div class="section-title"><img src="icon-profile.png" alt="Perfil" class="section-icon"> Tu ficha personal</div>
 
       <div class="perfil-layout">
 
@@ -263,7 +266,7 @@
           </div>
           <div class="perfil-avatar-label">Elegí tu avatar</div>
           <div class="avatar-options" id="avatar-options">
-            <!-- Las opciones de avatar se generan en MainJS.js → renderAvatarOptions() -->
+            <!-- Las opciones de avatar se generan en MainJS.js -->
           </div>
         </div>
 
@@ -278,7 +281,7 @@
             <span class="perfil-field-label">Mi CV</span>
             <div class="perfil-file-row">
               <input type="file" id="perfil-cv" class="perfil-file-input" accept=".pdf,.doc,.docx">
-              <label for="perfil-cv" class="perfil-file-btn interactive">+ Subir CV</label>
+              <label for="perfil-cv" class="perfil-file-btn interactive"><img src="icon-upload.png" alt="Subir" class="btn-icon"> Subir CV</label>
               <span class="perfil-file-name" id="perfil-cv-name">Ningún archivo subido</span>
             </div>
           </label>
@@ -299,7 +302,7 @@
           </label>
 
           <div class="perfil-save-row">
-            <button class="perfil-save-btn interactive" id="perfil-save-btn">Guardar ficha 💾</button>
+            <button class="perfil-save-btn interactive" id="perfil-save-btn"><img src="icon-save.png" alt="Guardar" class="btn-icon"> Guardar ficha</button>
             <span class="perfil-save-msg" id="perfil-save-msg"></span>
           </div>
         </div>
@@ -310,7 +313,7 @@
   <!-- FOOTER -->
   <footer class="section bg-footer" id="section-footer">
     <div class="footer-inner">
-      <div class="footer-emoji">🐰✿</div>
+      <img src="footer-emoji.png" alt="JobQuest" class="footer-emoji">
       <div class="footer-logo">JobQuest</div>
       <div class="footer-sub">Chicas en Tec · Grupo 8B · Con amor y código 💛</div>
     </div>

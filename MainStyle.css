@@ -48,6 +48,7 @@ a, button, .interactive {
 }
 .reveal.visible { opacity: 1; transform: scale(1) translateY(0); }
 
+/* ── CONTROLES DE SONIDO ── */
 .sound-controls {
   position: fixed;
   top: 70px;
@@ -62,16 +63,16 @@ a, button, .interactive {
   border-radius: 50%;
   border: 2.5px solid var(--cream);
   background: var(--caramel);
-  color: var(--white);
-  font-size: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: transform 0.2s, background 0.2s;
   box-shadow: 0 2px 8px var(--shadow);
+  padding: 0;
 }
 .sound-btn:hover { transform: scale(1.12); background: var(--caramel-light); }
 .sound-btn.muted { background: var(--caramel-dark); opacity: 0.6; }
+.sound-btn img { width: 18px; height: 18px; object-fit: contain; }
 
 .track-selector {
   display: none;
@@ -84,7 +85,7 @@ a, button, .interactive {
   box-shadow: 0 4px 16px var(--shadow);
   gap: 6px;
   flex-direction: column;
-  min-width: 140px;
+  min-width: 160px;
 }
 .track-selector.open { display: flex; }
 
@@ -98,10 +99,15 @@ a, button, .interactive {
   font-weight: 700;
   color: var(--brown-dark);
   transition: background 0.2s, transform 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 .track-btn:hover { background: var(--caramel); color: white; transform: scale(1.04); }
 .track-btn.active { background: var(--caramel-dark); color: white; }
+.track-icon { width: 16px; height: 16px; object-fit: contain; }
 
+/* ── LAYOUT PRINCIPAL ── */
 #app {
   position: relative;
   z-index: 10;
@@ -117,7 +123,7 @@ a, button, .interactive {
   position: relative;
 }
 
-/* ── FONDOS POR SECCIÓN CON IMÁGENES ── */
+/* ── FONDOS POR SECCIÓN ── */
 .bg-inicio,
 .bg-mascota,
 .bg-greenhouse,
@@ -130,7 +136,6 @@ a, button, .interactive {
   background-attachment: fixed;
 }
 
-/* Fondo por defecto */
 .bg-inicio { background-image: url('bg-pattern-1.png'); }
 .bg-mascota { background-image: url('bg-pattern-1.png'); }
 .bg-greenhouse { background-image: url('bg-pattern-1.png'); }
@@ -139,7 +144,6 @@ a, button, .interactive {
 .bg-metas { background-image: url('bg-pattern-1.png'); }
 .bg-perfil { background-image: url('bg-pattern-1.png'); }
 
-/* Clase para alternar al segundo fondo */
 .bg-pattern-2 .bg-inicio,
 .bg-pattern-2 .bg-mascota,
 .bg-pattern-2 .bg-greenhouse,
@@ -154,6 +158,7 @@ a, button, .interactive {
   background: rgba(74, 44, 10, 0.85);
 }
 
+/* ── TARJETAS ── */
 .card {
   background: rgba(245, 236, 215, 0.92);
   backdrop-filter: blur(6px);
@@ -185,7 +190,9 @@ a, button, .interactive {
   align-items: center;
   gap: 12px;
 }
+.section-icon { width: 32px; height: 32px; object-fit: contain; }
 
+/* ── NAVBAR ── */
 .top-navbar {
   position: fixed;
   top: 0;
@@ -210,6 +217,9 @@ a, button, .interactive {
   border-radius: 999px;
   transition: all 0.25s ease;
   font-size: 0.92rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 .top-navbar a:hover {
   background: var(--caramel);
@@ -217,35 +227,37 @@ a, button, .interactive {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(200, 133, 58, 0.3);
 }
+.nav-icon { width: 18px; height: 18px; object-fit: contain; }
 
 /* ── MARCOS LATERALES ── */
 .side-border {
   position: fixed;
   top: 0;
   bottom: 0;
-  width: 120px;
+  width: 80px;
   z-index: 50;
   pointer-events: none;
+  opacity: 1;
 }
 .side-border.left {
   left: 0;
   background-image: url('frame-left.png');
   background-repeat: repeat-y;
   background-position: top left;
-  background-size: 120px auto;
+  background-size: 80px auto;
 }
 .side-border.right {
   right: 0;
   background-image: url('frame-right.png');
   background-repeat: repeat-y;
   background-position: top right;
-  background-size: 120px auto;
+  background-size: 80px auto;
 }
 
-/* ── SECCIÓN BIENVENIDA ── */
+/* ── BIENVENIDA ── */
 .welcome-card { text-align: center; padding: 48px 40px; }
 .title-logo-row { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 8px; }
-.title-logo-emoji { font-size: 3rem; }
+.title-logo-img { width: 48px; height: 48px; object-fit: contain; }
 .title-platform-name {
   font-family: var(--font-display);
   font-size: 2.8rem;
@@ -300,8 +312,16 @@ a, button, .interactive {
   border: 2.5px solid white;
   box-shadow: 0 3px 10px var(--shadow);
   transition: transform 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 .deco-badge:hover { transform: scale(1.08) rotate(-2deg); }
+.badge-icon { width: 20px; height: 20px; object-fit: contain; }
+
+/* ── LOGIN ── */
+.login-logo { text-align: center; margin-bottom: 8px; }
+.login-logo-img { width: 80px; height: auto; object-fit: contain; }
 
 /* ── MASCOTA + CHAT ── */
 .mascota-card { max-width: 1100px; }
@@ -429,13 +449,15 @@ a, button, .interactive {
   border: none;
   border-radius: 10px;
   width: 40px; height: 40px;
-  color: white;
-  font-size: 18px;
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: transform 0.15s, background 0.2s;
   box-shadow: 0 2px 6px var(--shadow);
+  padding: 0;
 }
 .chat-send-btn:hover { transform: scale(1.12); background: var(--caramel-dark); }
+.chat-send-btn img { width: 20px; height: 20px; object-fit: contain; }
 
 /* ── INVERNADERO ── */
 .greenhouse-layout {
@@ -855,8 +877,14 @@ a, button, .interactive {
   cursor: pointer;
   transition: background 0.2s;
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 .add-meta-btn:hover { background: rgba(200,133,58,0.1); }
+.btn-icon { width: 16px; height: 16px; object-fit: contain; }
+
 .quotes-section {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -986,6 +1014,9 @@ a, button, .interactive {
   font-weight: 700;
   cursor: pointer;
   transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 .perfil-file-btn:hover { background: var(--caramel-dark); }
 .perfil-file-name {
@@ -1010,6 +1041,9 @@ a, button, .interactive {
   font-size: 1rem;
   cursor: pointer;
   transition: background 0.2s, transform 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 .perfil-save-btn:hover { background: var(--green-dark); transform: scale(1.03); }
 .perfil-save-msg { font-weight: 600; color: var(--green-dark); }
@@ -1029,6 +1063,7 @@ a, button, .interactive {
   gap: 10px;
   color: var(--cream);
 }
+.footer-emoji { width: 48px; height: 48px; object-fit: contain; }
 .footer-logo {
   font-family: var(--font-display);
   font-size: 1.6rem;
@@ -1036,7 +1071,6 @@ a, button, .interactive {
   paint-order: stroke fill;
 }
 .footer-sub { font-size: 0.88rem; font-weight: 600; opacity: 0.7; }
-.footer-emoji { font-size: 1.8rem; }
 
 /* ── LOGIN ── */
 #login-screen {
@@ -1058,12 +1092,6 @@ a, button, .interactive {
   max-width: 440px;
   width: 100%;
   box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-}
-.login-logo {
-  font-family: var(--font-display);
-  font-size: 2.2rem;
-  color: var(--caramel-dark);
-  text-align: center;
 }
 .login-sub {
   text-align: center;
@@ -1188,6 +1216,7 @@ a, button, .interactive {
   .card { padding: 20px 18px; }
   .welcome-card { padding: 28px 20px; }
   .title-platform-name { font-size: 2rem; }
+  .title-logo-img { width: 36px; height: 36px; }
   .greeting-line { font-size: 1.6rem; -webkit-text-stroke: 2px white; }
   .mascota-layout { grid-template-columns: 1fr; gap: 16px; }
   .gummy-panel { flex-direction: row; gap: 16px; align-items: center; }
@@ -1200,17 +1229,13 @@ a, button, .interactive {
   .perfil-avatar-preview { width: 100px; height: 100px; }
   .top-navbar { gap: 4px; padding: 8px 12px; }
   .top-navbar a { padding: 6px 10px; font-size: 0.78rem; }
+  .top-navbar a .nav-icon { width: 14px; height: 14px; }
   .sound-controls { top: 60px; right: 10px; }
-  .sound-btn { width: 32px; height: 32px; font-size: 13px; }
-  .side-border { 
-    width: 40px;
-  }
-  .side-border.left {
-    background-size: 40px auto;
-  }
-  .side-border.right {
-    background-size: 40px auto;
-  }
+  .sound-btn { width: 32px; height: 32px; }
+  .sound-btn img { width: 16px; height: 16px; }
+  .side-border { width: 30px; opacity: 0.5; }
+  .side-border.left { background-size: 30px auto; }
+  .side-border.right { background-size: 30px auto; }
   .login-card { padding: 28px 20px; margin: 16px; }
   .login-tabs { flex-wrap: wrap; }
   .login-tab-btn { font-size: 0.8rem; padding: 6px 12px; }

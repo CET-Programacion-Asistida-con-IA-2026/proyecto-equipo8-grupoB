@@ -2,6 +2,7 @@
 ╔══════════════════════════════════════════════════════════════════╗
 ║                    GUMMY ✿ SCRIPT.JS                            ║
 ║         Asistente Inteligente con Memoria y Contexto            ║
+║                    CON ICONOS PNG                               ║
 ╚══════════════════════════════════════════════════════════════════╝
 */
 
@@ -117,12 +118,13 @@ function playCozyBg() {
 }
 
 // ================================================================
-// 3. CONTROLES DE AUDIO
+// 3. CONTROLES DE AUDIO CON ICONOS PNG
 // ================================================================
 document.getElementById('sfx-btn').addEventListener('click', () => {
   sfxEnabled = !sfxEnabled;
+  const icon = document.getElementById('sfx-icon');
+  icon.src = sfxEnabled ? 'icon-sfx.png' : 'icon-sfx-muted.png';
   document.getElementById('sfx-btn').classList.toggle('muted', !sfxEnabled);
-  document.getElementById('sfx-btn').textContent = sfxEnabled ? '🔔' : '🔕';
 });
 
 const musicBtn = document.getElementById('music-btn');
@@ -146,12 +148,12 @@ document.querySelectorAll('.track-btn').forEach(btn => {
       musicEnabled = false;
       stopMusic();
       musicBtn.classList.add('muted');
-      musicBtn.textContent = '🔇';
+      document.getElementById('music-icon').src = 'icon-music-muted.png';
     } else {
       currentTrack = track;
       musicEnabled = true;
       musicBtn.classList.remove('muted');
-      musicBtn.textContent = '🎵';
+      document.getElementById('music-icon').src = 'icon-music.png';
       window._musicStarted = true;
       playCozyBg();
     }
@@ -315,7 +317,7 @@ function resetIdleTimer() {
     if (gummyState !== 'happy') setGummyState('sleep');
   }, 15000);
 }
-
+  
 gummyWrapper.addEventListener('mouseenter', () => {
   if (gummyState !== 'sleep' && gummyState !== 'happy') setGummyState('hover');
 });
@@ -501,22 +503,20 @@ function detectEmotion(text) {
   return 'neutral';
 }
 
+// ── GENERAR RESPUESTA INTELIGENTE ──
 function generateResponse(userText, emotion, info) {
   const lower = userText.toLowerCase();
   
   // ================================================================
-  // 1. DETECCIÓN DE TEXTO INCOMPRENSIBLE (menos restrictiva)
+  // 1. DETECCIÓN DE TEXTO INCOMPRENSIBLE
   // ================================================================
-  // Solo si el texto es muy corto y NO contiene letras comunes
   const commonWords = ['hola', 'buen', 'gracias', 'si', 'no', 'ok', 'vale', 'que', 'como', 'cuando', 'donde', 'porque', 'pero', 'y', 'o', 'a', 'el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas'];
   const hasCommonWord = commonWords.some(word => lower.includes(word));
   
-  // Si el texto tiene menos de 2 caracteres O solo son caracteres especiales sin palabras
   if (userText.length < 2 || (userText.match(/[a-zA-ZáéíóúñÁÉÍÓÚÑ]/g) || []).length === 0) {
     return "No estoy seguro de haber entendido tu mensaje. ¿Podrías reformularlo o darme un poco más de contexto? 🐰";
   }
   
-  // Si el texto tiene letras pero son muy pocas y no tiene palabras comunes
   if (userText.length < 4 && !hasCommonWord && userText.length > 0) {
     return "No estoy seguro de haber entendido tu mensaje. ¿Podrías reformularlo o darme un poco más de contexto? 🐰";
   }
@@ -564,7 +564,7 @@ function generateResponse(userText, emotion, info) {
   }
 
   // ================================================================
-  // 5. TEMAS LABORALES
+  // 5. TEMAS LABORALES (incluye "cv" como sinónimo de currículum)
   // ================================================================
   if (lower.match(/trabajo|empleo|buscar|conseguir|postular|aplicar|laburo/)) {
     if (userMemory.habilidades.length > 0 || userMemory.profesion) {
@@ -574,24 +574,36 @@ function generateResponse(userText, emotion, info) {
     return `Buscar trabajo es un viaje importante 🐰🌿 ¿En qué área te gustaría trabajar? Contame sobre tus habilidades y experiencias, así puedo ayudarte mejor a encontrar el camino adecuado.`;
   }
 
-  if (lower.match(/cv|currículum|curriculum/)) {
+  // ================================================================
+  // 6. CV / CURRÍCULUM (detecta "cv", "curriculum", "currículum")
+  // ================================================================
+  if (lower.match(/cv\b|curr[íi]culum|curriculum|currículum/)) {
     return `Tu CV es tu carta de presentación 📄🐰 ${userMemory.nombre ? userMemory.nombre + ', ' : ''}recordá incluir: datos de contacto, un resumen profesional que refleje quién sos, experiencia con logros concretos (no solo tareas), educación y habilidades relevantes. Si querés, puedo darte tips más específicos según tu área.`;
   }
 
+  // ================================================================
+  // 7. ENTREVISTAS
+  // ================================================================
   if (lower.match(/entrevista|entrevistas/)) {
     return `¡Las entrevistas son un desafío pero vos podés! 🐰💪 ${userMemory.nombre ? userMemory.nombre + ', ' : ''}mi consejo: investigá la empresa antes, prepará respuestas para preguntas comunes (como "contame sobre vos" o "cuáles son tus fortalezas"), y mostrá tu mejor versión auténtica. ¿Querés que practiquemos juntos?`;
   }
 
+  // ================================================================
+  // 8. LINKEDIN
+  // ================================================================
   if (lower.match(/linkedin|linked in/)) {
     return `LinkedIn es tu vitrina profesional 🤝🐰 ${userMemory.nombre ? userMemory.nombre + ', ' : ''}asegurate de tener: foto profesional, titular atractivo, resumen que cuente tu historia, y recomendaciones. Conectá con personas del sector y compartí contenido de valor. ¿Necesitás ayuda con algún aspecto en particular?`;
   }
 
+  // ================================================================
+  // 9. PORTFOLIO Y PROYECTOS
+  // ================================================================
   if (lower.match(/portfolio|portafolio|proyectos/)) {
     return `Tu portfolio es tu escaparate 🎨🐰 ${userMemory.nombre ? userMemory.nombre + ', ' : ''}incluí tus mejores proyectos, explicá tu proceso y mostrá resultados. Si es digital, mejor. ¿Querés que te dé ideas para mejorarlo?`;
   }
 
   // ================================================================
-  // 6. ORIENTACIÓN Y ESTUDIOS
+  // 10. ORIENTACIÓN Y ESTUDIOS
   // ================================================================
   if (lower.match(/qu[eé] estudiar|carrera|qu[eé] hacer|no s[eé] qu[eé] hacer|estudiar|estudio|facultad|universidad|curso|capacitaci[oó]n/)) {
     if (userMemory.intereses.length > 0) {
@@ -601,49 +613,49 @@ function generateResponse(userText, emotion, info) {
   }
 
   // ================================================================
-  // 7. RELACIONES Y SITUACIONES PERSONALES
+  // 11. RELACIONES Y SITUACIONES PERSONALES
   // ================================================================
   if (lower.match(/amigo|amiga|pareja|novio|novia|familia|mam[aá]|pap[aá]|herman|sola|solo|compañero|compañera|conflicto|pelea|discusi[oó]n|problema con|relaci[oó]n/)) {
     return `Las relaciones humanas son complejas 🐰💛 ${userMemory.nombre ? userMemory.nombre + ', ' : ''}¿querés contarme qué está pasando? A veces hablar ayuda a encontrar claridad. Estoy aquí para escucharte y apoyarte sin juzgar.`;
   }
 
   // ================================================================
-  // 8. AUTOESTIMA E INSEGURIDAD
+  // 12. AUTOESTIMA E INSEGURIDAD
   // ================================================================
   if (lower.match(/no sirvo|no puedo|no soy capaz|insegur|dudo|dudas|miedo a|fracaso|equivoc|error|no merezco|no valgo|in[úu]til|tonta|tonto|fea|feo/)) {
     return `Esas palabras duelen, y sé que a veces nos las decimos a nosotras mismas 🐰💔 ${userMemory.nombre ? userMemory.nombre + ', ' : ''}pero quiero recordarte que sos mucho más de lo que tu mente te dice ahora. Merecés amor, respeto y oportunidades. ¿Qué te está haciendo sentir así? Vamos a ponerlo en perspectiva juntas.`;
   }
 
   // ================================================================
-  // 9. PREGUNTAS SOBRE GUMMY
+  // 13. PREGUNTAS SOBRE GUMMY
   // ================================================================
   if (lower.match(/qui[eé]n eres|qu[eé] eres|quien sos|que sos|qu[eé] hac[eé]s|qu[eé] haces|que hacés/)) {
     return `¡Soy Gummy! 🐰✨ Tu conejita consejera, compañera y amiga virtual. Estoy aquí para ayudarte en tu camino profesional y personal, escucharte cuando lo necesites y darte ese empujoncito de motivación que a veces hace falta. ${userMemory.nombre ? 'Me encanta hablar con vos, ' + userMemory.nombre + ' 💛' : '¿Qué puedo hacer por vos hoy?'}`;
   }
 
   // ================================================================
-  // 10. AGRADECIMIENTOS
+  // 14. AGRADECIMIENTOS
   // ================================================================
   if (lower.match(/gracias|muchas gracias|thank you|merci/)) {
     return `¡De nada! 🐰💛 ${userMemory.nombre ? userMemory.nombre + ', ' : ''}para eso estoy aquí. Si necesitas algo más, solo decimelo. ¡Estoy para ayudarte!`;
   }
 
   // ================================================================
-  // 11. PROCRASTINACIÓN Y ORGANIZACIÓN
+  // 15. PROCRASTINACIÓN Y ORGANIZACIÓN
   // ================================================================
   if (lower.match(/procrastin|diferir|dejar para despu[eé]s|no tengo tiempo|no llego|atrasad|atrasada|me cuesta organizar/)) {
     return `La procrastinación es algo que nos pasa a todos 🐰🌿 ${userMemory.nombre ? userMemory.nombre + ', ' : ''}un tip que funciona: dividí las tareas grandes en pasos pequeños y alcanzables. Empezá con lo más fácil para ganar impulso. ¿Qué tarea te está costando arrancar?`;
   }
 
   // ================================================================
-  // 12. DESPEDIDA
+  // 16. DESPEDIDA
   // ================================================================
   if (lower.match(/chau|adi[oó]s|nos vemos|hasta luego|bye|goodbye/)) {
     return `¡Chau! 🐰💛 ${userMemory.nombre ? userMemory.nombre + ', ' : ''}fue lindo hablar con vos. Recordá que siempre estoy aquí cuando me necesites. ¡Cuidate y nos vemos pronto! ✨`;
   }
 
   // ================================================================
-  // 13. RESPUESTA POR DEFECTO CON CONTEXTO
+  // 17. RESPUESTA POR DEFECTO CON CONTEXTO
   // ================================================================
   if (userMemory.nombre) {
     const respuestas = [
@@ -664,7 +676,7 @@ function generateResponse(userText, emotion, info) {
   return respuestasDefault[Math.floor(Math.random() * respuestasDefault.length)];
 }
 
-// ── Enviar mensaje ──
+// ── ENVIAR MENSAJE ──
 async function sendChat() {
   const text = chatInput.value.trim();
   if (!text) return;
@@ -717,6 +729,7 @@ async function sendChat() {
   }, delay);
 }
 
+// ── EVENTOS DEL CHAT ──
 chatSendBtn.addEventListener('click', sendChat);
 chatInput.addEventListener('keydown', function(e) {
   if (e.key === 'Enter') {
@@ -727,6 +740,7 @@ chatInput.addEventListener('keydown', function(e) {
   }
 });
 
+// ── MOSTRAR BIENVENIDA PERSONALIZADA ──
 window.addEventListener('DOMContentLoaded', function() {
   if (userMemory.nombre) {
     setTimeout(function() {
@@ -1201,35 +1215,32 @@ updateQuotes();
 setInterval(updateQuotes, 8000);
 
 // ================================================================
-// 17. PERFIL — AVATARES
+// 17. PERFIL — AVATARES (5 opciones: cat, dog, capy, bee, duck)
 // ================================================================
 const avatarFiles = [
-  'avatar-bunny.png',
   'avatar-cat.png',
-  'avatar-fox.png',
-  'avatar-panda.png',
-  'avatar-koala.png',
-  'avatar-raccoon.png',
-  'avatar-cow.png',
-  'avatar-pig.png',
-  'avatar-octopus.png',
-  'avatar-butterfly.png',
+  'avatar-dog.png',
+  'avatar-capy.png',
+  'avatar-bee.png',
+  'avatar-duck.png'
 ];
-let currentAvatar = avatarFiles[0];
+let currentAvatar = avatarFiles[0]; // cat.png como default
 
 function renderAvatarOptions() {
   const container = document.getElementById('avatar-options');
+  if (!container) return;
   container.innerHTML = '';
+  
   avatarFiles.forEach((file, i) => {
     const div = document.createElement('div');
     div.className = `avatar-option interactive${i === 0 ? ' active' : ''}`;
     div.innerHTML = `<img src="${file}" alt="Avatar ${i+1}">`;
     div.dataset.index = i;
-    div.addEventListener('click', () => {
+    div.addEventListener('click', function() {
       currentAvatar = file;
       document.getElementById('avatar-img').src = file;
       document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('active'));
-      div.classList.add('active');
+      this.classList.add('active');
       playClick();
       localStorage.setItem('jobquest_avatar', file);
     });
@@ -1247,18 +1258,35 @@ function loadProfile() {
       document.getElementById('perfil-preferencias').value = data.preferencias || '';
       document.getElementById('perfil-habilidades').value = data.habilidades || '';
       document.getElementById('perfil-tecnologias').value = data.tecnologias || '';
-      if (data.avatar) {
+      
+      // Cargar avatar guardado o usar el default (cat)
+      if (data.avatar && avatarFiles.includes(data.avatar)) {
         currentAvatar = data.avatar;
         document.getElementById('avatar-img').src = data.avatar;
         document.querySelectorAll('.avatar-option').forEach(el => {
           const img = el.querySelector('img');
           el.classList.toggle('active', img && img.src.includes(data.avatar));
         });
+      } else {
+        // Si no hay avatar guardado, usar cat como default
+        currentAvatar = avatarFiles[0];
+        document.getElementById('avatar-img').src = avatarFiles[0];
+        document.querySelectorAll('.avatar-option').forEach((el, idx) => {
+          el.classList.toggle('active', idx === 0);
+        });
       }
+      
       if (data.cvName) {
         document.getElementById('perfil-cv-name').textContent = data.cvName;
       }
     } catch(e) {}
+  } else {
+    // Si no hay perfil guardado, usar cat como default
+    currentAvatar = avatarFiles[0];
+    document.getElementById('avatar-img').src = avatarFiles[0];
+    document.querySelectorAll('.avatar-option').forEach((el, idx) => {
+      el.classList.toggle('active', idx === 0);
+    });
   }
 }
 loadProfile();
