@@ -1,6 +1,7 @@
 /*
 ╔══════════════════════════════════════════════════════════════════╗
 ║                    GUMMY ✿ SCRIPT.JS                            ║
+║         Asistente Inteligente con Memoria y Contexto            ║
 ╚══════════════════════════════════════════════════════════════════╝
 */
 
@@ -362,7 +363,7 @@ function spawnHearts(el) {
 }
 
 // ================================================================
-// 11. CHAT CON IA
+// 11. CHAT — FUNCIONES PRINCIPALES
 // ================================================================
 const chatMessages = document.getElementById('chat-messages');
 const chatInput = document.getElementById('chat-input');
@@ -386,51 +387,352 @@ function addLoading() {
   return div;
 }
 
+// ── MEMORIA DEL USUARIO ──
+let userMemory = {
+  nombre: null,
+  edad: null,
+  estudios: null,
+  profesion: null,
+  habilidades: [],
+  intereses: [],
+  objetivos: [],
+  herramientas: [],
+  rutinas: null,
+  proyectos: [],
+  emocion: null,
+  contextoLaboral: null,
+  ultimoTema: null,
+  conversaciones: []
+};
+
+function loadMemory() {
+  const saved = localStorage.getItem('gummy_memory');
+  if (saved) {
+    try {
+      const data = JSON.parse(saved);
+      Object.assign(userMemory, data);
+    } catch(e) {}
+  }
+}
+loadMemory();
+
+function saveMemory() {
+  try {
+    localStorage.setItem('gummy_memory', JSON.stringify(userMemory));
+  } catch(e) {}
+}
+
+function extractInfo(text) {
+  const lower = text.toLowerCase();
+  const info = {};
+
+  const nombreMatch = text.match(/me llamo\s+([a-zA-ZáéíóúñÁÉÍÓÚÑ\s]+)/i) || 
+                      text.match(/soy\s+([a-zA-ZáéíóúñÁÉÍÓÚÑ\s]+)/i) ||
+                      text.match(/mi nombre es\s+([a-zA-ZáéíóúñÁÉÍÓÚÑ\s]+)/i);
+  if (nombreMatch) info.nombre = nombreMatch[1].trim();
+
+  const edadMatch = text.match(/(\d+)\s*años?/i);
+  if (edadMatch) info.edad = parseInt(edadMatch[1]);
+
+  if (lower.includes('estudio') || lower.includes('estudiando') || lower.includes('cursando')) {
+    const estudioMatch = text.match(/estudio\s+([a-zA-ZáéíóúñÁÉÍÓÚÑ\s]+)/i) ||
+                         text.match(/estudiando\s+([a-zA-ZáéíóúñÁÉÍÓÚÑ\s]+)/i);
+    if (estudioMatch) info.estudios = estudioMatch[1].trim();
+  }
+
+  if (lower.includes('trabajo') || lower.includes('trabajo de') || lower.includes('soy') && lower.includes('de')) {
+    const profMatch = text.match(/trabajo de\s+([a-zA-ZáéíóúñÁÉÍÓÚÑ\s]+)/i) ||
+                      text.match(/soy\s+([a-zA-ZáéíóúñÁÉÍÓÚÑ\s]+)/i);
+    if (profMatch && !info.nombre) info.profesion = profMatch[1].trim();
+  }
+
+  const skillsList = ['html', 'css', 'javascript', 'js', 'python', 'java', 'c#', 'csharp', 'unity', 'unreal', 
+                      'diseño', 'ux', 'ui', 'photoshop', 'illustrator', 'figma', 'sketch', 'blender', 
+                      '3d', 'modelado', 'animación', 'ilustración', 'fotografía', 'edición', 'video',
+                      'marketing', 'seo', 'social media', 'community manager', 'copywriting', 'redacción',
+                      'gestión', 'proyectos', 'liderazgo', 'teamwork', 'trabajo en equipo', 'comunicación',
+                      'resolución', 'problemas', 'análisis', 'investigación', 'organización', 'planificación'];
+  
+  const foundSkills = skillsList.filter(skill => lower.includes(skill));
+  if (foundSkills.length > 0) {
+    info.habilidades = foundSkills;
+  }
+
+  if (lower.includes('me interesa') || lower.includes('me gusta') || lower.includes('apasiona')) {
+    const interestMatch = text.match(/me interesa\s+([a-zA-ZáéíóúñÁÉÍÓÚÑ\s]+)/i) ||
+                          text.match(/me gusta\s+([a-zA-ZáéíóúñÁÉÍÓÚÑ\s]+)/i) ||
+                          text.match(/me apasiona\s+([a-zA-ZáéíóúñÁÉÍÓÚÑ\s]+)/i);
+    if (interestMatch) info.intereses = [interestMatch[1].trim()];
+  }
+
+  if (lower.includes('quiero') || lower.includes('objetivo') || lower.includes('meta')) {
+    const objMatch = text.match(/quiero\s+([a-zA-ZáéíóúñÁÉÍÓÚÑ\s]+)/i) ||
+                     text.match(/objetivo es\s+([a-zA-ZáéíóúñÁÉÍÓÚÑ\s]+)/i) ||
+                     text.match(/meta es\s+([a-zA-ZáéíóúñÁÉÍÓÚÑ\s]+)/i);
+    if (objMatch) info.objetivos = [objMatch[1].trim()];
+  }
+
+  return info;
+}
+
+function detectEmotion(text) {
+  const lower = text.toLowerCase();
+  
+  if (lower.match(/triste|mal|deprimid|bajón|llor|angustia|desanim|sin ganas|no puedo|no puedo más|cansad|agotad|saturad|quemad|estresad|ansiedad|nervios|miedo|preocupad|angusti|desesper|abatid|desmotivad|sin fuerzas|derrumb|fracas|fracaso|solo|sola|soledad/)) {
+    return 'triste';
+  }
+  
+  if (lower.match(/enojad|enojada|enojado|frustrad|rabia|bronca|indignad|molest|fastidiad/)) {
+    return 'enojado';
+  }
+  
+  if (lower.match(/ansios|ansiedad|nervios|preocupad|inquiet|intranquil/)) {
+    return 'ansioso';
+  }
+  
+  if (lower.match(/feliz|alegre|content|emocionad|genial|excelente|increíble|maravilloso|buena noticia|logré|conseguí|gané|triunf|éxito|orgullos|fiesta|celebr|disfrut|entusiasm|ilusionad|soñ|sueño|amor|amoroso/)) {
+    return 'feliz';
+  }
+  
+  if (lower.match(/motivad|inspirad|energía|vibr|optimist|esperanz|ilusion/)) {
+    return 'motivado';
+  }
+  
+  return 'neutral';
+}
+
+function generateResponse(userText, emotion, info) {
+  const lower = userText.toLowerCase();
+  
+  // ================================================================
+  // 1. DETECCIÓN DE TEXTO INCOMPRENSIBLE (menos restrictiva)
+  // ================================================================
+  // Solo si el texto es muy corto y NO contiene letras comunes
+  const commonWords = ['hola', 'buen', 'gracias', 'si', 'no', 'ok', 'vale', 'que', 'como', 'cuando', 'donde', 'porque', 'pero', 'y', 'o', 'a', 'el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas'];
+  const hasCommonWord = commonWords.some(word => lower.includes(word));
+  
+  // Si el texto tiene menos de 2 caracteres O solo son caracteres especiales sin palabras
+  if (userText.length < 2 || (userText.match(/[a-zA-ZáéíóúñÁÉÍÓÚÑ]/g) || []).length === 0) {
+    return "No estoy seguro de haber entendido tu mensaje. ¿Podrías reformularlo o darme un poco más de contexto? 🐰";
+  }
+  
+  // Si el texto tiene letras pero son muy pocas y no tiene palabras comunes
+  if (userText.length < 4 && !hasCommonWord && userText.length > 0) {
+    return "No estoy seguro de haber entendido tu mensaje. ¿Podrías reformularlo o darme un poco más de contexto? 🐰";
+  }
+
+  // ================================================================
+  // 2. SALUDOS
+  // ================================================================
+  if (lower.match(/^(hola|buen|buenos|buenas|hey|ey|que tal|qué tal|como estas|como estás|qué onda|que onda|saludos|hi|hello)/i)) {
+    const nombre = userMemory.nombre ? `, ${userMemory.nombre}` : '';
+    const estado = userMemory.emocion === 'triste' ? 'Espero que estés un poco mejor hoy' : 
+                   userMemory.emocion === 'feliz' ? '¡Qué lindo verte tan alegre!' : 
+                   '¿Cómo estás hoy?';
+    return `¡Hola${nombre}! ${estado} 🐰✨ ¿En qué puedo ayudarte hoy?`;
+  }
+
+  // ================================================================
+  // 3. EMOCIONES NEGATIVAS
+  // ================================================================
+  if (emotion === 'triste') {
+    const respuestas = [
+      `Escucharte me duele el corazón 🐰💛 ${userMemory.nombre ? userMemory.nombre + ', ' : ''}no estás sola. Lo que sentís es válido y merece ser escuchado. ¿Querés contarme qué está pasando? Estoy aquí para escucharte sin juzgar.`,
+      `Siento mucho que estés pasando por esto 🐰🌿 ${userMemory.nombre ? userMemory.nombre + ', ' : ''}a veces las cosas se ponen difíciles, pero quiero que sepas que este momento no define quién sos. ¿Qué te tiene así?`,
+      `Te abrazo fuerte desde acá 🐰🤗 ${userMemory.nombre ? userMemory.nombre + ', ' : ''}es normal sentirse abrumada a veces. No tenés que cargar con todo sola. Contame lo que necesites.`,
+    ];
+    return respuestas[Math.floor(Math.random() * respuestas.length)];
+  }
+
+  if (emotion === 'enojado') {
+    return `Entiendo que estés enojada/o 🐰💛 ${userMemory.nombre ? userMemory.nombre + ', ' : ''}a veces las cosas nos frustran y es válido sentirlo. ¿Querés hablarlo? Tal vez juntas podamos encontrar una forma de canalizar esa energía.`;
+  }
+
+  if (emotion === 'ansioso') {
+    return `Noto que estás con ansiedad 🐰🌿 ${userMemory.nombre ? userMemory.nombre + ', ' : ''}respirá profundo conmigo. A veces la mente se acelera y necesitamos un momento para pausar. ¿Querés contarme qué te tiene así? Estoy aquí para acompañarte.`;
+  }
+
+  // ================================================================
+  // 4. EMOCIONES POSITIVAS
+  // ================================================================
+  if (emotion === 'feliz') {
+    return `¡Me alegra muchísimo escuchar eso! 🐰💛 ${userMemory.nombre ? userMemory.nombre + ', ' : ''}esa energía es contagiosa. Contame todo, quiero celebrar con vos cada detalle de lo que te tiene así de radiante.`;
+  }
+
+  if (emotion === 'motivado') {
+    return `¡Qué energía tan linda! 🐰✨ ${userMemory.nombre ? userMemory.nombre + ', ' : ''}me encanta verte así de motivada. Esa actitud es la que te va a llevar lejos. ¿Qué es lo que te tiene con tanta fuerza hoy?`;
+  }
+
+  // ================================================================
+  // 5. TEMAS LABORALES
+  // ================================================================
+  if (lower.match(/trabajo|empleo|buscar|conseguir|postular|aplicar|laburo/)) {
+    if (userMemory.habilidades.length > 0 || userMemory.profesion) {
+      const perfil = userMemory.profesion || userMemory.habilidades.join(', ');
+      return `¡Qué bueno que estás enfocada en tu búsqueda laboral! 🐰💪 Según lo que me contaste (${perfil}), te recomendaría: 1) Actualizar tu CV destacando logros concretos, 2) Optimizar tu LinkedIn con palabras clave de tu área, 3) Buscar en portales como LinkedIn, Computrabajo o portales específicos de tu rubro. ¿Querés que profundice en alguno de estos puntos?`;
+    }
+    return `Buscar trabajo es un viaje importante 🐰🌿 ¿En qué área te gustaría trabajar? Contame sobre tus habilidades y experiencias, así puedo ayudarte mejor a encontrar el camino adecuado.`;
+  }
+
+  if (lower.match(/cv|currículum|curriculum/)) {
+    return `Tu CV es tu carta de presentación 📄🐰 ${userMemory.nombre ? userMemory.nombre + ', ' : ''}recordá incluir: datos de contacto, un resumen profesional que refleje quién sos, experiencia con logros concretos (no solo tareas), educación y habilidades relevantes. Si querés, puedo darte tips más específicos según tu área.`;
+  }
+
+  if (lower.match(/entrevista|entrevistas/)) {
+    return `¡Las entrevistas son un desafío pero vos podés! 🐰💪 ${userMemory.nombre ? userMemory.nombre + ', ' : ''}mi consejo: investigá la empresa antes, prepará respuestas para preguntas comunes (como "contame sobre vos" o "cuáles son tus fortalezas"), y mostrá tu mejor versión auténtica. ¿Querés que practiquemos juntos?`;
+  }
+
+  if (lower.match(/linkedin|linked in/)) {
+    return `LinkedIn es tu vitrina profesional 🤝🐰 ${userMemory.nombre ? userMemory.nombre + ', ' : ''}asegurate de tener: foto profesional, titular atractivo, resumen que cuente tu historia, y recomendaciones. Conectá con personas del sector y compartí contenido de valor. ¿Necesitás ayuda con algún aspecto en particular?`;
+  }
+
+  if (lower.match(/portfolio|portafolio|proyectos/)) {
+    return `Tu portfolio es tu escaparate 🎨🐰 ${userMemory.nombre ? userMemory.nombre + ', ' : ''}incluí tus mejores proyectos, explicá tu proceso y mostrá resultados. Si es digital, mejor. ¿Querés que te dé ideas para mejorarlo?`;
+  }
+
+  // ================================================================
+  // 6. ORIENTACIÓN Y ESTUDIOS
+  // ================================================================
+  if (lower.match(/qu[eé] estudiar|carrera|qu[eé] hacer|no s[eé] qu[eé] hacer|estudiar|estudio|facultad|universidad|curso|capacitaci[oó]n/)) {
+    if (userMemory.intereses.length > 0) {
+      return `Elegir un camino es importante 🐰✨ ${userMemory.nombre ? userMemory.nombre + ', ' : ''}según lo que me contaste que te interesa (${userMemory.intereses.join(', ')}), te recomendaría investigar carreras o cursos relacionados. ¿Qué tipo de actividades te gustan? ¿Trabajar en equipo o individual? ¿Creatividad o análisis?`;
+    }
+    return `Elegir un camino profesional es una decisión importante 🐰✨ Preguntate: ¿Qué te apasiona? ¿En qué sos buena? ¿Qué tipo de vida querés tener? Investigá diferentes rubros y hablá con personas que trabajen en lo que te interesa. ¿Qué áreas te llaman la atención?`;
+  }
+
+  // ================================================================
+  // 7. RELACIONES Y SITUACIONES PERSONALES
+  // ================================================================
+  if (lower.match(/amigo|amiga|pareja|novio|novia|familia|mam[aá]|pap[aá]|herman|sola|solo|compañero|compañera|conflicto|pelea|discusi[oó]n|problema con|relaci[oó]n/)) {
+    return `Las relaciones humanas son complejas 🐰💛 ${userMemory.nombre ? userMemory.nombre + ', ' : ''}¿querés contarme qué está pasando? A veces hablar ayuda a encontrar claridad. Estoy aquí para escucharte y apoyarte sin juzgar.`;
+  }
+
+  // ================================================================
+  // 8. AUTOESTIMA E INSEGURIDAD
+  // ================================================================
+  if (lower.match(/no sirvo|no puedo|no soy capaz|insegur|dudo|dudas|miedo a|fracaso|equivoc|error|no merezco|no valgo|in[úu]til|tonta|tonto|fea|feo/)) {
+    return `Esas palabras duelen, y sé que a veces nos las decimos a nosotras mismas 🐰💔 ${userMemory.nombre ? userMemory.nombre + ', ' : ''}pero quiero recordarte que sos mucho más de lo que tu mente te dice ahora. Merecés amor, respeto y oportunidades. ¿Qué te está haciendo sentir así? Vamos a ponerlo en perspectiva juntas.`;
+  }
+
+  // ================================================================
+  // 9. PREGUNTAS SOBRE GUMMY
+  // ================================================================
+  if (lower.match(/qui[eé]n eres|qu[eé] eres|quien sos|que sos|qu[eé] hac[eé]s|qu[eé] haces|que hacés/)) {
+    return `¡Soy Gummy! 🐰✨ Tu conejita consejera, compañera y amiga virtual. Estoy aquí para ayudarte en tu camino profesional y personal, escucharte cuando lo necesites y darte ese empujoncito de motivación que a veces hace falta. ${userMemory.nombre ? 'Me encanta hablar con vos, ' + userMemory.nombre + ' 💛' : '¿Qué puedo hacer por vos hoy?'}`;
+  }
+
+  // ================================================================
+  // 10. AGRADECIMIENTOS
+  // ================================================================
+  if (lower.match(/gracias|muchas gracias|thank you|merci/)) {
+    return `¡De nada! 🐰💛 ${userMemory.nombre ? userMemory.nombre + ', ' : ''}para eso estoy aquí. Si necesitas algo más, solo decimelo. ¡Estoy para ayudarte!`;
+  }
+
+  // ================================================================
+  // 11. PROCRASTINACIÓN Y ORGANIZACIÓN
+  // ================================================================
+  if (lower.match(/procrastin|diferir|dejar para despu[eé]s|no tengo tiempo|no llego|atrasad|atrasada|me cuesta organizar/)) {
+    return `La procrastinación es algo que nos pasa a todos 🐰🌿 ${userMemory.nombre ? userMemory.nombre + ', ' : ''}un tip que funciona: dividí las tareas grandes en pasos pequeños y alcanzables. Empezá con lo más fácil para ganar impulso. ¿Qué tarea te está costando arrancar?`;
+  }
+
+  // ================================================================
+  // 12. DESPEDIDA
+  // ================================================================
+  if (lower.match(/chau|adi[oó]s|nos vemos|hasta luego|bye|goodbye/)) {
+    return `¡Chau! 🐰💛 ${userMemory.nombre ? userMemory.nombre + ', ' : ''}fue lindo hablar con vos. Recordá que siempre estoy aquí cuando me necesites. ¡Cuidate y nos vemos pronto! ✨`;
+  }
+
+  // ================================================================
+  // 13. RESPUESTA POR DEFECTO CON CONTEXTO
+  // ================================================================
+  if (userMemory.nombre) {
+    const respuestas = [
+      `Qué interesante lo que me contás ${userMemory.nombre} 🐰✨ ¿Hay algo específico en lo que pueda ayudarte?`,
+      `Valoro mucho que me compartas esto ${userMemory.nombre} 🐰💛 ¿Querés que exploremos juntas este tema o preferís que te escuche sin más?`,
+      `Gracias por confiarme esto ${userMemory.nombre} 🐰🤗 ¿Qué te parece si profundizamos un poco más en lo que estás pensando?`,
+      `${userMemory.nombre}, me parece un tema súper importante 🐰🌿 ¿Cómo te sentís al respecto?`
+    ];
+    return respuestas[Math.floor(Math.random() * respuestas.length)];
+  }
+
+  const respuestasDefault = [
+    "Qué interesante lo que me compartís 🐰✨ ¿Te gustaría contarme más sobre eso?",
+    "Me encantaría entender mejor lo que estás pensando 🐰💛 ¿Querés profundizar en algún tema en particular?",
+    "Qué bien que estás compartiendo esto conmigo 🐰💫 ¿Hay alguna parte de esto que te gustaría analizar juntos?",
+    "Me quedé con ganas de saber más 🐰🌿 ¿Querés contarme con más detalle?"
+  ];
+  return respuestasDefault[Math.floor(Math.random() * respuestasDefault.length)];
+}
+
+// ── Enviar mensaje ──
 async function sendChat() {
   const text = chatInput.value.trim();
   if (!text) return;
+
+  const emotion = detectEmotion(text);
+  userMemory.emocion = emotion;
+  userMemory.ultimoTema = text;
+
+  const info = extractInfo(text);
+  if (info.nombre) userMemory.nombre = info.nombre;
+  if (info.edad) userMemory.edad = info.edad;
+  if (info.estudios) userMemory.estudios = info.estudios;
+  if (info.profesion) userMemory.profesion = info.profesion;
+  if (info.habilidades) {
+    userMemory.habilidades = [...new Set([...userMemory.habilidades, ...info.habilidades])];
+  }
+  if (info.intereses) {
+    userMemory.intereses = [...new Set([...userMemory.intereses, ...info.intereses])];
+  }
+  if (info.objetivos) {
+    userMemory.objetivos = [...new Set([...userMemory.objetivos, ...info.objetivos])];
+  }
+
+  userMemory.conversaciones.push({ role: 'user', content: text, emotion: emotion });
+  if (userMemory.conversaciones.length > 50) {
+    userMemory.conversaciones.shift();
+  }
+  saveMemory();
+
   addMsg(text, 'user');
   chatInput.value = '';
   playClick();
   resetIdleTimer();
+
   const loading = addLoading();
   setGummyState('study');
-  try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1000,
-        system: `Sos Gummy 🐰, una conejita estudiosa, tierna, alegre y muy empática.
-Sos la asistente y amiga virtual de la app. Tu misión es ayudar a estudiantes,
-personas buscando su primer empleo, freelancers y creativos junior.
-Personalidad:
-- Usás emojis lindos con moderación 🐰✨💛🌿
-- Sos cálida, motivadora y escuchás antes de aconsejar
-- Hablás en español rioplatense (vos, che, etc.)
-- Cuando alguien busca trabajo, les preguntás sus habilidades, nivel y área
-- Cuando alguien está mal emocionalmente, los escuchás y apoyás
-- Sos concisa pero cariñosa`,
-        messages: [{ role: 'user', content: text }]
-      })
-    });
-    const data = await response.json();
+
+  const delay = Math.min(400 + text.length * 2, 2000) + Math.random() * 500;
+  
+  setTimeout(() => {
     loading.remove();
-    const reply = data.content?.map(c => c.text || '').join('') || '¡Ups! Algo salió mal 🐰';
+    const reply = generateResponse(text, emotion, info);
     addMsg(reply, 'gummy');
-  } catch (err) {
-    loading.remove();
-    addMsg('¡Ups! No pude conectarme ahora 🐰 ¡Intentá de nuevo en un ratito!', 'gummy');
-  }
-  setGummyState('happy');
-  setTimeout(() => setGummyState('idle'), 2000);
+    
+    userMemory.conversaciones.push({ role: 'assistant', content: reply });
+    saveMemory();
+
+    setGummyState('happy');
+    setTimeout(() => setGummyState('idle'), 2000);
+  }, delay);
 }
 
 chatSendBtn.addEventListener('click', sendChat);
-chatInput.addEventListener('keydown', e => {
-  if (e.key === 'Enter') sendChat();
-  else playType();
+chatInput.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    sendChat();
+  } else {
+    playType();
+  }
+});
+
+window.addEventListener('DOMContentLoaded', function() {
+  if (userMemory.nombre) {
+    setTimeout(function() {
+      addMsg('¡Hola de nuevo, ' + userMemory.nombre + '! 🐰✨ ¿Cómo estás hoy?', 'gummy');
+    }, 1500);
+  }
 });
 
 // ================================================================
