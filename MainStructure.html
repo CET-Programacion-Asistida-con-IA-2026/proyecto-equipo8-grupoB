@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   ╔══════════════════════════════════════════════════════════════╗
-  ║               GUMMY ✿ TU ESPACIO COZY                       ║
+  ║               JOBQUEST ✿ GUMMY ✿ TU ESPACIO COZY            ║
   ║         Chicas en Tec · Grupo 8B                            ║
   ╠══════════════════════════════════════════════════════════════╣
   ║  ESTRUCTURA DE ARCHIVOS:                                     ║
@@ -10,46 +10,97 @@
   ║    MainJS.js           ← toda la lógica e interactividad     ║
   ║                                                              ║
   ║  PARA REEMPLAZAR SPRITES / IMÁGENES:                         ║
-  ║    · Gummy:  buscá el bloque <svg id="gummy-svg"> y          ║
-  ║              reemplazalo por <img src="tu-gummy.png">         ║
-  ║    · Fondo:  en MainStyle.css buscá #scene-bg                ║
-  ║    · Plantas: en MainJS.js buscá la función plantImageHTML()  ║
+  ║    · Gummy:   buscá <img id="MainPet"> y cambiá el src       ║
+  ║    · Fondos:  cada sección tiene una clase .bg-* — agregá    ║
+  ║               tus imágenes en /assets/backgrounds/           ║
+  ║    · Marcos laterales: buscá .side-border en MainStyle.css   ║
+  ║    · Avatares de perfil: buscá .avatar-option en este archivo║
   ╚══════════════════════════════════════════════════════════════╝
 -->
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JobQuest ✿ Gummy, tu espacio cozy</title>
 
-  <!-- ── TÍTULO DE LA PESTAÑA ─────────────────────────────────── -->
-  <title>Gummy ✿ Tu espacio cozy</title>
-
-  <!-- ── FUENTES DE GOOGLE ────────────────────────────────────────
-       Nunito     → texto general (redondita y legible)
-       Fredoka One → títulos y carteles grandes
-       Para cambiar la fuente: reemplazá los nombres acá y en style.css
-  ──────────────────────────────────────────────────────────────── -->
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
-
-  <!-- ── HOJA DE ESTILOS EXTERNA ──────────────────────────────── -->
   <link rel="stylesheet" href="MainStyle.css">
 </head>
 
-<!-- ── CLASE day/night: el JS la cambia sola según la hora ─────── -->
 <body class="day">
 
+<!-- ═══════════════════════════════════════════════════════════════
+     PANTALLA DE LOGIN
+     Se muestra antes de entrar a la plataforma.
+     Si ya hay sesión guardada en Local Storage, el JS la oculta sola.
+     Tabs: Ingresar / Registrarme / Recuperar contraseña
+     (Recuperar está preparado visualmente para el futuro backend)
+═════════════════════════════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-card reveal visible">
+    <div class="login-logo">🐰✿ JobQuest</div>
+    <div class="login-sub">Tu invernadero de crecimiento profesional</div>
+
+    <div class="login-tabs">
+      <button class="login-tab-btn interactive active" data-tab="ingresar">Ingresar</button>
+      <button class="login-tab-btn interactive" data-tab="registrarme">Registrarme</button>
+      <button class="login-tab-btn interactive" data-tab="recuperar">Olvidé mi clave</button>
+    </div>
+
+    <!-- TAB: INGRESAR -->
+    <form class="login-tab-panel active" id="tab-ingresar" autocomplete="off">
+      <label class="login-label">Usuario
+        <input type="text" id="login-user" class="login-input" placeholder="Tu nombre de usuario" required>
+      </label>
+      <label class="login-label">Contraseña
+        <input type="password" id="login-pass" class="login-input" placeholder="••••••••" required>
+      </label>
+      <div class="login-error" id="login-error"></div>
+      <button type="submit" class="login-submit-btn interactive">Ingresar ✦</button>
+    </form>
+
+    <!-- TAB: REGISTRARME -->
+    <form class="login-tab-panel" id="tab-registrarme" autocomplete="off">
+      <label class="login-label">Nombre
+        <input type="text" id="register-name" class="login-input" placeholder="¿Cómo te llamás?" required>
+      </label>
+      <label class="login-label">Usuario
+        <input type="text" id="register-user" class="login-input" placeholder="Elegí un usuario" required>
+      </label>
+      <label class="login-label">Contraseña
+        <input type="password" id="register-pass" class="login-input" placeholder="••••••••" required>
+      </label>
+      <div class="login-error" id="register-error"></div>
+      <button type="submit" class="login-submit-btn interactive">Crear mi cuenta 🌱</button>
+    </form>
+
+    <!-- TAB: RECUPERAR CONTRASEÑA -->
+    <form class="login-tab-panel" id="tab-recuperar" autocomplete="off">
+      <label class="login-label">Usuario o email
+        <input type="text" id="recover-user" class="login-input" placeholder="Tu usuario o email" required>
+      </label>
+      <div class="login-note">🌿 Por ahora esta función funciona solo con Local Storage.
+        Cuando conectemos el backend, te enviaremos un link de recuperación real.</div>
+      <button type="submit" class="login-submit-btn interactive">Enviar instrucciones</button>
+    </form>
+
+    <div class="login-skip-note">¿Ya tenés cuenta en este navegador? Si iniciaste sesión antes, entrás directo a tu Home 💛</div>
+  </div>
+</div>
+
+  <!-- ── BARRA DE ATAJOS SUPERIOR (sticky) ────────────────────────
+       Accesos rápidos: Inicio, Calendario, Metas, Perfil, CV, Chat ── -->
   <nav class="top-navbar">
-  <a href="#section-welcome">🏠 Inicio</a>
-  <a href="#section-greenhouse">🌿 Habilidades</a>
-  <a href="#section-roadmap">📌 Ruta</a>
-  <a href="#section-footer">💛 Contacto</a>
-</nav>
+    <a href="#section-inicio">🏠 Inicio</a>
+    <a href="#section-calendario">🗓️ Calendario</a>
+    <a href="#section-metas">🎯 Metas</a>
+    <a href="#section-perfil">🧺 Perfil</a>
+    <a href="#cv-upload">📄 CV</a>
+    <a href="#section-mascota">🐰 Chat</a>
+  </nav>
 
 <!-- ═══════════════════════════════════════════════════════════════
      PANTALLA DE CARGA
-     Se muestra al entrar y desaparece al cargar la página.
-     Para cambiar el texto de carga: editá .loading-text
-     Para cambiar el tiempo: buscá setTimeout en script.js → "LOADING"
 ═════════════════════════════════════════════════════════════════ -->
 <div id="loading-overlay">
   <div class="loading-text">✿ Gummy te espera ✿</div>
@@ -58,60 +109,26 @@
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     LLUVIA
-     El JS la activa aleatoriamente. Las gotitas se generan en script.js.
-     Para cambiar la frecuencia: buscá "shouldRain" en script.js
-═════════════════════════════════════════════════════════════════ -->
+<!-- LLUVIA -->
 <div id="rain-container"></div>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     ESCENA DE FONDO (FIJA, DETRÁS DE TODO)
-     Contiene: cielo día/noche, estrellas, sol/luna, ventana, piso, plantas.
-     Para reemplazar por una imagen tuya:
-       · En style.css, buscá #scene-bg y agregá:
-         background-image: url('tu-fondo.png');
-         background-size: cover;
-═════════════════════════════════════════════════════════════════ -->
+<!-- ESCENA DE FONDO FIJA -->
 <div id="scene">
   <div id="scene-bg"></div>
-
   <div id="scene-content">
-
-    <!-- Estrellas: se generan dinámicamente en script.js → "Generate stars" -->
     <div id="stars-container"></div>
-
-    <!-- Sol de día / Luna de noche: cambia con CSS según clase .day / .night -->
     <div id="celestial"></div>
-
-    <!-- Ventana decorativa en el fondo
-         Para cambiar su tamaño: buscá #window-frame en style.css
-         Para cambiar su posición: left / top en style.css -->
     <div id="window-frame">
       <div class="window-pane"></div>
     </div>
-
-    <!-- Piso / zócalo inferior del fondo -->
     <div id="floor"></div>
-   
   </div>
 </div><!-- fin #scene -->
 
-
-<!-- ═══════════════════════════════════════════════════════════════
-     CONTROLES DE SONIDO (arriba a la derecha, siempre visibles)
-     🔔 = efectos de sonido (clicks, teclas)
-     🎵 = música de fondo (abre el selector de pistas)
-     Para agregar pistas: buscá "PISTAS DE MÚSICA" en script.js
-═════════════════════════════════════════════════════════════════ -->
+<!-- CONTROLES DE SONIDO -->
 <div class="sound-controls">
   <button class="sound-btn" id="sfx-btn" title="Efectos de sonido">🔔</button>
   <button class="sound-btn" id="music-btn" title="Música">🎵</button>
-
-  <!-- Selector de pistas: se abre al clickear el botón de música
-       Para agregar una pista: agregá un <button class="track-btn" data-track="3">
-       y en script.js sumá las notas correspondientes en trackNotes[]
-       data-track="-1" siempre significa "sin música" -->
   <div class="track-selector" id="track-selector">
     <button class="track-btn active" data-track="0">☕ Café Cozy</button>
     <button class="track-btn"        data-track="1">🌧️ Lluvia & Jazz</button>
@@ -123,171 +140,230 @@
   </div>
 </div>
 
+<!-- ── MARCOS LATERALES DECORATIVOS ────────────────────────────
+     Franjas tileables a izquierda y derecha de toda la página.
+     Para reemplazar por tu imagen tileable:
+       en MainStyle.css buscá .side-border y agregá:
+       background-image: url('assets/backgrounds/side-frame.png');
+       background-repeat: repeat-y; ─────────────────────────── -->
+<div class="side-border left"></div>
+<div class="side-border right"></div>
+
 <!-- ═══════════════════════════════════════════════════════════════
      APP — CONTENEDOR PRINCIPAL
-     Está encima del fondo con z-index mayor.
-     Cada sección ocupa al menos 100vh de altura.
 ═════════════════════════════════════════════════════════════════ -->
 <div id="app">
 
   <!-- ─────────────────────────────────────────────────────────────
-       SECCIÓN 1: BIENVENIDA + PANEL DE GUMMY
-       Layout: dos columnas (tarjeta bienvenida | panel Gummy)
-       En mobile pasan a una columna (ver style.css → @media)
+       SECCIÓN: TÍTULO PRINCIPAL
+       Logo + nombre de plataforma + saludo personalizado escrito letra a letra
   ────────────────────────────────────────────────────────────── -->
-  <section class="section" id="section-welcome">
-    <div class="welcome-layout">
-
-      <!-- TARJETA DE BIENVENIDA ───────────────────────────────────
-           .reveal = aparece con animación al entrar en pantalla
-           Para cambiar los saludos que se escriben solos:
-             buscá "greetings" en script.js
-           Para cambiar las frases motivacionales:
-             buscá "quotes" en script.js -->
-      <div class="card welcome-card reveal">
-        <div class="greeting-line">
-          <!-- El texto se escribe letra a letra con JS -->
-          <span id="typed-greeting"></span><span class="cursor-blink"></span>
-        </div>
-
-        <!-- Frase motivacional que rota cada 5 segundos -->
-        <div class="motivational-quote" id="motivational-quote">
-          "Cada pequeño paso cuenta. ¡Hoy es un buen día para empezar! 🌱"
-        </div>
-
-        <!-- Badges decorativos
-             Para cambiar el texto o agregar más: editá los .deco-badge -->
-        <div class="welcome-decorations">
-          <div class="deco-badge">🌿 Tu espacio</div>
-          <div class="deco-badge">✨ Tu ritmo</div>
-          <div class="deco-badge">💛 Tu futuro</div>
-        </div>
-      </div><!-- fin welcome-card -->
-
-      <!-- PANEL DE GUMMY ──────────────────────────────────────────
-           Compuesto de dos partes unidas visualmente:
-           1. .gummy-frame  → el personaje
-           2. .gummy-chat   → el chat con IA
-
-           Para reemplazar el SVG por tu propio dibujo:
-             Eliminá todo el bloque <svg id="gummy-svg">...</svg>
-             y poné en su lugar: <img id="gummy-img" src="tu-gummy.png">
-             Luego en script.js buscá "GUMMY ANIMATIONS" y
-             reemplazá gummySvg.style.transform por gummyImg.style.transform
-      ────────────────────────────────────────────────────────────── -->
-      <div class="gummy-panel reveal" style="transition-delay:0.15s">
-
-        <!-- Marco superior con el personaje -->
-        <div class="gummy-frame">
-          <div class="gummy-frame-label">✦ Gummy, tu consejera ✦</div>
-
-          <!-- Contenedor clickeable de Gummy
-               Las reacciones se definen en script.js → "GUMMY ANIMATIONS" -->
-          <div id="gummy-wrapper">
-
-    <img
-        id="MainPet"
-        src="MainPetIdle1.png"
-        alt="MainPet"
-    />
-
-</div>
-
-          <!-- Etiqueta de estado debajo de Gummy (ej: "¡Hola! 🐰", "zzz... 😴") -->
-          <div class="gummy-state-label" id="gummy-state-label">¡Hola! 🐰</div>
-        </div><!-- fin gummy-frame -->
-
-        <!-- CHAT CON IA ──────────────────────────────────────────
-             La lógica del chat está en script.js → "GUMMY AI CHAT"
-             El sistema prompt (personalidad de Gummy) también está ahí.
-             Para cambiar qué dice Gummy: buscá "system:" en script.js -->
-        <div class="gummy-chat">
-          <!-- Historial de mensajes (se llena dinámicamente) -->
-          <div class="chat-messages" id="chat-messages">
-            <!-- Mensaje inicial de bienvenida -->
-            <div class="chat-msg gummy">
-              ¡Hola! Soy Gummy 🐰✨ Contame, ¿en qué te ayudo hoy?
-              Puedo buscarte oportunidades laborales o simplemente escucharte 💛
-            </div>
-          </div>
-
-          <!-- Fila de input + botón enviar -->
-          <div class="chat-input-row">
-            <input  type="text"
-                    class="chat-input"
-                    id="chat-input"
-                    placeholder="Escribile a Gummy..."
-                    autocomplete="off"/>
-            <button class="chat-send-btn" id="chat-send-btn">➤</button>
-          </div>
-        </div><!-- fin gummy-chat -->
-
-      </div><!-- fin gummy-panel -->
-
-    </div><!-- fin welcome-layout -->
-  </section><!-- fin section-welcome -->
+  <header class="section bg-inicio" id="section-inicio">
+    <div class="card title-card reveal">
+      <div class="title-logo-row">
+        <span class="title-logo-emoji">🐰✿</span>
+        <span class="title-platform-name">JobQuest</span>
+      </div>
+      <div class="greeting-line">
+        <span id="typed-greeting"></span><span class="cursor-blink"></span>
+      </div>
+      <div class="motivational-quote" id="motivational-quote">
+        "Cada pequeño paso cuenta. ¡Hoy es un buen día para empezar! 🌱"
+      </div>
+      <div class="welcome-decorations">
+        <div class="deco-badge">🌿 Tu espacio</div>
+        <div class="deco-badge">✨ Tu ritmo</div>
+        <div class="deco-badge">💛 Tu futuro</div>
+      </div>
+    </div>
+  </header>
 
   <!-- ─────────────────────────────────────────────────────────────
-       SECCIÓN 2: INVERNADERO DE HABILIDADES
-       Layout: dos columnas (plantas | tareas)
-       Las plantas y tareas se generan dinámicamente desde script.js
-       Para cambiar las tareas de ejemplo: buscá "let tasks" en script.js
+       SECCIÓN: MASCOTA + CHAT
   ────────────────────────────────────────────────────────────── -->
-  <section class="section" id="section-greenhouse">
-    <div class="card greenhouse-card reveal">
+  <section class="section bg-mascota" id="section-mascota">
+    <div class="gummy-panel reveal">
 
-      <!-- Título de sección
-           Para cambiar el emoji o texto: editá directamente acá -->
-      <div class="section-title">🌿 Tu invernadero de habilidades</div>
+      <div class="gummy-frame">
+        <div class="gummy-frame-label">✦ Gummy, tu consejera ✦</div>
 
-      <div class="greenhouse-layout">
-        <!-- Área de plantas (el JS pone una planta por cada tarea) -->
-        <div class="plants-area">
-          <div class="plants-row" id="plants-row">
-            <!-- Las plantas se generan en script.js → renderPlants() -->
+        <div id="gummy-wrapper">
+          <img id="MainPet" src="MainPetIdle1.png" alt="MainPet" />
+        </div>
+
+        <div class="gummy-state-label" id="gummy-state-label">¡Hola! 🐰</div>
+      </div>
+
+      <div class="gummy-chat">
+        <div class="chat-messages" id="chat-messages">
+          <div class="chat-msg gummy">
+            ¡Hola! Soy Gummy 🐰✨ Contame, ¿en qué te ayudo hoy?
+            Puedo buscarte oportunidades laborales o simplemente escucharte 💛
           </div>
         </div>
 
-        <!-- Área de tareas (lista expandible con subtareas) -->
-        <div class="tasks-area" id="tasks-area">
-          <!-- Las tareas se generan en script.js → renderTasks() -->
+        <div class="chat-input-row">
+          <input  type="text"
+                  class="chat-input"
+                  id="chat-input"
+                  placeholder="Escribile a Gummy..."
+                  autocomplete="off"/>
+          <button class="chat-send-btn" id="chat-send-btn">➤</button>
         </div>
       </div>
 
+    </div><!-- fin gummy-panel -->
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────────
+       SECCIÓN: INVERNADERO DE HABILIDADES
+  ────────────────────────────────────────────────────────────── -->
+  <section class="section bg-greenhouse" id="section-greenhouse">
+    <div class="card greenhouse-card reveal">
+      <div class="section-title">🌿 Tu invernadero de habilidades</div>
+      <div class="greenhouse-layout">
+        <div class="plants-area">
+          <div class="plants-row" id="plants-row"></div>
+        </div>
+        <div class="tasks-area" id="tasks-area"></div>
+      </div>
     </div>
   </section>
 
   <!-- ─────────────────────────────────────────────────────────────
-       SECCIÓN 3: MAPA DE RUTA LABORAL
-       Post-its arrastrables con snap a grilla.
-       Para cambiar el contenido inicial: buscá "let postits" en script.js
-       Para cambiar el tamaño de los post-its: buscá POSTIT_W y POSTIT_H
+       SECCIÓN: POST-ITS (tablón de corcho)
   ────────────────────────────────────────────────────────────── -->
-  <section class="section" id="section-roadmap">
-    <div class="card roadmap-card reveal">
-      <div class="section-title">📌 Mapa de ruta laboral</div>
-
-      <!-- Los post-its se generan en script.js → renderPostits() -->
+  <section class="section bg-postits" id="section-postits">
+    <div class="card postits-card reveal">
+      <div class="section-title">📌 Tus post-its</div>
       <div class="postits-container" id="postits-container"></div>
-
     </div>
   </section>
 
   <!-- ─────────────────────────────────────────────────────────────
-       FOOTER
-       Para cambiar el texto: editá directamente acá
+       SECCIÓN: GOOGLE CALENDAR
+       Reemplazá el src del iframe por el link "embed" de tu propio
+       Google Calendar (Configuración → Integrar calendario).
   ────────────────────────────────────────────────────────────── -->
-  <footer class="section" id="section-footer">
+  <section class="section bg-calendario" id="section-calendario">
+    <div class="card calendar-card reveal">
+      <div class="section-title">🗓️ Tu calendario</div>
+      <p class="calendar-subtitle">Entrevistas, fechas límite, eventos y recordatorios — todo en un solo lugar.</p>
+      <div class="calendar-frame-wrap">
+        <iframe
+          class="calendar-iframe"
+          src="https://calendar.google.com/calendar/embed?src=es.argentina%23holiday%40group.v.calendar.google.com&ctz=America%2FArgentina%2FBuenos_Aires"
+          style="border:0" frameborder="0" scrolling="no">
+        </iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────────
+       SECCIÓN: LISTA DE METAS + FRASES MOTIVACIONALES
+  ────────────────────────────────────────────────────────────── -->
+  <section class="section bg-metas" id="section-metas">
+    <div class="card metas-card reveal">
+      <div class="section-title">🎯 Tus metas</div>
+
+      <div class="metas-progress-row">
+        <div class="metas-progress-bar">
+          <div class="metas-progress-fill" id="metas-progress-fill"></div>
+        </div>
+        <span class="metas-progress-pct" id="metas-progress-pct">0%</span>
+      </div>
+
+      <div class="metas-columns">
+        <div class="metas-col">
+          <div class="metas-col-title">☀️ Metas diarias</div>
+          <div class="metas-list" id="metas-list-daily"></div>
+          <button class="add-meta-btn interactive" data-period="daily">+ Agregar meta diaria</button>
+        </div>
+        <div class="metas-col">
+          <div class="metas-col-title">📅 Metas semanales</div>
+          <div class="metas-list" id="metas-list-weekly"></div>
+          <button class="add-meta-btn interactive" data-period="weekly">+ Agregar meta semanal</button>
+        </div>
+      </div>
+
+      <div class="quotes-section" id="quotes-section">
+        <div class="quote-bubble" id="quote-bubble-1"></div>
+        <div class="quote-bubble" id="quote-bubble-2"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────────
+       SECCIÓN: PERFIL DEL USUARIO
+  ────────────────────────────────────────────────────────────── -->
+  <section class="section bg-perfil" id="section-perfil">
+    <div class="card perfil-card reveal">
+      <div class="section-title">🧺 Tu ficha personal</div>
+
+      <div class="perfil-layout">
+
+        <!-- FOTO DE PERFIL ────────────────────────────────────── -->
+        <div class="perfil-avatar-block">
+          <div class="perfil-avatar-preview" id="perfil-avatar-preview">🐰</div>
+          <div class="perfil-avatar-label">Elegí tu avatar</div>
+          <div class="avatar-options" id="avatar-options">
+            <!-- Las opciones de avatar se generan en MainJS.js → renderAvatarOptions() -->
+          </div>
+        </div>
+
+        <!-- FICHA / LIBRETA ───────────────────────────────────── -->
+        <div class="perfil-info-block">
+
+          <label class="perfil-field">
+            <span class="perfil-field-label">Nombre</span>
+            <input type="text" id="perfil-nombre" class="perfil-input" placeholder="¿Cómo te llamás?">
+          </label>
+
+          <label class="perfil-field" id="cv-upload">
+            <span class="perfil-field-label">Mi CV</span>
+            <div class="perfil-file-row">
+              <input type="file" id="perfil-cv" class="perfil-file-input" accept=".pdf,.doc,.docx">
+              <label for="perfil-cv" class="perfil-file-btn interactive">+ Subir CV</label>
+              <span class="perfil-file-name" id="perfil-cv-name">Ningún archivo subido</span>
+            </div>
+          </label>
+
+          <label class="perfil-field">
+            <span class="perfil-field-label">Preferencias laborales</span>
+            <textarea id="perfil-preferencias" class="perfil-textarea" rows="2" placeholder="Ej: remoto, jornada part-time, diseño UX/UI..."></textarea>
+          </label>
+
+          <label class="perfil-field">
+            <span class="perfil-field-label">Habilidades</span>
+            <textarea id="perfil-habilidades" class="perfil-textarea" rows="2" placeholder="Ej: trabajo en equipo, resolución de problemas..."></textarea>
+          </label>
+
+          <label class="perfil-field">
+            <span class="perfil-field-label">Tecnologías conocidas</span>
+            <textarea id="perfil-tecnologias" class="perfil-textarea" rows="2" placeholder="Ej: HTML, CSS, JavaScript, Unity, C#..."></textarea>
+          </label>
+
+          <div class="perfil-save-row">
+            <button class="perfil-save-btn interactive" id="perfil-save-btn">Guardar ficha 💾</button>
+            <span class="perfil-save-msg" id="perfil-save-msg"></span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="section bg-footer" id="section-footer">
     <div class="footer-inner">
       <div class="footer-emoji">🐰✿</div>
-      <div class="footer-logo">Chicas en Tec</div>
-      <div class="footer-sub">Grupo 8B · Con amor y código 💛</div>
+      <div class="footer-logo">JobQuest</div>
+      <div class="footer-sub">Chicas en Tec · Grupo 8B · Con amor y código 💛</div>
     </div>
   </footer>
 
 </div><!-- fin #app -->
 
-<!-- ── SCRIPT PRINCIPAL ─────────────────────────────────────────── -->
 <script src="MainJS.js"></script>
 
 </body>
