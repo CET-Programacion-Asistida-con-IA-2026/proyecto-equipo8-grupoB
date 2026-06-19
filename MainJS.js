@@ -1,36 +1,12 @@
 /*
 ╔══════════════════════════════════════════════════════════════════╗
 ║                    GUMMY ✿ SCRIPT.JS                            ║
-║              Chicas en Tec · Grupo 8B                           ║
-╠══════════════════════════════════════════════════════════════════╣
-║  ÍNDICE DE SECCIONES:                                            ║
-║   1.  Audio — efectos de sonido                                  ║
-║   2.  Música de fondo — 3 pistas generativas                     ║
-║   3.  Controles de audio                                         ║
-║   4.  Ciclo día/noche + lluvia                                   ║
-║   5.  Estrellas y gotas de lluvia                                ║
-║   6.  Parallax                                                   ║
-║   7.  Scroll reveal                                              ║
-║   8.  Saludo animado letra a letra                               ║
-║   9.  Frases motivacionales rotativas                            ║
-║  10.  Gummy — sistema de estados y animaciones                   ║
-║  11.  Gummy — reacciones a eventos                               ║
-║  12.  Corazones voladores                                        ║
-║  13.  Chat con IA (API de Anthropic)                             ║
-║  14.  Plantas — sprites SVG                                      ║
-║  15.  Tareas — datos y renderizado                               ║
-║  16.  Post-its — datos y drag & drop                             ║
-║  17.  Metas — diarias y semanales                                ║
-║  18.  Frases motivacionales (sección metas)                      ║
-║  19.  Perfil — avatar, CV, datos personales                      ║
-║  20.  Login — sistema de autenticación                           ║
-║  21.  Pantalla de carga + arranque de música                     ║
 ╚══════════════════════════════════════════════════════════════════╝
 */
 
-/* ================================================================
-   1. AUDIO — EFECTOS DE SONIDO
-   ================================================================ */
+// ================================================================
+// 1. AUDIO
+// ================================================================
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
 let sfxEnabled = true;
@@ -78,9 +54,9 @@ function playType() {
   } catch(e) {}
 }
 
-/* ================================================================
-   2. MÚSICA DE FONDO — PISTAS GENERATIVAS
-   ================================================================ */
+// ================================================================
+// 2. MÚSICA
+// ================================================================
 function stopMusic() {
   musicLoopActive = false;
   if (musicGain) {
@@ -91,9 +67,7 @@ function stopMusic() {
         try { musicGain.disconnect(); } catch(e) {}
         musicGain = null;
       }, 400);
-    } catch(e) {
-      musicGain = null;
-    }
+    } catch(e) { musicGain = null; }
   }
 }
 
@@ -141,9 +115,9 @@ function playCozyBg() {
   } catch(e) {}
 }
 
-/* ================================================================
-   3. CONTROLES DE AUDIO
-   ================================================================ */
+// ================================================================
+// 3. CONTROLES DE AUDIO
+// ================================================================
 document.getElementById('sfx-btn').addEventListener('click', () => {
   sfxEnabled = !sfxEnabled;
   document.getElementById('sfx-btn').classList.toggle('muted', !sfxEnabled);
@@ -187,65 +161,17 @@ document.querySelectorAll('.track-btn').forEach(btn => {
 document.addEventListener('click', () => trackSelector.classList.remove('open'));
 document.addEventListener('keydown', () => playType());
 
-/* ================================================================
-   4. CICLO DÍA / NOCHE + LLUVIA
-   ================================================================ */
-function setDayNight() {
-  const h = new Date().getHours();
-  const isNight = h < 6 || h >= 20;
-  document.body.classList.toggle('night', isNight);
-  document.body.classList.toggle('day', !isNight);
-  const shouldRain = Math.random() < 0.25;
-  document.getElementById('rain-container').classList.toggle('raining', shouldRain && !isNight);
+// ================================================================
+// 4. ROTACIÓN DE FONDOS
+// ================================================================
+function rotateBackgrounds() {
+  document.body.classList.toggle('bg-pattern-2');
 }
-setDayNight();
-setInterval(setDayNight, 60000);
+setInterval(rotateBackgrounds, 30000);
 
-/* ================================================================
-   5. ESTRELLAS Y LLUVIA
-   ================================================================ */
-const starsContainer = document.getElementById('stars-container');
-for (let i = 0; i < 60; i++) {
-  const s = document.createElement('div');
-  s.className = 'star';
-  s.style.cssText = [
-    `left:${Math.random() * 100}%`,
-    `top:${Math.random() * 60}%`,
-    `width:${2 + Math.random() * 3}px`,
-    `height:${2 + Math.random() * 3}px`,
-    `animation-delay:${Math.random() * 3}s`,
-  ].join(';');
-  starsContainer.appendChild(s);
-}
-
-const rainContainer = document.getElementById('rain-container');
-for (let i = 0; i < 80; i++) {
-  const d = document.createElement('div');
-  d.className = 'raindrop';
-  const h = 20 + Math.random() * 60;
-  d.style.cssText = [
-    `left:${Math.random() * 100}%`,
-    `height:${h}px`,
-    `animation-duration:${0.6 + Math.random() * 0.8}s`,
-    `animation-delay:${Math.random() * 2}s`,
-  ].join(';');
-  rainContainer.appendChild(d);
-}
-
-/* ================================================================
-   6. PARALLAX
-   ================================================================ */
-window.addEventListener('scroll', () => {
-  const scrollY = window.scrollY;
-  const sceneContent = document.getElementById('scene-content');
-  if (sceneContent) {
-    sceneContent.style.transform = `translateY(${scrollY * 0.12}px)`;
-  }
-});
-
-/* ================================================================
-   7. SCROLL REVEAL
-   ================================================================ */
+// ================================================================
+// 5. SCROLL REVEAL
+// ================================================================
 const revealEls = document.querySelectorAll('.reveal');
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(e => {
@@ -254,9 +180,9 @@ const observer = new IntersectionObserver((entries) => {
 }, { threshold: 0.12 });
 revealEls.forEach(el => observer.observe(el));
 
-/* ================================================================
-   8. SALUDO ANIMADO LETRA A LETRA
-   ================================================================ */
+// ================================================================
+// 6. SALUDO ANIMADO
+// ================================================================
 const greetings = [
   '¡Hola, explorador! 👋',
   '¡Hola, soñador! ✨',
@@ -274,9 +200,9 @@ function typeChar() {
 }
 setTimeout(typeChar, 600);
 
-/* ================================================================
-   9. FRASES MOTIVACIONALES ROTATIVAS (bienvenida)
-   ================================================================ */
+// ================================================================
+// 7. FRASES MOTIVACIONALES
+// ================================================================
 const quotes = [
   '"Cada pequeño paso cuenta. ¡Hoy es un buen día para empezar! 🌱"',
   '"Tu esfuerzo de hoy es tu éxito de mañana. ¡Seguí adelante! 💛"',
@@ -295,9 +221,9 @@ setInterval(() => {
   }, 500);
 }, 5000);
 
-/* ================================================================
-   10. GUMMY — SISTEMA DE ESTADOS Y ANIMACIONES
-   ================================================================ */
+// ================================================================
+// 8. GUMMY — SPRITES
+// ================================================================
 let gummyState = 'idle';
 let idleTimer = null;
 let gummyBounceT = 0;
@@ -305,10 +231,10 @@ const gummyWrapper = document.getElementById('gummy-wrapper');
 const mainPet = document.getElementById('MainPet');
 
 const SPRITES = {
-  idle1: 'MainPetIdle1.png',
-  idle2: 'MainPetIdle2.png',
-  pat: 'MainPetPat.png',
-  study: 'MainPetStudy.png',
+  idle1: 'gummy-idle1.png',
+  idle2: 'gummy-idle2.png',
+  pat: 'gummy-pat.png',
+  study: 'gummy-study.png',
 };
 
 let idleFrame = 0;
@@ -379,9 +305,9 @@ function animateGummy() {
 setGummyState('idle');
 animateGummy();
 
-/* ================================================================
-   11. GUMMY — REACCIONES A EVENTOS
-   ================================================================ */
+// ================================================================
+// 9. GUMMY — REACCIONES
+// ================================================================
 function resetIdleTimer() {
   clearTimeout(idleTimer);
   idleTimer = setTimeout(() => {
@@ -415,9 +341,9 @@ document.addEventListener('mousemove', resetIdleTimer);
 document.addEventListener('keydown', resetIdleTimer);
 resetIdleTimer();
 
-/* ================================================================
-   12. CORAZONES VOLADORES
-   ================================================================ */
+// ================================================================
+// 10. CORAZONES
+// ================================================================
 function spawnHearts(el) {
   const rect = el.getBoundingClientRect();
   const cx = rect.left + rect.width / 2;
@@ -435,9 +361,9 @@ function spawnHearts(el) {
   }
 }
 
-/* ================================================================
-   13. CHAT CON IA — API DE ANTHROPIC
-   ================================================================ */
+// ================================================================
+// 11. CHAT CON IA
+// ================================================================
 const chatMessages = document.getElementById('chat-messages');
 const chatInput = document.getElementById('chat-input');
 const chatSendBtn = document.getElementById('chat-send-btn');
@@ -507,9 +433,9 @@ chatInput.addEventListener('keydown', e => {
   else playType();
 });
 
-/* ================================================================
-   14. PLANTAS — SPRITES SVG
-   ================================================================ */
+// ================================================================
+// 12. PLANTAS
+// ================================================================
 const PLANT_TYPES = 3;
 const STAGE_THRESHOLDS = [0, 20, 45, 70, 95];
 
@@ -546,9 +472,9 @@ function plantImageHTML(plantType, stage) {
   </svg>`;
 }
 
-/* ================================================================
-   15. TAREAS — DATOS Y RENDERIZADO
-   ================================================================ */
+// ================================================================
+// 13. TAREAS
+// ================================================================
 let tasks = [
   { id: 1, name: 'Portfolio personal', plantType: 1, subtasks: [{ text: 'Elegir proyectos', done: false }, { text: 'Diseñar la web', done: true }, { text: 'Publicar online', done: false }] },
   { id: 2, name: 'LinkedIn optimizado', plantType: 2, subtasks: [{ text: 'Foto profesional', done: true }, { text: 'Escribir bio', done: false }] },
@@ -680,9 +606,9 @@ function addTask() {
 }
 renderAll();
 
-/* ================================================================
-   16. POST-ITS — DATOS Y DRAG & DROP
-   ================================================================ */
+// ================================================================
+// 14. POST-ITS
+// ================================================================
 const POSTIT_W = 190;
 const POSTIT_H = 175;
 const POSTIT_GAP = 20;
@@ -855,9 +781,9 @@ document.addEventListener('mouseup', () => {
 
 renderPostits();
 
-/* ================================================================
-   17. METAS — DIARIAS Y SEMANALES
-   ================================================================ */
+// ================================================================
+// 15. METAS
+// ================================================================
 let dailyMetas = [
   { text: 'Aplicar a 3 empleos', done: false },
   { text: 'Actualizar CV', done: false },
@@ -942,9 +868,9 @@ document.querySelectorAll('.add-meta-btn').forEach(btn => {
 
 renderMetas();
 
-/* ================================================================
-   18. FRASES MOTIVACIONALES (sección metas)
-   ================================================================ */
+// ================================================================
+// 16. FRASES MOTIVACIONALES (metas)
+// ================================================================
 const metaQuotes = [
   'Cada aplicación enviada es una oportunidad nueva 🌱',
   'El progreso lento sigue siendo progreso 🍃',
@@ -972,34 +898,44 @@ function updateQuotes() {
 updateQuotes();
 setInterval(updateQuotes, 8000);
 
-/* ================================================================
-   19. PERFIL — AVATAR, CV, DATOS PERSONALES
-   ================================================================ */
-const avatars = ['🐰', '🐱', '🦊', '🐼', '🐨', '🦝', '🐮', '🐷', '🐙', '🦋'];
-let currentAvatar = avatars[0];
+// ================================================================
+// 17. PERFIL — AVATARES
+// ================================================================
+const avatarFiles = [
+  'avatar-bunny.png',
+  'avatar-cat.png',
+  'avatar-fox.png',
+  'avatar-panda.png',
+  'avatar-koala.png',
+  'avatar-raccoon.png',
+  'avatar-cow.png',
+  'avatar-pig.png',
+  'avatar-octopus.png',
+  'avatar-butterfly.png',
+];
+let currentAvatar = avatarFiles[0];
 
 function renderAvatarOptions() {
   const container = document.getElementById('avatar-options');
   container.innerHTML = '';
-  avatars.forEach((a, i) => {
+  avatarFiles.forEach((file, i) => {
     const div = document.createElement('div');
     div.className = `avatar-option interactive${i === 0 ? ' active' : ''}`;
-    div.textContent = a;
+    div.innerHTML = `<img src="${file}" alt="Avatar ${i+1}">`;
     div.dataset.index = i;
     div.addEventListener('click', () => {
-      currentAvatar = a;
-      document.getElementById('perfil-avatar-preview').textContent = a;
+      currentAvatar = file;
+      document.getElementById('avatar-img').src = file;
       document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('active'));
       div.classList.add('active');
       playClick();
-      localStorage.setItem('jobquest_avatar', a);
+      localStorage.setItem('jobquest_avatar', file);
     });
     container.appendChild(div);
   });
 }
 renderAvatarOptions();
 
-// Cargar datos guardados
 function loadProfile() {
   const saved = localStorage.getItem('jobquest_profile');
   if (saved) {
@@ -1011,9 +947,10 @@ function loadProfile() {
       document.getElementById('perfil-tecnologias').value = data.tecnologias || '';
       if (data.avatar) {
         currentAvatar = data.avatar;
-        document.getElementById('perfil-avatar-preview').textContent = data.avatar;
+        document.getElementById('avatar-img').src = data.avatar;
         document.querySelectorAll('.avatar-option').forEach(el => {
-          el.classList.toggle('active', el.textContent === data.avatar);
+          const img = el.querySelector('img');
+          el.classList.toggle('active', img && img.src.includes(data.avatar));
         });
       }
       if (data.cvName) {
@@ -1048,9 +985,9 @@ document.getElementById('perfil-cv').addEventListener('change', function(e) {
   }
 });
 
-/* ================================================================
-   20. LOGIN — SISTEMA DE AUTENTICACIÓN
-   ================================================================ */
+// ================================================================
+// 18. LOGIN
+// ================================================================
 const loginScreen = document.getElementById('login-screen');
 const loginTabs = document.querySelectorAll('.login-tab-btn');
 const loginPanels = document.querySelectorAll('.login-tab-panel');
@@ -1064,14 +1001,12 @@ loginTabs.forEach(tab => {
   });
 });
 
-// Check existing session
 const sessionUser = localStorage.getItem('jobquest_user');
 if (sessionUser) {
   loginScreen.classList.add('hidden');
   document.querySelector('.greeting-line #typed-greeting').textContent = `¡Hola, ${sessionUser}! ✨`;
 }
 
-// Login form
 document.getElementById('tab-ingresar').addEventListener('submit', (e) => {
   e.preventDefault();
   const user = document.getElementById('login-user').value.trim();
@@ -1098,7 +1033,6 @@ document.getElementById('tab-ingresar').addEventListener('submit', (e) => {
   }
 });
 
-// Register form
 document.getElementById('tab-registrarme').addEventListener('submit', (e) => {
   e.preventDefault();
   const name = document.getElementById('register-name').value.trim();
@@ -1123,7 +1057,6 @@ document.getElementById('tab-registrarme').addEventListener('submit', (e) => {
   playClick();
 });
 
-// Recover form
 document.getElementById('tab-recuperar').addEventListener('submit', (e) => {
   e.preventDefault();
   const user = document.getElementById('recover-user').value.trim();
@@ -1136,9 +1069,9 @@ document.getElementById('tab-recuperar').addEventListener('submit', (e) => {
   }
 });
 
-/* ================================================================
-   21. PANTALLA DE CARGA + ARRANQUE DE MÚSICA
-   ================================================================ */
+// ================================================================
+// 19. CARGA
+// ================================================================
 window.addEventListener('load', () => {
   setTimeout(() => {
     document.getElementById('loading-overlay').classList.add('hidden');
