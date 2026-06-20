@@ -1100,15 +1100,21 @@ renderPostits();
 // ================================================================
 // 15. METAS
 // ================================================================
-let dailyMetas = [
+let dailyMetas = JSON.parse(localStorage.getItem('dailyMetas')) || [
   { text: 'Aplicar a 3 empleos', done: false },
   { text: 'Actualizar CV', done: false },
   { text: 'Mejorar portfolio', done: false },
 ];
-let weeklyMetas = [
+
+let weeklyMetas = JSON.parse(localStorage.getItem('weeklyMetas')) || [
   { text: 'Conectar con 5 reclutadores', done: false },
   { text: 'Completar un curso corto', done: false },
 ];
+
+function saveMetas() {
+  localStorage.setItem('dailyMetas', JSON.stringify(dailyMetas));
+  localStorage.setItem('weeklyMetas', JSON.stringify(weeklyMetas));
+}
 
 function renderMetas() {
   const dailyList = document.getElementById('metas-list-daily');
@@ -1124,12 +1130,16 @@ function renderMetas() {
       <button class="meta-delete" data-index="${i}" data-period="daily">✕</button>`;
     div.querySelector('.meta-check').addEventListener('change', e => {
       meta.done = e.target.checked;
+      saveMetas();
       renderMetas();
       playClick();
     });
-    div.querySelector('.meta-text').addEventListener('input', e => { meta.text = e.target.value; });
+    div.querySelector('.meta-text').addEventListener('input', e => { meta.text = e.target.value;
+      saveMetas();
+     });
     div.querySelector('.meta-delete').addEventListener('click', () => {
       dailyMetas.splice(i, 1);
+      saveMetas();
       renderMetas();
       playClick();
     });
@@ -1144,12 +1154,15 @@ function renderMetas() {
       <button class="meta-delete" data-index="${i}" data-period="weekly">✕</button>`;
     div.querySelector('.meta-check').addEventListener('change', e => {
       meta.done = e.target.checked;
+      saveMetas();
       renderMetas();
       playClick();
     });
-    div.querySelector('.meta-text').addEventListener('input', e => { meta.text = e.target.value; });
+    div.querySelector('.meta-text').addEventListener('input', e => { meta.text = e.target.value; 
+      saveMetas();});
     div.querySelector('.meta-delete').addEventListener('click', () => {
       weeklyMetas.splice(i, 1);
+      saveMetas();
       renderMetas();
       playClick();
     });
@@ -1175,6 +1188,7 @@ document.querySelectorAll('.add-meta-btn').forEach(btn => {
     } else {
       weeklyMetas.push({ text: 'Nueva meta semanal', done: false });
     }
+    saveMetas();
     renderMetas();
     playClick();
     const inputs = document.querySelectorAll(`#metas-list-${period} .meta-text`);
