@@ -1107,8 +1107,8 @@ let dailyMetas = JSON.parse(localStorage.getItem('dailyMetas')) || [
 ];
 
 let weeklyMetas = JSON.parse(localStorage.getItem('weeklyMetas')) || [
-  { text: 'Conectar con 5 reclutadores', done: false },
-  { text: 'Completar un curso corto', done: false },
+  { text: 'Conectar con 5 reclutadores', done: false, fechaLimite: '' },
+  { text: 'Completar un curso corto', done: false, fechaLimite: '' },
 ];
 
 function saveMetas() {
@@ -1130,6 +1130,9 @@ function renderMetas() {
       <button class="meta-delete" data-index="${i}" data-period="daily">✕</button>`;
     div.querySelector('.meta-check').addEventListener('change', e => {
       meta.done = e.target.checked;
+      if(meta.done){
+        launchConfetti();
+      }
       saveMetas();
       renderMetas();
       playClick();
@@ -1151,15 +1154,23 @@ function renderMetas() {
     div.className = `meta-item${meta.done ? ' done' : ''}`;
     div.innerHTML = `<input type="checkbox" class="meta-check" ${meta.done ? 'checked' : ''}/>
       <input class="meta-text" value="${meta.text}" placeholder="Escribí tu meta..."/>
+      <input type="date" class="meta-date" value="${meta.fechaLimite || ''}"/>
       <button class="meta-delete" data-index="${i}" data-period="weekly">✕</button>`;
     div.querySelector('.meta-check').addEventListener('change', e => {
       meta.done = e.target.checked;
+      if(meta.done){
+        launchConfetti();
+      }
       saveMetas();
       renderMetas();
       playClick();
     });
     div.querySelector('.meta-text').addEventListener('input', e => { meta.text = e.target.value; 
-      saveMetas();});
+      saveMetas();
+    });
+    div.querySelector('.meta-date').addEventListener('change', e => {meta.fechaLimite = e.target.value;
+      saveMetas();
+    });
     div.querySelector('.meta-delete').addEventListener('click', () => {
       weeklyMetas.splice(i, 1);
       saveMetas();
@@ -1170,6 +1181,49 @@ function renderMetas() {
   });
 
   updateProgress();
+}
+
+function launchConfetti(){
+
+    const container =
+    document.getElementById("confetti-container");
+
+    const emojis = [
+        "✨",
+        "🌸",
+        "⭐",
+        "🌼",
+        "🍃",
+        "💛"
+    ];
+
+    for(let i=0;i<35;i++){
+
+        const confetti =
+        document.createElement("div");
+
+        confetti.className = "confetti";
+
+        confetti.textContent =
+        emojis[Math.floor(Math.random()*emojis.length)];
+
+        confetti.style.left =
+        Math.random()*100 + "%";
+
+        confetti.style.animationDelay =
+        Math.random()*0.5 + "s";
+
+        confetti.style.fontSize =
+        (18 + Math.random()*18) + "px";
+
+        container.appendChild(confetti);
+
+        setTimeout(()=>{
+            confetti.remove();
+        },2000);
+
+    }
+
 }
 
 function updateProgress() {
@@ -1186,7 +1240,7 @@ document.querySelectorAll('.add-meta-btn').forEach(btn => {
     if (period === 'daily') {
       dailyMetas.push({ text: 'Nueva meta diaria', done: false });
     } else {
-      weeklyMetas.push({ text: 'Nueva meta semanal', done: false });
+      weeklyMetas.push({ text: 'Nueva meta', done: false, fechaLimite: '' });
     }
     saveMetas();
     renderMetas();
