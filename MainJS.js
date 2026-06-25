@@ -925,6 +925,9 @@ renderAll();
 // ================================================================
 // 14. POST-ITS
 // ================================================================
+// ================================================================
+// 14. POST-ITS
+// ================================================================
 const POSTIT_W = 190;
 const POSTIT_H = 175;
 const POSTIT_GAP = 20;
@@ -951,12 +954,14 @@ function getGridCols() {
   return Math.max(1, Math.floor((w + POSTIT_GAP) / (POSTIT_W + POSTIT_GAP)));
 }
 
+// Convierte slots a coordenadas
 function slotToXY(slot, cols) {
   const col = slot % cols;
   const row = Math.floor(slot / cols);
   return { x: POSTIT_PAD + col * (POSTIT_W + POSTIT_GAP), y: POSTIT_PAD + row * (POSTIT_H + POSTIT_GAP) };
 }
 
+// Asignacion de slots de forma automatica si hay uno que esta indefinido
 function assignSlots() {
   postits.forEach((p, i) => { if (p.slot === undefined) p.slot = i; });
   const used = new Map();
@@ -970,12 +975,26 @@ function assignSlots() {
   });
 }
 
+// Intercambiar las posiciones de dos post-its
+function swapPostIts(id1, id2) {
+  const p1 = postits.find(p => p.id === id1);
+  const p2 = postits.find(p => p.id === id2);
+  if (p1 && p2) {
+    const tempSlot = p1.slot;
+    p1.slot = p2.slot;
+    p2.slot = tempSlot;
+    renderPostits();
+  }
+}
+
 let dragging = null;
 let dragOffX = 0;
 let dragOffY = 0;
 
 function renderPostits() {
   const container = document.getElementById('postits-container');
+  if (!container) return;
+  
   assignSlots();
   const cols = getGridCols();
   const rows = Math.ceil((postits.length + 1) / cols);
@@ -1064,31 +1083,81 @@ document.addEventListener('mousemove', e => {
   dragging.el.style.top = y + 'px';
 });
 
+// Permite intercambiar los postits automaticamente al arrastrarlos 
 document.addEventListener('mouseup', () => {
-  if (!dragging) return;
+  if (!dragging) return; // Si no hay arrastre, NO HACER NADA
+
   const cols = getGridCols();
   const x = parseFloat(dragging.el.style.left);
   const y = parseFloat(dragging.el.style.top);
-  const occupiedSlots = new Set(postits.filter(p => p.id !== dragging.data.id).map(p => p.slot));
-  let bestSlot = dragging.data.slot;
-  let bestDist = Infinity;
-  for (let s = 0; s <= postits.length; s++) {
-    if (occupiedSlots.has(s)) continue;
-    const { x: sx, y: sy } = slotToXY(s, cols);
-    const dist = Math.hypot(x - sx, y - sy);
-    if (dist < bestDist) { bestDist = dist; bestSlot = s; }
+  
+  // Obtener el post-it que está siendo arrastrado
+  const draggedId = dragging.data.id;
+  
+  // Buscar si hay otro post-it en la posición donde se soltó
+  let targetPostit = null;
+  
+  // Obtener todos los post-its excepto el que se está arrastrando
+  const otherPostits = postits.filter(p => p.id !== draggedId);
+  
+  // Verificar si el mouse está sobre otro post-it
+  for (const p of otherPostits) {
+    const { x: px, y: py } = slotToXY(p.slot, cols);
+    const dist = Math.hypot(x - px, y - py);
+    if (dist < POSTIT_W * 0.6) {
+      targetPostit = p;
+      break;
+    }
   }
-  dragging.data.slot = bestSlot;
-  const { x: snapX, y: snapY } = slotToXY(bestSlot, cols);
-  dragging.el.style.transition = 'left 0.35s cubic-bezier(.22,.68,0,1.5), top 0.35s cubic-bezier(.22,.68,0,1.5)';
-  dragging.el.style.left = snapX + 'px';
-  dragging.el.style.top = snapY + 'px';
-  dragging.el.style.zIndex = '';
-  dragging.el.classList.remove('dragging');
-  dragging.el.classList.add('dropped');
-  const droppedEl = dragging.el;
-  setTimeout(() => droppedEl.classList.remove('dropped'), 400);
-  dragging = null;
+  
+  // Si se soltó sobre otro post-it → INTERCAMBIAR
+  if (targetPostit) {
+    swapPostIts(draggedId, targetPostit.id);
+    
+    const targetEl = document.getElementById(`postit-${targetPostit.id}`);
+    if (targetEl) {
+      targetEl.classList.add('dropped');
+      setTimeout(() => targetEl.classList.remove('dropped'), 400);
+    }
+    
+    const updatedDraggedEl = document.getElementById(`postit-${draggedId}`);
+    if (updatedDraggedEl) {
+      updatedDraggedEl.classList.add('dropped');
+      setTimeout(() => updatedDraggedEl.classList.remove('dropped'), 400);
+    }
+    
+    dragging = null;
+    
+  } else {
+    // Si NO se soltó sobre otro post-it → Comportamiento normal
+    const occupiedSlots = new Set(postits.filter(p => p.id !== draggedId).map(p => p.slot));
+    let bestSlot = dragging.data.slot;
+    let bestDist = Infinity;
+    
+    for (let s = 0; s < postits.length; s++) {
+      if (occupiedSlots.has(s)) continue;
+      const { x: sx, y: sy } = slotToXY(s, cols);
+      const dist = Math.hypot(x - sx, y - sy);
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestSlot = s;
+      }
+    }
+    
+    dragging.data.slot = bestSlot;
+    const { x: snapX, y: snapY } = slotToXY(bestSlot, cols);
+    dragging.el.style.transition = 'left 0.35s cubic-bezier(.22,.68,0,1.5), top 0.35s cubic-bezier(.22,.68,0,1.5)';
+    dragging.el.style.left = snapX + 'px';
+    dragging.el.style.top = snapY + 'px';
+    
+    dragging.el.style.zIndex = '';
+    dragging.el.classList.remove('dragging');
+    dragging.el.classList.add('dropped');
+    const droppedEl = dragging.el;
+    setTimeout(() => droppedEl.classList.remove('dropped'), 400);
+    dragging = null;
+  }
+  
   const container = document.getElementById('postits-container');
   const rows = Math.ceil((postits.length + 1) / getGridCols());
   container.style.minHeight = (POSTIT_PAD * 2 + rows * (POSTIT_H + POSTIT_GAP)) + 'px';
@@ -1100,84 +1169,88 @@ renderPostits();
 // ================================================================
 // 15. METAS
 // ================================================================
-let dailyMetas = JSON.parse(localStorage.getItem('dailyMetas')) || [
-  { text: 'Aplicar a 3 empleos', done: false },
-  { text: 'Actualizar CV', done: false },
-  { text: 'Mejorar portfolio', done: false },
-];
+  // ================================================================
+  // 15. METAS
+  // ================================================================
+  let dailyMetas = JSON.parse(localStorage.getItem('dailyMetas')) || [
+    { text: 'Aplicar a 3 empleos', done: false },
+    { text: 'Actualizar CV', done: false },
+    { text: 'Mejorar portfolio', done: false },
+  ];
 
-let weeklyMetas = JSON.parse(localStorage.getItem('weeklyMetas')) || [
-  { text: 'Conectar con 5 reclutadores', done: false, fechaLimite: '' },
-  { text: 'Completar un curso corto', done: false, fechaLimite: '' },
-];
+  let weeklyMetas = JSON.parse(localStorage.getItem('weeklyMetas')) || [
+    { text: 'Conectar con 5 reclutadores', done: false, fechaLimite: '' },
+    { text: 'Completar un curso corto', done: false, fechaLimite: '' },
+  ];
 
-function saveMetas() {
-  localStorage.setItem('dailyMetas', JSON.stringify(dailyMetas));
-  localStorage.setItem('weeklyMetas', JSON.stringify(weeklyMetas));
-}
+  function saveMetas() {
+    localStorage.setItem('dailyMetas', JSON.stringify(dailyMetas));
+    localStorage.setItem('weeklyMetas', JSON.stringify(weeklyMetas));
+  }
 
-function renderMetas() {
-  const dailyList = document.getElementById('metas-list-daily');
-  const weeklyList = document.getElementById('metas-list-weekly');
-  dailyList.innerHTML = '';
-  weeklyList.innerHTML = '';
+  function renderMetas() {
+    const dailyList = document.getElementById('metas-list-daily');
+    const weeklyList = document.getElementById('metas-list-weekly');
+    dailyList.innerHTML = '';
+    weeklyList.innerHTML = '';
 
-  dailyMetas.forEach((meta, i) => {
-    const div = document.createElement('div');
-    div.className = `meta-item${meta.done ? ' done' : ''}`;
-    div.innerHTML = `<input type="checkbox" class="meta-check" ${meta.done ? 'checked' : ''}/>
-      <input class="meta-text" value="${meta.text}" placeholder="Escribí tu meta..."/>
-      <button class="meta-delete" data-index="${i}" data-period="daily">✕</button>`;
-    div.querySelector('.meta-check').addEventListener('change', e => {
-      meta.done = e.target.checked;
-      if(meta.done){
-        launchConfetti();
-      }
-      saveMetas();
-      renderMetas();
-      playClick();
+    dailyMetas.forEach((meta, i) => {
+      const div = document.createElement('div');
+      div.className = `meta-item${meta.done ? ' done' : ''}`;
+      div.innerHTML = `<input type="checkbox" class="meta-check" ${meta.done ? 'checked' : ''}/>
+        <input class="meta-text" value="${meta.text}" placeholder="Escribí tu meta..."/>
+        <button class="meta-delete" data-index="${i}" data-period="daily">✕</button>`;
+      div.querySelector('.meta-check').addEventListener('change', e => {
+        meta.done = e.target.checked;
+        if(meta.done){
+          launchConfetti();
+        }
+        saveMetas();
+        renderMetas();
+        playClick();
+      });
+      div.querySelector('.meta-text').addEventListener('input', e => { meta.text = e.target.value;
+        saveMetas();
+      });
+      div.querySelector('.meta-delete').addEventListener('click', () => {
+        dailyMetas.splice(i, 1);
+        saveMetas();
+        renderMetas();
+        playClick();
+      });
+      dailyList.appendChild(div);
     });
-    div.querySelector('.meta-text').addEventListener('input', e => { meta.text = e.target.value;
-      saveMetas();
-     });
-    div.querySelector('.meta-delete').addEventListener('click', () => {
-      dailyMetas.splice(i, 1);
-      saveMetas();
-      renderMetas();
-      playClick();
-    });
-    dailyList.appendChild(div);
-  });
 
-  weeklyMetas.forEach((meta, i) => {
-    const div = document.createElement('div');
-    div.className = `meta-item${meta.done ? ' done' : ''}`;
-    div.innerHTML = `<input type="checkbox" class="meta-check" ${meta.done ? 'checked' : ''}/>
-      <input class="meta-text" value="${meta.text}" placeholder="Escribí tu meta..."/>
-      <input type="date" class="meta-date" value="${meta.fechaLimite || ''}"/>
-      <button class="meta-delete" data-index="${i}" data-period="weekly">✕</button>`;
-    div.querySelector('.meta-check').addEventListener('change', e => {
-      meta.done = e.target.checked;
-      if(meta.done){
-        launchConfetti();
-      }
-      saveMetas();
-      renderMetas();
-      playClick();
-    });
-    div.querySelector('.meta-text').addEventListener('input', e => { meta.text = e.target.value; 
-      saveMetas();
-    });
-    div.querySelector('.meta-date').addEventListener('change', e => {meta.fechaLimite = e.target.value;
-      saveMetas();
-    });
-    div.querySelector('.meta-delete').addEventListener('click', () => {
-      weeklyMetas.splice(i, 1);
-      saveMetas();
-      renderMetas();
-      playClick();
-    });
-    weeklyList.appendChild(div);
+    weeklyMetas.forEach((meta, i) => {
+      const div = document.createElement('div');
+      div.className = `meta-item${meta.done ? ' done' : ''}`;
+      div.innerHTML = `<input type="checkbox" class="meta-check" ${meta.done ? 'checked' : ''}/>
+        <input class="meta-text" value="${meta.text}" placeholder="Escribí tu meta..."/>
+        <input type="date" class="meta-date" value="${meta.fechaLimite || ''}"/>
+        <button class="meta-delete" data-index="${i}" data-period="weekly">✕</button>`;
+      div.querySelector('.meta-check').addEventListener('change', e => {
+        meta.done = e.target.checked;
+        if(meta.done){
+          launchConfetti();
+        }
+        saveMetas();
+        renderMetas();
+        playClick();
+      });
+      div.querySelector('.meta-text').addEventListener('input', e => { meta.text = e.target.value; 
+        saveMetas();
+      });
+      div.querySelector('.meta-date').addEventListener('change', e => {meta.fechaLimite = e.target.value;
+        saveMetas();
+      });
+      div.querySelector('.meta-delete').addEventListener('click', () => {
+        weeklyMetas.splice(i, 1);
+        saveMetas();
+        renderMetas();
+        playClick();
+      });
+      weeklyList.appendChild(div);
+      
   });
 
   updateProgress();
