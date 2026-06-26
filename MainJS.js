@@ -750,51 +750,38 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 
 // ================================================================
-// 12. PLANTAS
+// 12. PLANTAS — VERSIÓN PNG (CORREGIDA: MÁS GRANDES Y ELEVADAS)
 // ================================================================
-const PLANT_TYPES = 3;
-const STAGE_THRESHOLDS = [0, 20, 45, 70, 95];
+const STAGE_THRESHOLDS = [0, 25, 50, 75];          // 4 fases (1-4)
+const PLANT_NAMES = ['Rose', 'Daisy', 'Lily'];     // Nombres de las plantas
 
 function getStage(pct) {
   let stage = 0;
   for (let i = STAGE_THRESHOLDS.length - 1; i >= 0; i--) {
     if (pct >= STAGE_THRESHOLDS[i]) { stage = i; break; }
   }
-  return stage;
+  return stage;  // 0, 1, 2 o 3
 }
 
-function plantImageHTML(plantType, stage) {
-  const colors = ['#7AB648', '#E8A85A', '#C8853A'];
-  const col = colors[(plantType - 1) % colors.length];
-  const heights = [8, 22, 40, 58, 76];
-  const h = heights[stage];
-  const showFlower = stage >= 3;
-  const showLeaves = stage >= 2;
-  const potH = 28;
-  const totalH = 100;
-  const stemBottom = totalH - potH;
-  const stemTop = stemBottom - h;
-
-  return `<svg width="64" height="${totalH}" viewBox="0 0 64 ${totalH}" xmlns="http://www.w3.org/2000/svg" class="plant-img" style="transition: all 0.6s cubic-bezier(.22,.68,0,1.2)">
-    <rect x="16" y="${totalH - potH}" width="32" height="${potH - 6}" rx="4" fill="#C8853A"/>
-    <rect x="12" y="${totalH - potH}" width="40" height="8" rx="4" fill="#A0622A"/>
-    <ellipse cx="32" cy="${totalH - potH + 5}" rx="14" ry="4" fill="#5A3010"/>
-    ${stage === 0 ? `<circle cx="32" cy="${stemBottom - 4}" r="4" fill="#5A8A28" opacity="0.6"/>` : ''}
-    ${stage > 0 ? `<line x1="32" y1="${stemBottom}" x2="32" y2="${stemTop}" stroke="${col}" stroke-width="3" stroke-linecap="round"/>` : ''}
-    ${showLeaves ? `<ellipse cx="22" cy="${stemTop + h * 0.4}" rx="10" ry="6" fill="${col}" transform="rotate(-25 22 ${stemTop + h * 0.4})" opacity="0.85"/>
-    <ellipse cx="42" cy="${stemTop + h * 0.6}" rx="10" ry="6" fill="${col}" transform="rotate(25 42 ${stemTop + h * 0.6})" opacity="0.85"/>` : ''}
-    ${showFlower ? `<circle cx="32" cy="${stemTop}" r="${stage === 4 ? 11 : 8}" fill="${stage === 4 ? '#FFD700' : '#FFB3C6'}" opacity="0.9"/>
-    <circle cx="32" cy="${stemTop}" r="4" fill="${stage === 4 ? '#FF8800' : '#FF6B9D'}"/>` : (stage >= 1 ? `<ellipse cx="32" cy="${stemTop}" rx="6" ry="5" fill="${col}" opacity="0.9"/>` : '')}
-  </svg>`;
+function plantImageHTML(plantName, stage) {
+  const stageNum = stage + 1;
+  return `
+    <div style="position:relative; width:64px; height:120px; display:flex; align-items:flex-end; justify-content:center;">
+      <!-- Maceta (abajo) -->
+      <img src="Pot.png" style="position:absolute; bottom:0; left:0; width:100%; height:auto; object-fit:contain; z-index:1;" alt="Maceta">
+      <!-- Planta (más arriba y a la izquierda) -->
+      <img src="${plantName}${stageNum}.png" style="position:absolute; bottom:45px; left:40%; transform:translateX(-40%); width:90%; height:auto; object-fit:contain; z-index:2;" alt="${plantName} fase ${stageNum}">
+    </div>
+  `;
 }
 
 // ================================================================
 // 13. TAREAS
 // ================================================================
 let tasks = [
-  { id: 1, name: 'Portfolio personal', plantType: 1, subtasks: [{ text: 'Elegir proyectos', done: false }, { text: 'Diseñar la web', done: true }, { text: 'Publicar online', done: false }] },
-  { id: 2, name: 'LinkedIn optimizado', plantType: 2, subtasks: [{ text: 'Foto profesional', done: true }, { text: 'Escribir bio', done: false }] },
-  { id: 3, name: 'Practicar entrevistas', plantType: 3, subtasks: [{ text: 'Estudiar preguntas', done: false }, { text: 'Mock interview', done: false }, { text: 'Feedback', done: false }] },
+  { id: 1, name: 'Portfolio personal', plantType: PLANT_NAMES[0], subtasks: [{ text: 'Elegir proyectos', done: false }, { text: 'Diseñar la web', done: true }, { text: 'Publicar online', done: false }] },
+  { id: 2, name: 'LinkedIn optimizado', plantType: PLANT_NAMES[1], subtasks: [{ text: 'Foto profesional', done: true }, { text: 'Escribir bio', done: false }] },
+  { id: 3, name: 'Practicar entrevistas', plantType: PLANT_NAMES[2], subtasks: [{ text: 'Estudiar preguntas', done: false }, { text: 'Mock interview', done: false }, { text: 'Feedback', done: false }] },
 ];
 
 function getTaskPct(task) {
@@ -810,7 +797,11 @@ function renderPlants() {
     const stage = getStage(pct);
     const div = document.createElement('div');
     div.className = 'plant-pot interactive';
-    div.innerHTML = `<div class="plant-svg-wrap">${plantImageHTML(task.plantType, stage)}</div><div class="plant-label">${task.name}</div><div class="plant-pct">${pct}%</div>`;
+    div.innerHTML = `
+      <div class="plant-svg-wrap">${plantImageHTML(task.plantType, stage)}</div>
+      <div class="plant-label">${task.name}</div>
+      <div class="plant-pct">${pct}%</div>
+    `;
     div.addEventListener('click', () => {
       const taskEl = document.getElementById(`task-${task.id}`);
       if (taskEl) { taskEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); taskEl.classList.add('expanded'); task._expanded = true; }
@@ -911,8 +902,8 @@ function renderAll() { renderPlants(); renderTasks(); }
 
 function addTask() {
   const id = Date.now();
-  const plantType = Math.floor(Math.random() * PLANT_TYPES) + 1;
-  tasks.push({ id, name: 'Nueva tarea', plantType, subtasks: [] });
+  const plantName = PLANT_NAMES[Math.floor(Math.random() * PLANT_NAMES.length)];
+  tasks.push({ id, name: 'Nueva tarea', plantType: plantName, subtasks: [] });
   renderAll();
   setTimeout(() => {
     const el = document.getElementById(`task-${id}`);
@@ -922,9 +913,6 @@ function addTask() {
 }
 renderAll();
 
-// ================================================================
-// 14. POST-ITS
-// ================================================================
 // ================================================================
 // 14. POST-ITS
 // ================================================================
@@ -954,14 +942,12 @@ function getGridCols() {
   return Math.max(1, Math.floor((w + POSTIT_GAP) / (POSTIT_W + POSTIT_GAP)));
 }
 
-// Convierte slots a coordenadas
 function slotToXY(slot, cols) {
   const col = slot % cols;
   const row = Math.floor(slot / cols);
   return { x: POSTIT_PAD + col * (POSTIT_W + POSTIT_GAP), y: POSTIT_PAD + row * (POSTIT_H + POSTIT_GAP) };
 }
 
-// Asignacion de slots de forma automatica si hay uno que esta indefinido
 function assignSlots() {
   postits.forEach((p, i) => { if (p.slot === undefined) p.slot = i; });
   const used = new Map();
@@ -975,7 +961,6 @@ function assignSlots() {
   });
 }
 
-// Intercambiar las posiciones de dos post-its
 function swapPostIts(id1, id2) {
   const p1 = postits.find(p => p.id === id1);
   const p2 = postits.find(p => p.id === id2);
@@ -1083,24 +1068,18 @@ document.addEventListener('mousemove', e => {
   dragging.el.style.top = y + 'px';
 });
 
-// Permite intercambiar los postits automaticamente al arrastrarlos 
 document.addEventListener('mouseup', () => {
-  if (!dragging) return; // Si no hay arrastre, NO HACER NADA
+  if (!dragging) return;
 
   const cols = getGridCols();
   const x = parseFloat(dragging.el.style.left);
   const y = parseFloat(dragging.el.style.top);
   
-  // Obtener el post-it que está siendo arrastrado
   const draggedId = dragging.data.id;
-  
-  // Buscar si hay otro post-it en la posición donde se soltó
   let targetPostit = null;
   
-  // Obtener todos los post-its excepto el que se está arrastrando
   const otherPostits = postits.filter(p => p.id !== draggedId);
   
-  // Verificar si el mouse está sobre otro post-it
   for (const p of otherPostits) {
     const { x: px, y: py } = slotToXY(p.slot, cols);
     const dist = Math.hypot(x - px, y - py);
@@ -1110,7 +1089,6 @@ document.addEventListener('mouseup', () => {
     }
   }
   
-  // Si se soltó sobre otro post-it → INTERCAMBIAR
   if (targetPostit) {
     swapPostIts(draggedId, targetPostit.id);
     
@@ -1129,7 +1107,6 @@ document.addEventListener('mouseup', () => {
     dragging = null;
     
   } else {
-    // Si NO se soltó sobre otro post-it → Comportamiento normal
     const occupiedSlots = new Set(postits.filter(p => p.id !== draggedId).map(p => p.slot));
     let bestSlot = dragging.data.slot;
     let bestDist = Infinity;
@@ -1169,9 +1146,6 @@ renderPostits();
 // ================================================================
 // 15. METAS
 // ================================================================
-  // ================================================================
-  // 15. METAS
-  // ================================================================
   let dailyMetas = JSON.parse(localStorage.getItem('dailyMetas')) || [
     { text: 'Aplicar a 3 empleos', done: false },
     { text: 'Actualizar CV', done: false },
@@ -1365,7 +1339,7 @@ const avatarFiles = [
   'avatar-bee.png',
   'avatar-duck.png'
 ];
-let currentAvatar = avatarFiles[0]; // cat.png como default
+let currentAvatar = avatarFiles[0];
 
 function renderAvatarOptions() {
   const container = document.getElementById('avatar-options');
@@ -1400,7 +1374,6 @@ function loadProfile() {
       document.getElementById('perfil-habilidades').value = data.habilidades || '';
       document.getElementById('perfil-tecnologias').value = data.tecnologias || '';
       
-      // Cargar avatar guardado o usar el default (cat)
       if (data.avatar && avatarFiles.includes(data.avatar)) {
         currentAvatar = data.avatar;
         document.getElementById('avatar-img').src = data.avatar;
@@ -1409,7 +1382,6 @@ function loadProfile() {
           el.classList.toggle('active', img && img.src.includes(data.avatar));
         });
       } else {
-        // Si no hay avatar guardado, usar cat como default
         currentAvatar = avatarFiles[0];
         document.getElementById('avatar-img').src = avatarFiles[0];
         document.querySelectorAll('.avatar-option').forEach((el, idx) => {
@@ -1422,7 +1394,6 @@ function loadProfile() {
       }
     } catch(e) {}
   } else {
-    // Si no hay perfil guardado, usar cat como default
     currentAvatar = avatarFiles[0];
     document.getElementById('avatar-img').src = avatarFiles[0];
     document.querySelectorAll('.avatar-option').forEach((el, idx) => {
