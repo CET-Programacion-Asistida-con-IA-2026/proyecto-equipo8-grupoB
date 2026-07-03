@@ -208,12 +208,37 @@
   <!-- ─────────────────────────────────────────────────────────────
        SECCIÓN 5: GOOGLE CALENDAR
   ────────────────────────────────────────────────────────────── -->
+  <!-- ─────────────────────────────────────────────────────────────
+     SECCIÓN 5: CALENDARIO PERSONALIZADO
+───────────────────────────────────────────────────────────── -->
   <section class="section bg-calendario" id="section-calendario">
     <div class="card calendar-card reveal">
       <div class="section-title"><img src="icon-calendar.png" alt="Calendario" class="section-icon"> Tu calendario</div>
       <p class="calendar-subtitle">Entrevistas, fechas límite, eventos y recordatorios — todo en un solo lugar.</p>
-      <div class="calendar-frame-wrap">
-        <iframe class="calendar-iframe" src="https://calendar.google.com/calendar/embed?src=es.argentina%23holiday%40group.v.calendar.google.com&ctz=America%2FArgentina%2FBuenos_Aires" style="border:0" frameborder="0" scrolling="no"></iframe>
+      
+      <div class="calendar-custom">
+        <!-- Cabecera del calendario -->
+        <div class="calendar-header">
+          <button class="calendar-nav-btn interactive" id="calendar-prev">◀</button>
+          <span class="calendar-month-year" id="calendar-month-year">Julio 2026</span>
+          <button class="calendar-nav-btn interactive" id="calendar-next">▶</button>
+        </div>
+
+        <!-- Días de la semana -->
+        <div class="calendar-weekdays">
+          <span>LUN</span>
+          <span>MAR</span>
+          <span>MIÉ</span>
+          <span>JUE</span>
+          <span>VIE</span>
+          <span>SÁB</span>
+          <span>DOM</span>
+        </div>
+
+        <!-- Grid de días -->
+        <div class="calendar-grid" id="calendar-grid">
+          <!-- Se genera con JavaScript -->
+        </div>
       </div>
     </div>
   </section>

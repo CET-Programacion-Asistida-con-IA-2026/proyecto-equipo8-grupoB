@@ -1533,3 +1533,271 @@ document.addEventListener('click', e => {
 });
 
 console.log('🐰✿ JobQuest — Tu espacio cozy para crecer profesionalmente ✿🐰');
+
+// ================================================================
+// 20. CALENDARIO PERSONALIZADO
+// ================================================================
+
+const CALENDAR_KEY = 'jobquest_calendar_events';
+
+// Obtener eventos guardados
+function getCalendarEvents() {
+  try {
+    const data = localStorage.getItem(CALENDAR_KEY);
+    return data ? JSON.parse(data) : {};
+  } catch {
+    return {};
+  }
+}
+
+// Guardar eventos
+function saveCalendarEvents(events) {
+  localStorage.setItem(CALENDAR_KEY, JSON.stringify(events));
+}
+
+// Obtener eventos de una fecha específica (YYYY-MM-DD)
+function getEventsForDate(dateStr) {
+  const events = getCalendarEvents();
+  return events[dateStr] || [];
+}
+
+// Guardar eventos de una fecha específica
+function setEventsForDate(dateStr, eventList) {
+  const events = getCalendarEvents();
+  if (eventList.length === 0) {
+    delete events[dateStr];
+  } else {
+    events[dateStr] = eventList;
+  }
+  saveCalendarEvents(events);
+}
+
+// Agregar un evento a una fecha
+function addEventToDate(dateStr, eventText) {
+  const events = getEventsForDate(dateStr);
+  if (events.length >= 5) return false;
+  if (eventText.length > 22) eventText = eventText.substring(0, 22);
+  events.push(eventText);
+  setEventsForDate(dateStr, events);
+  return true;
+}
+
+// Eliminar un evento de una fecha
+function removeEventFromDate(dateStr, index) {
+  const events = getEventsForDate(dateStr);
+  events.splice(index, 1);
+  setEventsForDate(dateStr, events);
+}
+
+// Estado del calendario
+let calendarState = {
+  year: 2026,
+  month: 6, // Julio (0-indexed: 0=Ene, 6=Jul)
+};
+
+// Nombres de meses
+const monthNames = [
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+];
+
+// Días de la semana (Lunes=0, Domingo=6)
+function getFirstDayOfMonth(year, month) {
+  // 0 = Lunes, 1 = Martes, ..., 6 = Domingo
+  const day = new Date(year, month, 1).getDay();
+  return day === 0 ? 6 : day - 1;
+}
+
+function getDaysInMonth(year, month) {
+  return new Date(year, month + 1, 0).getDate();
+}
+
+function formatDate(year, month, day) {
+  const m = String(month + 1).padStart(2, '0');
+  const d = String(day).padStart(2, '0');
+  return `${year}-${m}-${d}`;
+}
+
+function renderCalendar() {
+  const grid = document.getElementById('calendar-grid');
+  if (!grid) return;
+
+  const { year, month } = calendarState;
+  const firstDay = getFirstDayOfMonth(year, month);
+  const daysInMonth = getDaysInMonth(year, month);
+
+  // Actualizar título
+  document.getElementById('calendar-month-year').textContent = `${monthNames[month]} ${year}`;
+
+  grid.innerHTML = '';
+
+  // Días vacíos antes del primer día
+  for (let i = 0; i < firstDay; i++) {
+    const empty = document.createElement('div');
+    empty.className = 'calendar-day empty';
+    grid.appendChild(empty);
+  }
+
+  // Días del mes
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateStr = formatDate(year, month, day);
+    const events = getEventsForDate(dateStr);
+    const hasEvents = events.length > 0;
+
+    const dayEl = document.createElement('div');
+    dayEl.className = `calendar-day${hasEvents ? ' has-events' : ''}`;
+    dayEl.dataset.date = dateStr;
+
+    // Número del día
+    const numEl = document.createElement('span');
+    numEl.className = 'day-number';
+    numEl.textContent = day;
+    dayEl.appendChild(numEl);
+
+    // Contenedor de eventos
+    const eventsContainer = document.createElement('div');
+    eventsContainer.className = 'day-events';
+
+    // Mostrar hasta 5 eventos; si hay más, mostrar la cantidad restante
+    const visibleEvents = events.slice(0, 5);
+    const hiddenCount = Math.max(0, events.length - 5);
+
+    visibleEvents.forEach((eventText, idx) => {
+      const eventEl = document.createElement('div');
+      eventEl.className = 'day-event';
+      eventEl.innerHTML = `
+        <span>📌 ${eventText}</span>
+        <button class="event-delete" data-index="${idx}" title="Eliminar">✕</button>
+      `;
+      eventEl.querySelector('.event-delete').addEventListener('click', (e) => {
+        e.stopPropagation();
+        const index = parseInt(e.target.dataset.index);
+        removeEventFromDate(dateStr, index);
+        renderCalendar();
+        playClick();
+      });
+      eventsContainer.appendChild(eventEl);
+    });
+
+    if (hiddenCount > 0) {
+      const moreEl = document.createElement('div');
+      moreEl.className = 'day-event';
+      moreEl.style.background = 'rgba(200,133,58,0.1)';
+      moreEl.textContent = `+${hiddenCount} más`;
+      eventsContainer.appendChild(moreEl);
+    }
+
+    dayEl.appendChild(eventsContainer);
+
+    // Botón para agregar evento (solo si no hay input activo)
+    const addBtn = document.createElement('button');
+    addBtn.className = 'day-add-btn interactive';
+    addBtn.textContent = '+';
+    addBtn.title = 'Agregar evento';
+    addBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (events.length >= 5) return;
+      // Cerrar otros inputs abiertos
+      document.querySelectorAll('.event-input-wrapper.active').forEach(el => {
+        el.classList.remove('active');
+      });
+      const wrapper = dayEl.querySelector('.event-input-wrapper');
+      if (wrapper) {
+        wrapper.classList.toggle('active');
+        const input = wrapper.querySelector('input');
+        if (input) {
+          input.focus();
+          input.value = '';
+        }
+      }
+    });
+    dayEl.appendChild(addBtn);
+
+    // Input para agregar evento (flotante)
+    const inputWrapper = document.createElement('div');
+    inputWrapper.className = 'event-input-wrapper';
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = 'Evento (máx 22)';
+    input.maxLength = 22;
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        confirmAdd();
+      }
+      if (e.key === 'Escape') {
+        inputWrapper.classList.remove('active');
+      }
+    });
+
+    const confirmBtn = document.createElement('button');
+    confirmBtn.className = 'event-confirm-btn';
+    confirmBtn.textContent = '➕';
+    confirmBtn.addEventListener('click', confirmAdd);
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'event-cancel-btn';
+    cancelBtn.textContent = '✕';
+    cancelBtn.addEventListener('click', () => {
+      inputWrapper.classList.remove('active');
+    });
+
+    function confirmAdd() {
+      const text = input.value.trim();
+      if (text && addEventToDate(dateStr, text)) {
+        renderCalendar();
+        playClick();
+      }
+      inputWrapper.classList.remove('active');
+    }
+
+    inputWrapper.appendChild(input);
+    inputWrapper.appendChild(confirmBtn);
+    inputWrapper.appendChild(cancelBtn);
+    dayEl.appendChild(inputWrapper);
+
+    grid.appendChild(dayEl);
+  }
+}
+
+// Navegación del calendario
+document.addEventListener('DOMContentLoaded', function() {
+  const prevBtn = document.getElementById('calendar-prev');
+  const nextBtn = document.getElementById('calendar-next');
+
+  if (prevBtn) {
+    prevBtn.addEventListener('click', () => {
+      calendarState.month--;
+      if (calendarState.month < 0) {
+        calendarState.month = 11;
+        calendarState.year--;
+      }
+      renderCalendar();
+      playClick();
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      calendarState.month++;
+      if (calendarState.month > 11) {
+        calendarState.month = 0;
+        calendarState.year++;
+      }
+      renderCalendar();
+      playClick();
+    });
+  }
+
+  // Inicializar calendario
+  renderCalendar();
+
+  // Cerrar inputs al hacer click fuera
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.calendar-day')) {
+      document.querySelectorAll('.event-input-wrapper.active').forEach(el => {
+        el.classList.remove('active');
+      });
+    }
+  });
+});
