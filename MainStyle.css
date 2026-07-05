@@ -1259,7 +1259,7 @@ a, button, .interactive {
   .postit { width: 160px; min-height: 140px; }
 }
 
-/* ── Confetitos cuando de cumple con una meta.── */
+/* ── Confetitos - metasz── */
 #confetti-container{ 
     position:fixed;
     top:0;
@@ -1274,7 +1274,7 @@ a, button, .interactive {
 .confetti{
     position:absolute;
     font-size:24px;
-    animation:fall 2s linear forwards;
+    animation:fall 4s linear forwards;
 }
 
 @keyframes fall{
@@ -1288,8 +1288,7 @@ a, button, .interactive {
     }
 }
 
-@keyframes fall{
-}
+
 
 /* ===== SECCIÓN SOBRE NOSOTRAS ===== */
 
