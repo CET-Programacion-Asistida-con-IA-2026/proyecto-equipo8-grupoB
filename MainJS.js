@@ -1,10 +1,3 @@
-/*
-╔══════════════════════════════════════════════════════════════════╗
-║                    TERRAJOB ✿ SCRIPT.JS                        ║
-║         Asistente Inteligente con Memoria y Contexto            ║
-║                    CON ICONOS PNG                               ║
-╚══════════════════════════════════════════════════════════════════╝
-*/
 
 // ================================================================
 // 1. AUDIO - EFECTOS DE SONIDO (OSCILADORES) + MÚSICA MP3
@@ -1466,21 +1459,16 @@ updateQuotes();
 setInterval(updateQuotes, 8000);
 
 // ================================================================
-// 17. PERFIL — AVATARES (10 opciones)
+// 17. PERFIL — AVATARES (5 opciones: perro, gato, pato, abeja, carpincho)
 // ================================================================
 const avatarFiles = [
-  'avatar-bunny.png',
-  'avatar-cat.png',
-  'avatar-fox.png',
-  'avatar-panda.png',
-  'avatar-koala.png',
-  'avatar-raccoon.png',
-  'avatar-cow.png',
-  'avatar-pig.png',
-  'avatar-octopus.png',
-  'avatar-butterfly.png'
+  'avatar-perro.png',    // Perro (default)
+  'avatar-gato.png',     // Gato
+  'avatar-pato.png',     // Pato
+  'avatar-abeja.png',    // Abeja
+  'avatar-carpincho.png' // Carpincho
 ];
-let currentAvatar = avatarFiles[0];
+let currentAvatar = avatarFiles[0]; // Perro como default
 
 function renderAvatarOptions() {
   const container = document.getElementById('avatar-options');
@@ -1523,6 +1511,7 @@ function loadProfile() {
           el.classList.toggle('active', img && img.src.includes(data.avatar));
         });
       } else {
+        // Default: perro (primer avatar)
         currentAvatar = avatarFiles[0];
         document.getElementById('avatar-img').src = avatarFiles[0];
         document.querySelectorAll('.avatar-option').forEach((el, idx) => {
@@ -1535,6 +1524,7 @@ function loadProfile() {
       }
     } catch(e) {}
   } else {
+    // Default: perro
     currentAvatar = avatarFiles[0];
     document.getElementById('avatar-img').src = avatarFiles[0];
     document.querySelectorAll('.avatar-option').forEach((el, idx) => {
@@ -1543,31 +1533,6 @@ function loadProfile() {
   }
 }
 loadProfile();
-
-document.getElementById('perfil-save-btn').addEventListener('click', () => {
-  const data = {
-    nombre: document.getElementById('perfil-nombre').value,
-    preferencias: document.getElementById('perfil-preferencias').value,
-    habilidades: document.getElementById('perfil-habilidades').value,
-    tecnologias: document.getElementById('perfil-tecnologias').value,
-    avatar: currentAvatar,
-    cvName: document.getElementById('perfil-cv-name').textContent,
-  };
-  localStorage.setItem('terrajob_profile', JSON.stringify(data));
-  const msg = document.getElementById('perfil-save-msg');
-  msg.textContent = '✅ ¡Ficha guardada!';
-  playClick();
-  setTimeout(() => { msg.textContent = ''; }, 3000);
-});
-
-document.getElementById('perfil-cv').addEventListener('change', function(e) {
-  const file = this.files[0];
-  if (file) {
-    document.getElementById('perfil-cv-name').textContent = file.name;
-    playClick();
-  }
-});
-
 // ================================================================
 // 18. LOGIN
 // ================================================================
@@ -1930,3 +1895,4 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 });
+
