@@ -1,125 +1,217 @@
 /*
 ╔══════════════════════════════════════════════════════════════════╗
-║                    GUMMY ✿ SCRIPT.JS                            ║
+║                    TERRAJOB ✿ SCRIPT.JS                        ║
 ║         Asistente Inteligente con Memoria y Contexto            ║
 ║                    CON ICONOS PNG                               ║
 ╚══════════════════════════════════════════════════════════════════╝
 */
 
 // ================================================================
-// 1. AUDIO
+// 1. AUDIO 
 // ================================================================
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
 let sfxEnabled = true;
 let musicEnabled = true;
 let currentTrack = 0;
-let musicGain = null;
-let musicLoopActive = false;
+let audioElement = null;
+let isAudioPlaying = false;
 
 function getAudioCtx() {
   if (!audioCtx) audioCtx = new AudioCtx();
   return audioCtx;
 }
-
-function playClick() {
-  if (!sfxEnabled) return;
-  try {
-    const ctx = getAudioCtx();
-    const o = ctx.createOscillator();
-    const g = ctx.createGain();
-    o.connect(g);
-    g.connect(ctx.destination);
-    o.frequency.setValueAtTime(880, ctx.currentTime);
-    o.frequency.exponentialRampToValueAtTime(1320, ctx.currentTime + 0.08);
-    g.gain.setValueAtTime(0.18, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
-    o.start();
-    o.stop(ctx.currentTime + 0.2);
-  } catch(e) {}
-}
-
-function playType() {
-  if (!sfxEnabled) return;
-  try {
-    const ctx = getAudioCtx();
-    const o = ctx.createOscillator();
-    const g = ctx.createGain();
-    o.connect(g);
-    g.connect(ctx.destination);
-    const freqs = [440, 523, 587, 659, 784, 880];
-    o.frequency.setValueAtTime(freqs[Math.floor(Math.random() * freqs.length)], ctx.currentTime);
-    g.gain.setValueAtTime(0.06, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
-    o.start();
-    o.stop(ctx.currentTime + 0.08);
-  } catch(e) {}
-}
-
+   
 // ================================================================
-// 2. MÚSICA
+// 2. MÚSICA CON MP3 LOCALES
 // ================================================================
-function stopMusic() {
-  musicLoopActive = false;
-  if (musicGain) {
-    try {
-      const ctx = getAudioCtx();
-      musicGain.gain.setTargetAtTime(0, ctx.currentTime, 0.2);
+
+// Configuración de tracks con archivos MP3 locales
+const MP3_TRACKS = {
+  0: {
+    name: 'Café Cozy',
+    file: 'track-cozy.mp3',
+    volume: 0.3
+  },
+  1: {
+    name: 'Lluvia & Jazz',
+    file: 'track-rainy.mp3',
+    volume: 0.25
+  },
+  2: {
+    name: 'Otoño Suave',
+    file: 'track-autumn.mp3',
+    volume: 0.3
+  }
+};
+
+// Crear y configurar el elemento de audio
+function createAudioElement(trackIndex) {
+  const track = MP3_TRACKS[trackIndex];
+  if (!track) return null;
+  
+  // Si ya existe un elemento, limpiarlo
+  if (audioElement) {
+    audioElement.pause();
+    audioElement.src = '';
+    audioElement = null;
+  }
+  
+  // Crear nuevo elemento de audio
+  audioElement = new Audio();
+  audioElement.src = track.file;
+  audioElement.loop = true;
+  audioElement.volume = track.volume;
+  audioElement.preload = 'auto';
+  
+  // Manejar errores de carga
+  audioElement.addEventListener('error', function(e) {
+    console.error('Error cargando el archivo MP3:', track.file, e);
+    // Intentar cargar el siguiente track o mostrar mensaje
+    const msg = document.getElementById('motivational-quote');
+    if (msg) {
+      msg.textContent = '🎵 No pude cargar la música. ¿Está el archivo ' + track.file + ' en la carpeta?';
       setTimeout(() => {
-        try { musicGain.disconnect(); } catch(e) {}
-        musicGain = null;
-      }, 400);
-    } catch(e) { musicGain = null; }
+        msg.textContent = '"Cada pequeño paso cuenta. ¡Hoy es un buen día para empezar! 🌱"';
+      }, 5000);
+    }
+  });
+  
+  // Cuando el audio está listo para reproducirse
+  audioElement.addEventListener('canplaythrough', function() {
+    console.log('✅ Música lista:', track.file);
+  });
+  
+  return audioElement;
+}
+
+// Función para reproducir música
+function playMP3Track(trackIndex) {
+  // Si es el track -1 (sin música), detener todo
+  if (trackIndex === -1) {
+    stopMusic();
+    return;
+  }
+  
+  const track = MP3_TRACKS[trackIndex];
+  if (!track) {
+    console.error('Track no encontrado:', trackIndex);
+    return;
+  }
+  
+  try {
+    // Crear o actualizar el elemento de audio
+    if (!audioElement || audioElement.src !== track.file) {
+      createAudioElement(trackIndex);
+    }
+    
+    if (audioElement) {
+      // Forzar la recarga si el archivo cambió
+      if (audioElement.src !== track.file) {
+        audioElement.src = track.file;
+        audioElement.load();
+      }
+      
+      // Reproducir con manejo de promesas
+      const playPromise = audioElement.play();
+      
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            isAudioPlaying = true;
+            console.log('▶️ Reproduciendo:', track.name);
+          })
+          .catch(error => {
+            // Autoplay bloqueado por el navegador
+            console.log('⏸️ Autoplay bloqueado, esperando interacción:', error);
+            isAudioPlaying = false;
+            
+            // Mostrar mensaje al usuario
+            const msg = document.getElementById('motivational-quote');
+            if (msg) {
+              msg.textContent = '🎵 Haz clic en la página para activar la música';
+              setTimeout(() => {
+                msg.textContent = '"Cada pequeño paso cuenta. ¡Hoy es un buen día para empezar! 🌱"';
+              }, 4000);
+            }
+          });
+      }
+    }
+  } catch (e) {
+    console.error('Error reproduciendo audio:', e);
   }
 }
 
+// Función para detener música
+function stopMusic() {
+  if (audioElement) {
+    try {
+      audioElement.pause();
+      audioElement.currentTime = 0;
+      isAudioPlaying = false;
+      console.log('⏹️ Música detenida');
+    } catch (e) {
+      console.error('Error deteniendo audio:', e);
+    }
+  }
+}
+
+// Función para pausar música
+function pauseMusic() {
+  if (audioElement && isAudioPlaying) {
+    try {
+      audioElement.pause();
+      isAudioPlaying = false;
+      console.log('⏸️ Música pausada');
+    } catch (e) {
+      console.error('Error pausando audio:', e);
+    }
+  }
+}
+
+// Función para reanudar música
+function resumeMusic() {
+  if (audioElement && !isAudioPlaying) {
+    try {
+      const playPromise = audioElement.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            isAudioPlaying = true;
+            console.log('▶️ Música reanudada');
+          })
+          .catch(error => {
+            console.log('⏸️ No se pudo reanudar:', error);
+          });
+      }
+    } catch (e) {
+      console.error('Error reanudando audio:', e);
+    }
+  }
+}
+
+// Función principal para cambiar música
 function playCozyBg() {
-  if (!musicEnabled || currentTrack === -1) return;
-  stopMusic();
-  try {
-    const ctx = getAudioCtx();
-    const myToken = Symbol();
-    musicLoopActive = myToken;
-    const newGain = ctx.createGain();
-    newGain.gain.value = 0;
-    newGain.connect(ctx.destination);
-    newGain.gain.linearRampToValueAtTime(0.08, ctx.currentTime + 0.4);
-    musicGain = newGain;
-
-    const trackNotes = [
-      [261, 294, 329, 349, 392, 440, 494],
-      [220, 261, 294, 329, 392],
-      [196, 220, 261, 294, 329],
-    ];
-    const notes = trackNotes[currentTrack] || trackNotes[0];
-    let time = ctx.currentTime + 0.1;
-
-    const scheduleNote = () => {
-      if (musicLoopActive !== myToken) return;
-      const o = ctx.createOscillator();
-      const g2 = ctx.createGain();
-      o.type = currentTrack === 1 ? 'triangle' : 'sine';
-      o.connect(g2);
-      g2.connect(newGain);
-      const note = notes[Math.floor(Math.random() * notes.length)];
-      o.frequency.setValueAtTime(note, time);
-      const dur = 0.5 + Math.random() * 0.7;
-      g2.gain.setValueAtTime(0, time);
-      g2.gain.linearRampToValueAtTime(0.18, time + 0.04);
-      g2.gain.setTargetAtTime(0, time + dur - 0.12, 0.06);
-      o.start(time);
-      o.stop(time + dur + 0.1);
-      time += dur * 0.55;
-      const delay = Math.max(0, (time - ctx.currentTime) * 1000 - 150);
-      setTimeout(scheduleNote, delay);
-    };
-    scheduleNote();
-  } catch(e) {}
+  if (!musicEnabled || currentTrack === -1) {
+    stopMusic();
+    return;
+  }
+  
+  // Verificar que el archivo existe
+  const track = MP3_TRACKS[currentTrack];
+  if (!track) {
+    console.error('Track no configurado:', currentTrack);
+    return;
+  }
+  
+  playMP3Track(currentTrack);
 }
 
 // ================================================================
-// 3. CONTROLES DE AUDIO CON ICONOS PNG
+// 3. CONTROLES DE AUDIO 
 // ================================================================
+
+// Botón de efectos de sonido
 document.getElementById('sfx-btn').addEventListener('click', () => {
   sfxEnabled = !sfxEnabled;
   const icon = document.getElementById('sfx-icon');
@@ -127,6 +219,7 @@ document.getElementById('sfx-btn').addEventListener('click', () => {
   document.getElementById('sfx-btn').classList.toggle('muted', !sfxEnabled);
 });
 
+// Botón de música
 const musicBtn = document.getElementById('music-btn');
 const trackSelector = document.getElementById('track-selector');
 
@@ -135,6 +228,7 @@ musicBtn.addEventListener('click', (e) => {
   trackSelector.classList.toggle('open');
 });
 
+// Botones de selección de tracks
 document.querySelectorAll('.track-btn').forEach(btn => {
   btn.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -143,10 +237,12 @@ document.querySelectorAll('.track-btn').forEach(btn => {
     btn.classList.add('active');
     trackSelector.classList.remove('open');
 
+    // Detener música actual
+    stopMusic();
+    
     if (track === -1) {
       currentTrack = -1;
       musicEnabled = false;
-      stopMusic();
       musicBtn.classList.add('muted');
       document.getElementById('music-icon').src = 'icon-music-muted.png';
     } else {
@@ -155,14 +251,27 @@ document.querySelectorAll('.track-btn').forEach(btn => {
       musicBtn.classList.remove('muted');
       document.getElementById('music-icon').src = 'icon-music.png';
       window._musicStarted = true;
+      // Reproducir la nueva música
       playCozyBg();
     }
     playClick();
   });
 });
 
+// Cerrar selector al hacer clic fuera
 document.addEventListener('click', () => trackSelector.classList.remove('open'));
+
+// Efecto de tecleo
 document.addEventListener('keydown', () => playType());
+
+// Manejar la reproducción automática al cargar
+document.addEventListener('click', function initAudio() {
+  if (musicEnabled && currentTrack !== -1 && !isAudioPlaying) {
+    playCozyBg();
+  }
+  // Remover el listener después del primer clic
+  document.removeEventListener('click', initAudio);
+}, { once: true });
 
 // ================================================================
 // 4. ROTACIÓN DE FONDOS
@@ -408,7 +517,7 @@ let userMemory = {
 };
 
 function loadMemory() {
-  const saved = localStorage.getItem('gummy_memory');
+  const saved = localStorage.getItem('terrajob_memory');
   if (saved) {
     try {
       const data = JSON.parse(saved);
@@ -420,7 +529,7 @@ loadMemory();
 
 function saveMemory() {
   try {
-    localStorage.setItem('gummy_memory', JSON.stringify(userMemory));
+    localStorage.setItem('terrajob_memory', JSON.stringify(userMemory));
   } catch(e) {}
 }
 
@@ -750,26 +859,24 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 
 // ================================================================
-// 12. PLANTAS — VERSIÓN PNG (CORREGIDA: MÁS GRANDES Y ELEVADAS)
+// 12. PLANTAS — VERSIÓN PNG
 // ================================================================
-const STAGE_THRESHOLDS = [0, 25, 50, 75];          // 4 fases (1-4)
-const PLANT_NAMES = ['Rose', 'Daisy', 'Lily'];     // Nombres de las plantas
+const STAGE_THRESHOLDS = [0, 25, 50, 75];
+const PLANT_NAMES = ['Rose', 'Daisy', 'Lily'];
 
 function getStage(pct) {
   let stage = 0;
   for (let i = STAGE_THRESHOLDS.length - 1; i >= 0; i--) {
     if (pct >= STAGE_THRESHOLDS[i]) { stage = i; break; }
   }
-  return stage;  // 0, 1, 2 o 3
+  return stage;
 }
 
 function plantImageHTML(plantName, stage) {
   const stageNum = stage + 1;
   return `
     <div style="position:relative; width:64px; height:120px; display:flex; align-items:flex-end; justify-content:center;">
-      <!-- Maceta (abajo) -->
       <img src="Pot.png" style="position:absolute; bottom:0; left:0; width:100%; height:auto; object-fit:contain; z-index:1;" alt="Maceta">
-      <!-- Planta (más arriba y a la izquierda) -->
       <img src="${plantName}${stageNum}.png" style="position:absolute; bottom:45px; left:40%; transform:translateX(-40%); width:90%; height:auto; object-fit:contain; z-index:2;" alt="${plantName} fase ${stageNum}">
     </div>
   `;
@@ -1146,20 +1253,20 @@ renderPostits();
 // ================================================================
 // 15. METAS
 // ================================================================
-  let dailyMetas = JSON.parse(localStorage.getItem('dailyMetas')) || [
+  let dailyMetas = JSON.parse(localStorage.getItem('terrajob_daily_metas')) || [
     { text: 'Aplicar a 3 empleos', done: false },
     { text: 'Actualizar CV', done: false },
     { text: 'Mejorar portfolio', done: false },
   ];
 
-  let weeklyMetas = JSON.parse(localStorage.getItem('weeklyMetas')) || [
+  let weeklyMetas = JSON.parse(localStorage.getItem('terrajob_weekly_metas')) || [
     { text: 'Conectar con 5 reclutadores', done: false, fechaLimite: '' },
     { text: 'Completar un curso corto', done: false, fechaLimite: '' },
   ];
 
   function saveMetas() {
-    localStorage.setItem('dailyMetas', JSON.stringify(dailyMetas));
-    localStorage.setItem('weeklyMetas', JSON.stringify(weeklyMetas));
+    localStorage.setItem('terrajob_daily_metas', JSON.stringify(dailyMetas));
+    localStorage.setItem('terrajob_weekly_metas', JSON.stringify(weeklyMetas));
   }
 
   function renderMetas() {
@@ -1330,14 +1437,19 @@ updateQuotes();
 setInterval(updateQuotes, 8000);
 
 // ================================================================
-// 17. PERFIL — AVATARES (5 opciones: cat, dog, capy, bee, duck)
+// 17. PERFIL — AVATARES (10 opciones)
 // ================================================================
 const avatarFiles = [
+  'avatar-bunny.png',
   'avatar-cat.png',
-  'avatar-dog.png',
-  'avatar-capy.png',
-  'avatar-bee.png',
-  'avatar-duck.png'
+  'avatar-fox.png',
+  'avatar-panda.png',
+  'avatar-koala.png',
+  'avatar-raccoon.png',
+  'avatar-cow.png',
+  'avatar-pig.png',
+  'avatar-octopus.png',
+  'avatar-butterfly.png'
 ];
 let currentAvatar = avatarFiles[0];
 
@@ -1357,7 +1469,7 @@ function renderAvatarOptions() {
       document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('active'));
       this.classList.add('active');
       playClick();
-      localStorage.setItem('jobquest_avatar', file);
+      localStorage.setItem('terrajob_avatar', file);
     });
     container.appendChild(div);
   });
@@ -1365,7 +1477,7 @@ function renderAvatarOptions() {
 renderAvatarOptions();
 
 function loadProfile() {
-  const saved = localStorage.getItem('jobquest_profile');
+  const saved = localStorage.getItem('terrajob_profile');
   if (saved) {
     try {
       const data = JSON.parse(saved);
@@ -1412,7 +1524,7 @@ document.getElementById('perfil-save-btn').addEventListener('click', () => {
     avatar: currentAvatar,
     cvName: document.getElementById('perfil-cv-name').textContent,
   };
-  localStorage.setItem('jobquest_profile', JSON.stringify(data));
+  localStorage.setItem('terrajob_profile', JSON.stringify(data));
   const msg = document.getElementById('perfil-save-msg');
   msg.textContent = '✅ ¡Ficha guardada!';
   playClick();
@@ -1443,7 +1555,7 @@ loginTabs.forEach(tab => {
   });
 });
 
-const sessionUser = localStorage.getItem('jobquest_user');
+const sessionUser = localStorage.getItem('terrajob_user');
 if (sessionUser) {
   loginScreen.classList.add('hidden');
   document.querySelector('.greeting-line #typed-greeting').textContent = `¡Hola, ${sessionUser}! ✨`;
@@ -1460,8 +1572,8 @@ document.getElementById('tab-ingresar').addEventListener('submit', (e) => {
     return;
   }
 
-  const savedUser = localStorage.getItem('jobquest_user');
-  const savedPass = localStorage.getItem('jobquest_pass');
+  const savedUser = localStorage.getItem('terrajob_user');
+  const savedPass = localStorage.getItem('terrajob_pass');
 
   if (savedUser === user && savedPass === pass) {
     error.textContent = '';
@@ -1487,14 +1599,14 @@ document.getElementById('tab-registrarme').addEventListener('submit', (e) => {
     return;
   }
 
-  if (localStorage.getItem('jobquest_user')) {
+  if (localStorage.getItem('terrajob_user')) {
     error.textContent = '❌ Ya existe un usuario registrado. Ingresá directamente.';
     return;
   }
 
-  localStorage.setItem('jobquest_user', user);
-  localStorage.setItem('jobquest_pass', pass);
-  localStorage.setItem('jobquest_name', name);
+  localStorage.setItem('terrajob_user', user);
+  localStorage.setItem('terrajob_pass', pass);
+  localStorage.setItem('terrajob_name', name);
   error.textContent = '✅ ¡Cuenta creada! Ahora ingresá.';
   playClick();
 });
@@ -1532,13 +1644,13 @@ document.addEventListener('click', e => {
   }
 });
 
-console.log('🐰✿ JobQuest — Tu espacio cozy para crecer profesionalmente ✿🐰');
+console.log('🐰✿ TerraJob — Tu espacio cozy para crecer profesionalmente ✿🐰');
 
 // ================================================================
 // 20. CALENDARIO PERSONALIZADO
 // ================================================================
 
-const CALENDAR_KEY = 'jobquest_calendar_events';
+const CALENDAR_KEY = 'terrajob_calendar_events';
 
 // Obtener eventos guardados
 function getCalendarEvents() {
@@ -1603,7 +1715,6 @@ const monthNames = [
 
 // Días de la semana (Lunes=0, Domingo=6)
 function getFirstDayOfMonth(year, month) {
-  // 0 = Lunes, 1 = Martes, ..., 6 = Domingo
   const day = new Date(year, month, 1).getDay();
   return day === 0 ? 6 : day - 1;
 }
@@ -1626,19 +1737,16 @@ function renderCalendar() {
   const firstDay = getFirstDayOfMonth(year, month);
   const daysInMonth = getDaysInMonth(year, month);
 
-  // Actualizar título
   document.getElementById('calendar-month-year').textContent = `${monthNames[month]} ${year}`;
 
   grid.innerHTML = '';
 
-  // Días vacíos antes del primer día
   for (let i = 0; i < firstDay; i++) {
     const empty = document.createElement('div');
     empty.className = 'calendar-day empty';
     grid.appendChild(empty);
   }
 
-  // Días del mes
   for (let day = 1; day <= daysInMonth; day++) {
     const dateStr = formatDate(year, month, day);
     const events = getEventsForDate(dateStr);
@@ -1648,17 +1756,14 @@ function renderCalendar() {
     dayEl.className = `calendar-day${hasEvents ? ' has-events' : ''}`;
     dayEl.dataset.date = dateStr;
 
-    // Número del día
     const numEl = document.createElement('span');
     numEl.className = 'day-number';
     numEl.textContent = day;
     dayEl.appendChild(numEl);
 
-    // Contenedor de eventos
     const eventsContainer = document.createElement('div');
     eventsContainer.className = 'day-events';
 
-    // Mostrar hasta 5 eventos; si hay más, mostrar la cantidad restante
     const visibleEvents = events.slice(0, 5);
     const hiddenCount = Math.max(0, events.length - 5);
 
@@ -1689,7 +1794,6 @@ function renderCalendar() {
 
     dayEl.appendChild(eventsContainer);
 
-    // Botón para agregar evento (solo si no hay input activo)
     const addBtn = document.createElement('button');
     addBtn.className = 'day-add-btn interactive';
     addBtn.textContent = '+';
@@ -1697,7 +1801,6 @@ function renderCalendar() {
     addBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       if (events.length >= 5) return;
-      // Cerrar otros inputs abiertos
       document.querySelectorAll('.event-input-wrapper.active').forEach(el => {
         el.classList.remove('active');
       });
@@ -1713,7 +1816,6 @@ function renderCalendar() {
     });
     dayEl.appendChild(addBtn);
 
-    // Input para agregar evento (flotante)
     const inputWrapper = document.createElement('div');
     inputWrapper.className = 'event-input-wrapper';
 
@@ -1789,10 +1891,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Inicializar calendario
   renderCalendar();
 
-  // Cerrar inputs al hacer click fuera
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.calendar-day')) {
       document.querySelectorAll('.event-input-wrapper.active').forEach(el => {
