@@ -14,7 +14,7 @@ function getAudioCtx() {
   if (!audioCtx) audioCtx = new AudioCtx();
   return audioCtx;
 }
-
+   
 // ================================================================
 // 1.1 EFECTOS DE SONIDO (SIEMPRE CON OSCILADORES)
 // ================================================================
@@ -318,10 +318,9 @@ revealEls.forEach(el => observer.observe(el));
 // 6. SALUDO ANIMADO
 // ================================================================
 const greetings = [
-  '¡Hola, explorador! 👋',
-  '¡Hola, soñador! ✨',
-  '¡Bienvenido de vuelta! 🌿',
-  '¡Hola, campeón! 🏆',
+  '👋',
+  '💛',
+  '🏆',
 ];
 const greet = greetings[Math.floor(Math.random() * greetings.length)];
 const typedEl = document.getElementById('typed-greeting');
@@ -666,7 +665,7 @@ function generateResponse(userText, emotion, info) {
   // ================================================================
   // 3. EMOCIONES NEGATIVAS
   // ================================================================
-  if (emotion === 'triste') {
+  if (emotion === 'triste' || emotion === 'mato' || emotion === 'angustiado') {
     const respuestas = [
       `Escucharte me duele el corazón 🐰💛 ${userMemory.nombre ? userMemory.nombre + ', ' : ''}no estás sola. Lo que sentís es válido y merece ser escuchado. ¿Querés contarme qué está pasando? Estoy aquí para escucharte sin juzgar.`,
       `Siento mucho que estés pasando por esto 🐰🌿 ${userMemory.nombre ? userMemory.nombre + ', ' : ''}a veces las cosas se ponen difíciles, pero quiero que sepas que este momento no define quién sos. ¿Qué te tiene así?`,
@@ -695,7 +694,34 @@ function generateResponse(userText, emotion, info) {
   }
 
   // ================================================================
-  // 5. TEMAS LABORALES (incluye "cv" como sinónimo de currículum)
+  // 5. CV / CURRÍCULUM (detecta "cv", "curriculum", "currículum")
+  // ================================================================
+ if (lower.match(/(^|\s)cv(\s|$|\.)|curr[íi]culum|curriculum|currículum|hoja de vida|resume/i)) {
+  const nombre = userMemory.nombre ? userMemory.nombre + ', ' : '';
+  const habilidades = userMemory.habilidades.length > 0 ? `Según tus habilidades (${userMemory.habilidades.join(', ')}), ` : '';
+  
+  return `¡Excelente pregunta! Tu CV es tu carta de presentación más importante 📄🐰 ${nombre}
+  
+Te comparto una guía completa para que tu CV brille:
+
+📌 **Estructura recomendada:**
+1️⃣ Datos de contacto (mail, teléfono, LinkedIn, ciudad)
+2️⃣ Resumen profesional (3-4 líneas que cuenten quién sos y qué buscás)
+3️⃣ Experiencia laboral (con logros CUANTIFICABLES, no solo tareas)
+4️⃣ Educación y cursos relevantes
+5️⃣ Habilidades técnicas y blandas
+
+💡 **Tips clave:**
+• Usá números: "aumenté ventas un 30%", "gestioné equipo de 5 personas"
+• Adaptá el CV a cada oferta (no mandes el mismo a todas)
+• Mantenelo en 1-2 páginas como máximo
+• Revisá ortografía y formato (¡que sea legible!)
+
+${habilidades}¿Querés que profundice en alguna sección en particular o te ayudo a armar un resumen profesional? 🐰✨`;
+}
+
+  // ================================================================
+  // 6. TEMAS LABORALES (incluye "cv" como sinónimo de currículum)
   // ================================================================
   if (lower.match(/trabajo|empleo|buscar|conseguir|postular|aplicar|laburo/)) {
     if (userMemory.habilidades.length > 0 || userMemory.profesion) {
@@ -704,13 +730,7 @@ function generateResponse(userText, emotion, info) {
     }
     return `Buscar trabajo es un viaje importante 🐰🌿 ¿En qué área te gustaría trabajar? Contame sobre tus habilidades y experiencias, así puedo ayudarte mejor a encontrar el camino adecuado.`;
   }
-
-  // ================================================================
-  // 6. CV / CURRÍCULUM (detecta "cv", "curriculum", "currículum")
-  // ================================================================
-  if (lower.match(/cv\b|curr[íi]culum|curriculum|currículum/)) {
-    return `Tu CV es tu carta de presentación 📄🐰 ${userMemory.nombre ? userMemory.nombre + ', ' : ''}recordá incluir: datos de contacto, un resumen profesional que refleje quién sos, experiencia con logros concretos (no solo tareas), educación y habilidades relevantes. Si querés, puedo darte tips más específicos según tu área.`;
-  }
+   
 
   // ================================================================
   // 7. ENTREVISTAS

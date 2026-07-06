@@ -260,7 +260,7 @@ a, button, .interactive {
   background-position: top right;
   background-size: 80px auto;
 }
-
+  
 /* ── BIENVENIDA ── */
 .welcome-card { text-align: center; padding: 48px 40px; }
 .title-logo-row { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 8px; }
@@ -1612,4 +1612,318 @@ a, button, .interactive {
   .card { padding: 16px 14px; border-radius: 20px; }
   .top-navbar a { font-size: 0.7rem; padding: 4px 8px; }
   .top-navbar { gap: 2px; padding: 6px 8px; }
+}
+
+/* ── EFECTO DE RAYO DE LUZ DIAGONAL (ARRIBA-DERECHA → CENTRO) ── */
+.light-ray {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+  overflow: visible;
+}
+
+/* ── EFECTO DE RAYO DE LUZ DIAGONAL (MÁS A LA DERECHA) ── */
+.light-ray {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+  overflow: visible;
+}
+
+/* RAYO PRINCIPAL - Diagonal desde arriba-derecha hacia centro (más a la derecha) */
+.ray-beam {
+  position: absolute;
+  top: -30%;
+  right: -30%;     /* <-- CAMBIADO: antes -20%, ahora -10% (más a la derecha) */
+  width: 100%;     /* <-- CAMBIADO: antes 120%, ahora 100% (más angosto) */
+  height: 200%;
+  background: linear-gradient(
+    145deg,
+    transparent 10%,
+    rgba(255, 240, 180, 0.35) 20%,
+    rgba(255, 230, 120, 0.65) 30%,
+    rgba(255, 255, 220, 0.90) 38%,
+    rgba(255, 240, 150, 0.75) 45%,
+    rgba(255, 220, 100, 0.55) 52%,
+    rgba(255, 200, 80, 0.30) 60%,
+    transparent 75%
+  );
+  transform: rotate(-35deg) translateX(30px);  /* <-- AÑADIDO: desplazado a la derecha */
+  animation: rayMove 8s ease-in-out infinite alternate;
+  filter: blur(10px);
+}
+
+/* SEGUNDO RAYO - Más suave y envolvente (más a la derecha) */
+.ray-beam-soft {
+  position: absolute;
+  top: -25%;
+  right: -30%;      /* <-- CAMBIADO: antes -15%, ahora -5% */
+  width: 120%;     /* <-- CAMBIADO: antes 140%, ahora 120% */
+  height: 220%;
+  background: linear-gradient(
+    145deg,
+    transparent 15%,
+    rgba(255, 240, 180, 0.20) 25%,
+    rgba(255, 230, 150, 0.40) 35%,
+    rgba(255, 250, 200, 0.55) 42%,
+    rgba(255, 230, 150, 0.35) 50%,
+    transparent 70%
+  );
+  transform: rotate(-32deg) translateX(25px);  /* <-- AÑADIDO: desplazado a la derecha */
+  animation: rayMove 10s ease-in-out infinite alternate;
+  animation-delay: 1s;
+  filter: blur(30px);
+}
+
+/* TERCER RAYO - Brillo central intenso (más a la derecha) */
+.ray-beam-glow {
+  position: absolute;
+  top: -28%;
+  right: -30%;       /* <-- CAMBIADO: antes -10%, ahora 0% */
+  width: 80%;      /* <-- CAMBIADO: antes 100%, ahora 80% */
+  height: 180%;
+  background: linear-gradient(
+    145deg,
+    transparent 20%,
+    rgba(255, 255, 240, 0.10) 28%,
+    rgba(255, 255, 200, 0.35) 35%,
+    rgba(255, 255, 255, 0.60) 40%,
+    rgba(255, 255, 200, 0.35) 45%,
+    rgba(255, 240, 180, 0.15) 52%,
+    transparent 65%
+  );
+  transform: rotate(-35deg) translateX(35px);  /* <-- AÑADIDO: desplazado a la derecha */
+  animation: rayMove 7s ease-in-out infinite alternate;
+  animation-delay: 0.5s;
+  filter: blur(5px);
+}
+
+@keyframes rayMove {
+  0% {
+    transform: rotate(-32deg) translateX(20px) translateY(-10px);
+    opacity: 0.1;
+  }
+  50% {
+    transform: rotate(-38deg) translateX(10px) translateY(15px);
+    opacity: 0.3;
+  }
+  100% {
+    transform: rotate(-35deg) translateX(30px) translateY(8px);
+    opacity: 0.15;
+  }
+}
+   
+/* RESPLANDOR AMBIENTAL - Luz cálida desde arriba-derecha (más a la derecha) */
+.ambient-glow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9998;
+  background: radial-gradient(
+    ellipse at 90% 15%,    /* <-- CAMBIADO: antes 80%, ahora 90% */
+    rgba(255, 220, 150, 0.12) 0%,
+    rgba(255, 200, 100, 0.06) 25%,
+    rgba(255, 180, 80, 0.02) 50%,
+    transparent 100%
+  );
+  animation: ambientPulse 6s ease-in-out infinite alternate;
+}
+
+@keyframes ambientPulse {
+  0% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+
+/* PARTÍCULAS DE LUZ - Flotando en diagonal (más a la derecha) */
+.light-particles-ray {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9998;
+  overflow: visible;
+}
+
+.light-particle-ray {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: radial-gradient(circle, rgba(255, 255, 220, 0.9), rgba(255, 220, 100, 0.2));
+  border-radius: 50%;
+  box-shadow: 0 0 30px rgba(255, 200, 80, 0.4), 0 0 60px rgba(255, 200, 80, 0.15);
+  animation: particleFloat 12s linear infinite;
+}
+
+.light-particle-ray:nth-child(1) { right: 5%; top: 5%; animation-delay: 0s; width: 10px; height: 10px; }
+.light-particle-ray:nth-child(2) { right: 20%; top: 20%; animation-delay: 1.5s; width: 6px; height: 6px; }
+.light-particle-ray:nth-child(3) { right: 35%; top: 40%; animation-delay: 3s; width: 12px; height: 12px; }
+.light-particle-ray:nth-child(4) { right: 10%; top: 55%; animation-delay: 0.8s; width: 5px; height: 5px; }
+.light-particle-ray:nth-child(5) { right: 25%; top: 10%; animation-delay: 2.2s; width: 8px; height: 8px; }
+.light-particle-ray:nth-child(6) { right: 45%; top: 35%; animation-delay: 4s; width: 7px; height: 7px; }
+.light-particle-ray:nth-child(7) { right: 15%; top: 45%; animation-delay: 1.8s; width: 6px; height: 6px; }
+.light-particle-ray:nth-child(8) { right: 30%; top: 65%; animation-delay: 3.5s; width: 11px; height: 11px; }
+.light-particle-ray:nth-child(9) { right: 40%; top: 15%; animation-delay: 0.5s; width: 5px; height: 5px; }
+.light-particle-ray:nth-child(10) { right: 50%; top: 50%; animation-delay: 2.8s; width: 9px; height: 9px; }
+
+@keyframes particleFloat {
+  0% {
+    transform: translate(0, 0) scale(0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+    transform: translate(-40px, 50px) scale(1) rotate(45deg);
+  }
+  50% {
+    transform: translate(-100px, 150px) scale(1.8) rotate(180deg);
+    opacity: 0.9;
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translate(-180px, 280px) scale(0) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* ── IMAGEN ARRIBA IZQUIERDA (debajo del navbar) ── */
+.top-left-image {
+  position: fixed;
+  top: 60px;
+  left: 120px;
+  z-index: 10005;
+  pointer-events: none;
+  opacity: 0;
+  animation: fadeInImage 0.8s ease 2s forwards;
+  transform-origin: top center;
+  will-change: transform;
+}
+
+.top-left-image img {
+  width: 185px;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 4px 16px rgba(200, 133, 58, 0.20));
+  animation: swingImage 4s ease-in-out infinite;
+  animation-delay: 2.8s;
+}
+
+/* ── FADE IN ── */
+@keyframes fadeInImage {
+  0% { 
+    opacity: 0; 
+    transform: scale(0.8); 
+  }
+  100% { 
+    opacity: 1; 
+    transform: scale(1); 
+  }
+}
+
+/* ── SWING CON TRANSICIÓN SUAVE (empieza desde 0 y va aumentando) ── */
+@keyframes swingImage {
+  0% { 
+    transform: rotate(0deg);  /* Empieza recto */
+  }
+  10% { 
+    transform: rotate(-0.3deg);  /* Primer movimiento muy sutil */
+  }
+  25% { 
+    transform: rotate(-0.5deg);  /* Llega al swing completo */
+  }
+  50% { 
+    transform: rotate(0.5deg); 
+  }
+  75% { 
+    transform: rotate(-0.5deg); 
+  }
+  100% { 
+    transform: rotate(0.5deg); 
+  }
+}
+
+/* ── IMAGEN ARRIBA IZQUIERDA (debajo del navbar) ── */
+.top-left-image {
+  position: fixed;
+  top: 60px;
+  left: 130px;
+  z-index: 10005;
+  pointer-events: none;
+  opacity: 0;
+  animation: fadeInImage 0.8s ease 2s forwards;
+  transform-origin: top center;
+  will-change: transform;
+}
+   
+.top-left-image img {
+  width: 200px;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 4px 16px rgba(200, 133, 58, 0.20));
+  animation: swingImage 2.5s ease-in-out infinite; /* MÁS RÁPIDO = MENOS PAUSA */
+  animation-delay: 2.8s;
+}
+  
+/* ── FADE IN ── */
+@keyframes fadeInImage {
+  0% { 
+    opacity: 0; 
+    transform: scale(0.8); 
+  }
+  100% { 
+    opacity: 1; 
+    transform: scale(1); 
+  }
+}
+
+/* ── SWING CONTINUO (sin pausas, como un péndulo) ── */
+@keyframes swingImage {
+  0% { transform: rotate(-1.5deg); }
+  50% { transform: rotate(1.5deg); }
+  100% { transform: rotate(-1.5deg); }
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .top-left-image {
+    top: 55px;
+    left: 40px;
+  }
+  .top-left-image img {
+    width: 70px;
+  }
+  @keyframes swingImage {
+    0% { transform: rotate(-1.2deg); }
+    50% { transform: rotate(1.2deg); }
+    100% { transform: rotate(-1.2deg); }
+  }
+}
+
+@media (max-width: 480px) {
+  .top-left-image {
+    top: 50px;
+    left: 30px;
+  }
+  .top-left-image img {
+    width: 55px;
+  }
+  @keyframes swingImage {
+    0% { transform: rotate(-1deg); }
+    50% { transform: rotate(1deg); }
+    100% { transform: rotate(-1deg); }
+  }
 }

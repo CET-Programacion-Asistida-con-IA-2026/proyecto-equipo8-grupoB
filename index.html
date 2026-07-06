@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -7,14 +6,48 @@
   <title>TerraJob ✿ Gummy, tu espacio cozy</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Darumadrop+One&family=Edu+SA+Beginner:wght@400..700&family=Londrina+Sketch&family=Sour+Gummy:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Darumadrop+One&family=Edu+SA+Beginner:wght@400..700&family=Londrina+Sketch&family=Sour+Gummy:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="MainStyle.css">
 </head>
 
 <body class="day">
+
+<!-- EFECTO DE RAYO DE LUZ DESDE LA IZQUIERDA (ANGOSTO) -->
+<div class="light-ray">
+  <div class="ray-beam"></div>
+  <div class="ray-beam-soft"></div>
+  <div class="ray-beam-glow"></div>
+</div>
+
+<!-- EFECTO DE RAYO DE LUZ DIAGONAL (ARRIBA-DERECHA → CENTRO) -->
+<div class="light-ray">
+  <div class="ray-beam"></div>
+  <div class="ray-beam-soft"></div>
+  <div class="ray-beam-glow"></div>
+</div>
+
+<!-- Resplandor ambiental -->
+<div class="ambient-glow"></div>
+
+<!-- Partículas de luz -->
+<div class="light-particles-ray">
+  <div class="light-particle-ray"></div>
+  <div class="light-particle-ray"></div>
+  <div class="light-particle-ray"></div>
+  <div class="light-particle-ray"></div>
+  <div class="light-particle-ray"></div>
+  <div class="light-particle-ray"></div>
+  <div class="light-particle-ray"></div>
+  <div class="light-particle-ray"></div>
+  <div class="light-particle-ray"></div>
+  <div class="light-particle-ray"></div>
+</div>
+
+<!-- ── IMAGEN ARRIBA IZQUIERDA ── -->
+<div class="top-left-image">
+  <img src="top-plant.png" alt="Decoración">
+</div>
 
 <!-- ═══════════════════════════════════════════════════════════════
      PANTALLA DE LOGIN
@@ -160,6 +193,7 @@
     </div>
   </div>
 </section>
+
   <!-- ─────────────────────────────────────────────────────────────
        SECCIÓN 3: INVERNADERO DE HABILIDADES
   ────────────────────────────────────────────────────────────── -->
@@ -194,14 +228,12 @@
       <p class="calendar-subtitle">Entrevistas, fechas límite, eventos y recordatorios — todo en un solo lugar.</p>
       
       <div class="calendar-custom">
-        <!-- Cabecera del calendario -->
         <div class="calendar-header">
           <button class="calendar-nav-btn interactive" id="calendar-prev">◀</button>
           <span class="calendar-month-year" id="calendar-month-year">Julio 2026</span>
           <button class="calendar-nav-btn interactive" id="calendar-next">▶</button>
         </div>
 
-        <!-- Días de la semana -->
         <div class="calendar-weekdays">
           <span>LUN</span>
           <span>MAR</span>
@@ -212,10 +244,7 @@
           <span>DOM</span>
         </div>
 
-        <!-- Grid de días -->
-        <div class="calendar-grid" id="calendar-grid">
-          <!-- Se genera con JavaScript -->
-        </div>
+        <div class="calendar-grid" id="calendar-grid"></div>
       </div>
     </div>
   </section>
@@ -263,18 +292,14 @@
 
       <div class="perfil-layout">
 
-        <!-- FOTO DE PERFIL -->
         <div class="perfil-avatar-block">
           <div class="perfil-avatar-preview" id="perfil-avatar-preview">
             <img src="avatar-perro.png" alt="Avatar" id="avatar-img" />
           </div>
           <div class="perfil-avatar-label">Elegí tu avatar</div>
-          <div class="avatar-options" id="avatar-options">
-            <!-- Las opciones de avatar se generan en MainJS.js -->
-          </div>
+          <div class="avatar-options" id="avatar-options"></div>
         </div>
 
-        <!-- FICHA / LIBRETA -->
         <div class="perfil-info-block">
           <label class="perfil-field">
             <span class="perfil-field-label">Nombre</span>
@@ -299,10 +324,10 @@
             <span class="perfil-field-label">Habilidades</span>
             <textarea id="perfil-habilidades" class="perfil-textarea" rows="2" placeholder="Ej: trabajo en equipo, resolución de problemas..."></textarea>
           </label>
-
+   
           <label class="perfil-field">
-            <span class="perfil-field-label">Tecnologías conocidas</span>
-            <textarea id="perfil-tecnologias" class="perfil-textarea" rows="2" placeholder="Ej: HTML, CSS, JavaScript, Unity, C#..."></textarea>
+            <span class="perfil-field-label">Programas Conocidos</span>
+            <textarea id="perfil-tecnologias" class="perfil-textarea" rows="2" placeholder="Ej: Adobe Photoshop, Excel, Unity, ZBrush..."></textarea>
           </label>
 
           <div class="perfil-save-row">
@@ -367,11 +392,11 @@
       <div class="footer-sub">Chicas en Tec · Grupo 8B · Con amor y código 💛</div>
     </div>
   </footer>
-
+  
 </div><!-- fin #app -->
 
 <script src="MainJS.js"></script>
-<div id="confetti-container"></div> <!-- confetitos cuando se cumpla una meta -->
+<div id="confetti-container"></div>
 
 </body>
 </html>
