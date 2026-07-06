@@ -7,7 +7,7 @@
 */
 
 // ================================================================
-// 1. AUDIO 
+// 1. AUDIO - EFECTOS DE SONIDO (OSCILADORES) + MÚSICA MP3
 // ================================================================
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
@@ -21,7 +21,49 @@ function getAudioCtx() {
   if (!audioCtx) audioCtx = new AudioCtx();
   return audioCtx;
 }
-   
+
+// ================================================================
+// 1.1 EFECTOS DE SONIDO (SIEMPRE CON OSCILADORES)
+// ================================================================
+
+function playClick() {
+  if (!sfxEnabled) return;
+  try {
+    const ctx = getAudioCtx();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g);
+    g.connect(ctx.destination);
+    o.frequency.setValueAtTime(880, ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(1320, ctx.currentTime + 0.08);
+    g.gain.setValueAtTime(0.18, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+    o.start();
+    o.stop(ctx.currentTime + 0.2);
+  } catch(e) {
+    console.log('Error en playClick:', e);
+  }
+}
+
+function playType() {
+  if (!sfxEnabled) return;
+  try {
+    const ctx = getAudioCtx();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g);
+    g.connect(ctx.destination);
+    const freqs = [440, 523, 587, 659, 784, 880];
+    o.frequency.setValueAtTime(freqs[Math.floor(Math.random() * freqs.length)], ctx.currentTime);
+    g.gain.setValueAtTime(0.06, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+    o.start();
+    o.stop(ctx.currentTime + 0.08);
+  } catch(e) {
+    console.log('Error en playType:', e);
+  }
+}
+
 // ================================================================
 // 2. MÚSICA CON MP3 LOCALES
 // ================================================================
@@ -29,17 +71,17 @@ function getAudioCtx() {
 // Configuración de tracks con archivos MP3 locales
 const MP3_TRACKS = {
   0: {
-    name: 'Café Cozy',
+    name: 'Brisa Alegre',
     file: 'track-cozy.mp3',
     volume: 0.3
   },
   1: {
-    name: 'Lluvia & Jazz',
+    name: 'Calma Nocturna',
     file: 'track-rainy.mp3',
     volume: 0.25
   },
   2: {
-    name: 'Otoño Suave',
+    name: 'Aroma Dulce',
     file: 'track-autumn.mp3',
     volume: 0.3
   }
@@ -67,10 +109,9 @@ function createAudioElement(trackIndex) {
   // Manejar errores de carga
   audioElement.addEventListener('error', function(e) {
     console.error('Error cargando el archivo MP3:', track.file, e);
-    // Intentar cargar el siguiente track o mostrar mensaje
     const msg = document.getElementById('motivational-quote');
     if (msg) {
-      msg.textContent = '🎵 No pude cargar la música. ¿Está el archivo ' + track.file + ' en la carpeta?';
+      msg.textContent = '  ';
       setTimeout(() => {
         msg.textContent = '"Cada pequeño paso cuenta. ¡Hoy es un buen día para empezar! 🌱"';
       }, 5000);
@@ -156,40 +197,6 @@ function stopMusic() {
   }
 }
 
-// Función para pausar música
-function pauseMusic() {
-  if (audioElement && isAudioPlaying) {
-    try {
-      audioElement.pause();
-      isAudioPlaying = false;
-      console.log('⏸️ Música pausada');
-    } catch (e) {
-      console.error('Error pausando audio:', e);
-    }
-  }
-}
-
-// Función para reanudar música
-function resumeMusic() {
-  if (audioElement && !isAudioPlaying) {
-    try {
-      const playPromise = audioElement.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            isAudioPlaying = true;
-            console.log('▶️ Música reanudada');
-          })
-          .catch(error => {
-            console.log('⏸️ No se pudo reanudar:', error);
-          });
-      }
-    } catch (e) {
-      console.error('Error reanudando audio:', e);
-    }
-  }
-}
-
 // Función principal para cambiar música
 function playCozyBg() {
   if (!musicEnabled || currentTrack === -1) {
@@ -208,7 +215,7 @@ function playCozyBg() {
 }
 
 // ================================================================
-// 3. CONTROLES DE AUDIO 
+// 3. CONTROLES DE AUDIO CON ICONOS PNG
 // ================================================================
 
 // Botón de efectos de sonido
@@ -217,6 +224,8 @@ document.getElementById('sfx-btn').addEventListener('click', () => {
   const icon = document.getElementById('sfx-icon');
   icon.src = sfxEnabled ? 'icon-sfx.png' : 'icon-sfx-muted.png';
   document.getElementById('sfx-btn').classList.toggle('muted', !sfxEnabled);
+  // Reproducir sonido de prueba al hacer clic
+  if (sfxEnabled) playClick();
 });
 
 // Botón de música
@@ -226,6 +235,7 @@ const trackSelector = document.getElementById('track-selector');
 musicBtn.addEventListener('click', (e) => {
   e.stopPropagation();
   trackSelector.classList.toggle('open');
+  playClick();
 });
 
 // Botones de selección de tracks
@@ -261,17 +271,36 @@ document.querySelectorAll('.track-btn').forEach(btn => {
 // Cerrar selector al hacer clic fuera
 document.addEventListener('click', () => trackSelector.classList.remove('open'));
 
-// Efecto de tecleo
-document.addEventListener('keydown', () => playType());
+// Efecto de tecleo (se activa al escribir en el chat)
+document.addEventListener('keydown', (e) => {
+  // Solo si no está escribiendo en un input o textarea
+  if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+    playType();
+  }
+});
+
+// También activar playType cuando se escribe en el chat (desde el evento original)
+// El evento original ya está en el chat, pero lo dejamos como respaldo
 
 // Manejar la reproducción automática al cargar
-document.addEventListener('click', function initAudio() {
-  if (musicEnabled && currentTrack !== -1 && !isAudioPlaying) {
+let audioInitialized = false;
+
+function initAudioOnInteraction() {
+  if (!audioInitialized && musicEnabled && currentTrack !== -1) {
     playCozyBg();
+    audioInitialized = true;
+    console.log('🎵 Audio inicializado por interacción del usuario');
   }
-  // Remover el listener después del primer clic
-  document.removeEventListener('click', initAudio);
-}, { once: true });
+}
+
+// Escuchar cualquier clic para inicializar el audio
+document.addEventListener('click', initAudioOnInteraction, { once: false });
+// También en teclado
+document.addEventListener('keydown', initAudioOnInteraction, { once: false });
+// También en touch
+document.addEventListener('touchstart', initAudioOnInteraction, { once: false });
+
+console.log('🐰✿ TerraJob — Sistema de audio: Efectos SFX + Música MP3 ✿🐰');
 
 // ================================================================
 // 4. ROTACIÓN DE FONDOS
