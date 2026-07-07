@@ -1638,32 +1638,8 @@ a, button, .interactive {
   overflow: visible;
 }
 
-<<<<<<< HEAD
 @keyframes fall{
     
-=======
-/* RAYO PRINCIPAL - Diagonal desde arriba-derecha hacia centro (más a la derecha) */
-.ray-beam {
-  position: absolute;
-  top: -30%;
-  right: -30%;     /* <-- CAMBIADO: antes -20%, ahora -10% (más a la derecha) */
-  width: 100%;     /* <-- CAMBIADO: antes 120%, ahora 100% (más angosto) */
-  height: 200%;
-  background: linear-gradient(
-    145deg,
-    transparent 10%,
-    rgba(255, 240, 180, 0.35) 20%,
-    rgba(255, 230, 120, 0.65) 30%,
-    rgba(255, 255, 220, 0.90) 38%,
-    rgba(255, 240, 150, 0.75) 45%,
-    rgba(255, 220, 100, 0.55) 52%,
-    rgba(255, 200, 80, 0.30) 60%,
-    transparent 75%
-  );
-  transform: rotate(-35deg) translateX(30px);  /* <-- AÑADIDO: desplazado a la derecha */
-  animation: rayMove 8s ease-in-out infinite alternate;
-  filter: blur(10px);
->>>>>>> be81d8c80ec179edeebc12693db97f5bb5aa84f6
 }
 
 /* SEGUNDO RAYO - Más suave y envolvente (más a la derecha) */
