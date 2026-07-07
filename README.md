@@ -1,8 +1,8 @@
-# 🌱 JobQuest - Compañero Gamificado para la Búsqueda Laboral
+# 🌱 TerraJob - Compañero Gamificado para la Búsqueda Laboral
 
 ## 📌 Sobre el Proyecto
 
-**JobQuest** es una plataforma web diseñada para transformar la búsqueda laboral en una experiencia más organizada, motivadora y personalizada.
+**TerraJob** es una plataforma web diseñada para transformar la búsqueda laboral en una experiencia más organizada, motivadora y personalizada.
 
 Muchos jóvenes experimentan frustración, ansiedad y desmotivación al buscar empleo. El proceso suele ser largo, repetitivo y emocionalmente agotador, especialmente para estudiantes, freelancers y personas que buscan su primera oportunidad laboral.
 
@@ -17,7 +17,7 @@ Este proyecto contribuye a los siguientes Objetivos de Desarrollo Sostenible (OD
 
 ## 🎯 Público Objetivo
 
-JobQuest está orientado a jóvenes de entre **18 y 30 años**, incluyendo:
+TerraJob está orientado a jóvenes de entre **18 y 30 años**, incluyendo:
 
 * Estudiantes
 * Personas en búsqueda de su primer empleo
