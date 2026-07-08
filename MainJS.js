@@ -1,23 +1,26 @@
+/*
+╔══════════════════════════════════════════════════════════════════╗
+║                    GUMMY ✿ SCRIPT.JS                            ║
+║         Asistente Inteligente con Memoria y Contexto            ║
+║                    CON ICONOS PNG                               ║
+╚══════════════════════════════════════════════════════════════════╝
+*/
 
 // ================================================================
-// 1. AUDIO - EFECTOS DE SONIDO (OSCILADORES) + MÚSICA MP3
+// 1. AUDIO
 // ================================================================
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
 let sfxEnabled = true;
 let musicEnabled = true;
 let currentTrack = 0;
-let audioElement = null;
-let isAudioPlaying = false;
+let musicGain = null;
+let musicLoopActive = false;
 
 function getAudioCtx() {
   if (!audioCtx) audioCtx = new AudioCtx();
   return audioCtx;
 }
-   
-// ================================================================
-// 1.1 EFECTOS DE SONIDO (SIEMPRE CON OSCILADORES)
-// ================================================================
 
 function playClick() {
   if (!sfxEnabled) return;
@@ -33,9 +36,7 @@ function playClick() {
     g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
     o.start();
     o.stop(ctx.currentTime + 0.2);
-  } catch(e) {
-    console.log('Error en playClick:', e);
-  }
+  } catch(e) {}
 }
 
 function playType() {
@@ -52,186 +53,88 @@ function playType() {
     g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
     o.start();
     o.stop(ctx.currentTime + 0.08);
-  } catch(e) {
-    console.log('Error en playType:', e);
-  }
+  } catch(e) {}
 }
 
 // ================================================================
-// 2. MÚSICA CON MP3 LOCALES
+// 2. MÚSICA
 // ================================================================
-
-// Configuración de tracks con archivos MP3 locales
-const MP3_TRACKS = {
-  0: {
-    name: 'Brisa Alegre',
-    file: 'track-cozy.mp3',
-    volume: 0.3
-  },
-  1: {
-    name: 'Calma Nocturna',
-    file: 'track-rainy.mp3',
-    volume: 0.25
-  },
-  2: {
-    name: 'Aroma Dulce',
-    file: 'track-autumn.mp3',
-    volume: 0.3
-  }
-};
-
-// Crear y configurar el elemento de audio
-function createAudioElement(trackIndex) {
-  const track = MP3_TRACKS[trackIndex];
-  if (!track) return null;
-  
-  // Si ya existe un elemento, limpiarlo
-  if (audioElement) {
-    audioElement.pause();
-    audioElement.src = '';
-    audioElement = null;
-  }
-  
-  // Crear nuevo elemento de audio
-  audioElement = new Audio();
-  audioElement.src = track.file;
-  audioElement.loop = true;
-  audioElement.volume = track.volume;
-  audioElement.preload = 'auto';
-  
-  // Manejar errores de carga
-  audioElement.addEventListener('error', function(e) {
-    console.error('Error cargando el archivo MP3:', track.file, e);
-    const msg = document.getElementById('motivational-quote');
-    if (msg) {
-      msg.textContent = '  ';
-      setTimeout(() => {
-        msg.textContent = '"Cada pequeño paso cuenta. ¡Hoy es un buen día para empezar! 🌱"';
-      }, 5000);
-    }
-  });
-  
-  // Cuando el audio está listo para reproducirse
-  audioElement.addEventListener('canplaythrough', function() {
-    console.log('✅ Música lista:', track.file);
-  });
-  
-  return audioElement;
-}
-
-// Función para reproducir música
-function playMP3Track(trackIndex) {
-  // Si es el track -1 (sin música), detener todo
-  if (trackIndex === -1) {
-    stopMusic();
-    return;
-  }
-  
-  const track = MP3_TRACKS[trackIndex];
-  if (!track) {
-    console.error('Track no encontrado:', trackIndex);
-    return;
-  }
-  
-  try {
-    // Crear o actualizar el elemento de audio
-    if (!audioElement || audioElement.src !== track.file) {
-      createAudioElement(trackIndex);
-    }
-    
-    if (audioElement) {
-      // Forzar la recarga si el archivo cambió
-      if (audioElement.src !== track.file) {
-        audioElement.src = track.file;
-        audioElement.load();
-      }
-      
-      // Reproducir con manejo de promesas
-      const playPromise = audioElement.play();
-      
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            isAudioPlaying = true;
-            console.log('▶️ Reproduciendo:', track.name);
-          })
-          .catch(error => {
-            // Autoplay bloqueado por el navegador
-            console.log('⏸️ Autoplay bloqueado, esperando interacción:', error);
-            isAudioPlaying = false;
-            
-            // Mostrar mensaje al usuario
-            const msg = document.getElementById('motivational-quote');
-            if (msg) {
-              msg.textContent = '🎵 Haz clic en la página para activar la música';
-              setTimeout(() => {
-                msg.textContent = '"Cada pequeño paso cuenta. ¡Hoy es un buen día para empezar! 🌱"';
-              }, 4000);
-            }
-          });
-      }
-    }
-  } catch (e) {
-    console.error('Error reproduciendo audio:', e);
-  }
-}
-
-// Función para detener música
 function stopMusic() {
-  if (audioElement) {
+  musicLoopActive = false;
+  if (musicGain) {
     try {
-      audioElement.pause();
-      audioElement.currentTime = 0;
-      isAudioPlaying = false;
-      console.log('⏹️ Música detenida');
-    } catch (e) {
-      console.error('Error deteniendo audio:', e);
-    }
+      const ctx = getAudioCtx();
+      musicGain.gain.setTargetAtTime(0, ctx.currentTime, 0.2);
+      setTimeout(() => {
+        try { musicGain.disconnect(); } catch(e) {}
+        musicGain = null;
+      }, 400);
+    } catch(e) { musicGain = null; }
   }
 }
 
-// Función principal para cambiar música
 function playCozyBg() {
-  if (!musicEnabled || currentTrack === -1) {
-    stopMusic();
-    return;
-  }
-  
-  // Verificar que el archivo existe
-  const track = MP3_TRACKS[currentTrack];
-  if (!track) {
-    console.error('Track no configurado:', currentTrack);
-    return;
-  }
-  
-  playMP3Track(currentTrack);
+  if (!musicEnabled || currentTrack === -1) return;
+  stopMusic();
+  try {
+    const ctx = getAudioCtx();
+    const myToken = Symbol();
+    musicLoopActive = myToken;
+    const newGain = ctx.createGain();
+    newGain.gain.value = 0;
+    newGain.connect(ctx.destination);
+    newGain.gain.linearRampToValueAtTime(0.08, ctx.currentTime + 0.4);
+    musicGain = newGain;
+
+    const trackNotes = [
+      [261, 294, 329, 349, 392, 440, 494],
+      [220, 261, 294, 329, 392],
+      [196, 220, 261, 294, 329],
+    ];
+    const notes = trackNotes[currentTrack] || trackNotes[0];
+    let time = ctx.currentTime + 0.1;
+
+    const scheduleNote = () => {
+      if (musicLoopActive !== myToken) return;
+      const o = ctx.createOscillator();
+      const g2 = ctx.createGain();
+      o.type = currentTrack === 1 ? 'triangle' : 'sine';
+      o.connect(g2);
+      g2.connect(newGain);
+      const note = notes[Math.floor(Math.random() * notes.length)];
+      o.frequency.setValueAtTime(note, time);
+      const dur = 0.5 + Math.random() * 0.7;
+      g2.gain.setValueAtTime(0, time);
+      g2.gain.linearRampToValueAtTime(0.18, time + 0.04);
+      g2.gain.setTargetAtTime(0, time + dur - 0.12, 0.06);
+      o.start(time);
+      o.stop(time + dur + 0.1);
+      time += dur * 0.55;
+      const delay = Math.max(0, (time - ctx.currentTime) * 1000 - 150);
+      setTimeout(scheduleNote, delay);
+    };
+    scheduleNote();
+  } catch(e) {}
 }
 
 // ================================================================
 // 3. CONTROLES DE AUDIO CON ICONOS PNG
 // ================================================================
-
-// Botón de efectos de sonido
 document.getElementById('sfx-btn').addEventListener('click', () => {
   sfxEnabled = !sfxEnabled;
   const icon = document.getElementById('sfx-icon');
   icon.src = sfxEnabled ? 'icon-sfx.png' : 'icon-sfx-muted.png';
   document.getElementById('sfx-btn').classList.toggle('muted', !sfxEnabled);
-  // Reproducir sonido de prueba al hacer clic
-  if (sfxEnabled) playClick();
 });
 
-// Botón de música
 const musicBtn = document.getElementById('music-btn');
 const trackSelector = document.getElementById('track-selector');
 
 musicBtn.addEventListener('click', (e) => {
   e.stopPropagation();
   trackSelector.classList.toggle('open');
-  playClick();
 });
 
-// Botones de selección de tracks
 document.querySelectorAll('.track-btn').forEach(btn => {
   btn.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -240,12 +143,10 @@ document.querySelectorAll('.track-btn').forEach(btn => {
     btn.classList.add('active');
     trackSelector.classList.remove('open');
 
-    // Detener música actual
-    stopMusic();
-    
     if (track === -1) {
       currentTrack = -1;
       musicEnabled = false;
+      stopMusic();
       musicBtn.classList.add('muted');
       document.getElementById('music-icon').src = 'icon-music-muted.png';
     } else {
@@ -254,46 +155,14 @@ document.querySelectorAll('.track-btn').forEach(btn => {
       musicBtn.classList.remove('muted');
       document.getElementById('music-icon').src = 'icon-music.png';
       window._musicStarted = true;
-      // Reproducir la nueva música
       playCozyBg();
     }
     playClick();
   });
 });
 
-// Cerrar selector al hacer clic fuera
 document.addEventListener('click', () => trackSelector.classList.remove('open'));
-
-// Efecto de tecleo (se activa al escribir en el chat)
-document.addEventListener('keydown', (e) => {
-  // Solo si no está escribiendo en un input o textarea
-  if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
-    playType();
-  }
-});
-
-// También activar playType cuando se escribe en el chat (desde el evento original)
-// El evento original ya está en el chat, pero lo dejamos como respaldo
-
-// Manejar la reproducción automática al cargar
-let audioInitialized = false;
-
-function initAudioOnInteraction() {
-  if (!audioInitialized && musicEnabled && currentTrack !== -1) {
-    playCozyBg();
-    audioInitialized = true;
-    console.log('🎵 Audio inicializado por interacción del usuario');
-  }
-}
-
-// Escuchar cualquier clic para inicializar el audio
-document.addEventListener('click', initAudioOnInteraction, { once: false });
-// También en teclado
-document.addEventListener('keydown', initAudioOnInteraction, { once: false });
-// También en touch
-document.addEventListener('touchstart', initAudioOnInteraction, { once: false });
-
-console.log('🐰✿ TerraJob — Sistema de audio: Efectos SFX + Música MP3 ✿🐰');
+document.addEventListener('keydown', () => playType());
 
 // ================================================================
 // 4. ROTACIÓN DE FONDOS
@@ -318,9 +187,10 @@ revealEls.forEach(el => observer.observe(el));
 // 6. SALUDO ANIMADO
 // ================================================================
 const greetings = [
-  '👋',
-  '💛',
-  '🏆',
+  '¡Hola, explorador! 👋',
+  '¡Hola, soñador! ✨',
+  '¡Bienvenido de vuelta! 🌿',
+  '¡Hola, campeón! 🏆',
 ];
 const greet = greetings[Math.floor(Math.random() * greetings.length)];
 const typedEl = document.getElementById('typed-greeting');
@@ -538,7 +408,7 @@ let userMemory = {
 };
 
 function loadMemory() {
-  const saved = localStorage.getItem('terrajob_memory');
+  const saved = localStorage.getItem('gummy_memory');
   if (saved) {
     try {
       const data = JSON.parse(saved);
@@ -550,7 +420,7 @@ loadMemory();
 
 function saveMemory() {
   try {
-    localStorage.setItem('terrajob_memory', JSON.stringify(userMemory));
+    localStorage.setItem('gummy_memory', JSON.stringify(userMemory));
   } catch(e) {}
 }
 
@@ -665,7 +535,7 @@ function generateResponse(userText, emotion, info) {
   // ================================================================
   // 3. EMOCIONES NEGATIVAS
   // ================================================================
-  if (emotion === 'triste' || emotion === 'mato' || emotion === 'angustiado') {
+  if (emotion === 'triste') {
     const respuestas = [
       `Escucharte me duele el corazón 🐰💛 ${userMemory.nombre ? userMemory.nombre + ', ' : ''}no estás sola. Lo que sentís es válido y merece ser escuchado. ¿Querés contarme qué está pasando? Estoy aquí para escucharte sin juzgar.`,
       `Siento mucho que estés pasando por esto 🐰🌿 ${userMemory.nombre ? userMemory.nombre + ', ' : ''}a veces las cosas se ponen difíciles, pero quiero que sepas que este momento no define quién sos. ¿Qué te tiene así?`,
@@ -694,34 +564,7 @@ function generateResponse(userText, emotion, info) {
   }
 
   // ================================================================
-  // 5. CV / CURRÍCULUM (detecta "cv", "curriculum", "currículum")
-  // ================================================================
- if (lower.match(/(^|\s)cv(\s|$|\.)|curr[íi]culum|curriculum|currículum|hoja de vida|resume/i)) {
-  const nombre = userMemory.nombre ? userMemory.nombre + ', ' : '';
-  const habilidades = userMemory.habilidades.length > 0 ? `Según tus habilidades (${userMemory.habilidades.join(', ')}), ` : '';
-  
-  return `¡Excelente pregunta! Tu CV es tu carta de presentación más importante 📄🐰 ${nombre}
-  
-Te comparto una guía completa para que tu CV brille:
-
-📌 **Estructura recomendada:**
-1️⃣ Datos de contacto (mail, teléfono, LinkedIn, ciudad)
-2️⃣ Resumen profesional (3-4 líneas que cuenten quién sos y qué buscás)
-3️⃣ Experiencia laboral (con logros CUANTIFICABLES, no solo tareas)
-4️⃣ Educación y cursos relevantes
-5️⃣ Habilidades técnicas y blandas
-
-💡 **Tips clave:**
-• Usá números: "aumenté ventas un 30%", "gestioné equipo de 5 personas"
-• Adaptá el CV a cada oferta (no mandes el mismo a todas)
-• Mantenelo en 1-2 páginas como máximo
-• Revisá ortografía y formato (¡que sea legible!)
-
-${habilidades}¿Querés que profundice en alguna sección en particular o te ayudo a armar un resumen profesional? 🐰✨`;
-}
-
-  // ================================================================
-  // 6. TEMAS LABORALES (incluye "cv" como sinónimo de currículum)
+  // 5. TEMAS LABORALES (incluye "cv" como sinónimo de currículum)
   // ================================================================
   if (lower.match(/trabajo|empleo|buscar|conseguir|postular|aplicar|laburo/)) {
     if (userMemory.habilidades.length > 0 || userMemory.profesion) {
@@ -730,7 +573,13 @@ ${habilidades}¿Querés que profundice en alguna sección en particular o te ayu
     }
     return `Buscar trabajo es un viaje importante 🐰🌿 ¿En qué área te gustaría trabajar? Contame sobre tus habilidades y experiencias, así puedo ayudarte mejor a encontrar el camino adecuado.`;
   }
-   
+
+  // ================================================================
+  // 6. CV / CURRÍCULUM (detecta "cv", "curriculum", "currículum")
+  // ================================================================
+  if (lower.match(/cv\b|curr[íi]culum|curriculum|currículum/)) {
+    return `Tu CV es tu carta de presentación 📄🐰 ${userMemory.nombre ? userMemory.nombre + ', ' : ''}recordá incluir: datos de contacto, un resumen profesional que refleje quién sos, experiencia con logros concretos (no solo tareas), educación y habilidades relevantes. Si querés, puedo darte tips más específicos según tu área.`;
+  }
 
   // ================================================================
   // 7. ENTREVISTAS
@@ -901,24 +750,26 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 
 // ================================================================
-// 12. PLANTAS — VERSIÓN PNG
+// 12. PLANTAS — VERSIÓN PNG (CORREGIDA: MÁS GRANDES Y ELEVADAS)
 // ================================================================
-const STAGE_THRESHOLDS = [0, 25, 50, 75];
-const PLANT_NAMES = ['Rose', 'Daisy', 'Lily'];
+const STAGE_THRESHOLDS = [0, 25, 50, 75];          // 4 fases (1-4)
+const PLANT_NAMES = ['Rose', 'Daisy', 'Lily'];     // Nombres de las plantas
 
 function getStage(pct) {
   let stage = 0;
   for (let i = STAGE_THRESHOLDS.length - 1; i >= 0; i--) {
     if (pct >= STAGE_THRESHOLDS[i]) { stage = i; break; }
   }
-  return stage;
+  return stage;  // 0, 1, 2 o 3
 }
 
 function plantImageHTML(plantName, stage) {
   const stageNum = stage + 1;
   return `
     <div style="position:relative; width:64px; height:120px; display:flex; align-items:flex-end; justify-content:center;">
+      <!-- Maceta (abajo) -->
       <img src="Pot.png" style="position:absolute; bottom:0; left:0; width:100%; height:auto; object-fit:contain; z-index:1;" alt="Maceta">
+      <!-- Planta (más arriba y a la izquierda) -->
       <img src="${plantName}${stageNum}.png" style="position:absolute; bottom:45px; left:40%; transform:translateX(-40%); width:90%; height:auto; object-fit:contain; z-index:2;" alt="${plantName} fase ${stageNum}">
     </div>
   `;
@@ -1295,20 +1146,20 @@ renderPostits();
 // ================================================================
 // 15. METAS
 // ================================================================
-  let dailyMetas = JSON.parse(localStorage.getItem('terrajob_daily_metas')) || [
+  let dailyMetas = JSON.parse(localStorage.getItem('dailyMetas')) || [
     { text: 'Aplicar a 3 empleos', done: false },
     { text: 'Actualizar CV', done: false },
     { text: 'Mejorar portfolio', done: false },
   ];
 
-  let weeklyMetas = JSON.parse(localStorage.getItem('terrajob_weekly_metas')) || [
+  let weeklyMetas = JSON.parse(localStorage.getItem('weeklyMetas')) || [
     { text: 'Conectar con 5 reclutadores', done: false, fechaLimite: '' },
     { text: 'Completar un curso corto', done: false, fechaLimite: '' },
   ];
 
   function saveMetas() {
-    localStorage.setItem('terrajob_daily_metas', JSON.stringify(dailyMetas));
-    localStorage.setItem('terrajob_weekly_metas', JSON.stringify(weeklyMetas));
+    localStorage.setItem('dailyMetas', JSON.stringify(dailyMetas));
+    localStorage.setItem('weeklyMetas', JSON.stringify(weeklyMetas));
   }
 
   function renderMetas() {
@@ -1479,16 +1330,16 @@ updateQuotes();
 setInterval(updateQuotes, 8000);
 
 // ================================================================
-// 17. PERFIL — AVATARES (5 opciones: perro, gato, pato, abeja, carpincho)
+// 17. PERFIL — AVATARES (5 opciones: cat, dog, capy, bee, duck)
 // ================================================================
 const avatarFiles = [
-  'avatar-perro.png',    // Perro (default)
-  'avatar-gato.png',     // Gato
-  'avatar-pato.png',     // Pato
-  'avatar-abeja.png',    // Abeja
-  'avatar-carpincho.png' // Carpincho
+  'avatar-cat.png',
+  'avatar-dog.png',
+  'avatar-capy.png',
+  'avatar-bee.png',
+  'avatar-duck.png'
 ];
-let currentAvatar = avatarFiles[0]; // Perro como default
+let currentAvatar = avatarFiles[0];
 
 function renderAvatarOptions() {
   const container = document.getElementById('avatar-options');
@@ -1506,7 +1357,7 @@ function renderAvatarOptions() {
       document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('active'));
       this.classList.add('active');
       playClick();
-      localStorage.setItem('terrajob_avatar', file);
+      localStorage.setItem('jobquest_avatar', file);
     });
     container.appendChild(div);
   });
@@ -1514,7 +1365,7 @@ function renderAvatarOptions() {
 renderAvatarOptions();
 
 function loadProfile() {
-  const saved = localStorage.getItem('terrajob_profile');
+  const saved = localStorage.getItem('jobquest_profile');
   if (saved) {
     try {
       const data = JSON.parse(saved);
@@ -1531,7 +1382,6 @@ function loadProfile() {
           el.classList.toggle('active', img && img.src.includes(data.avatar));
         });
       } else {
-        // Default: perro (primer avatar)
         currentAvatar = avatarFiles[0];
         document.getElementById('avatar-img').src = avatarFiles[0];
         document.querySelectorAll('.avatar-option').forEach((el, idx) => {
@@ -1544,7 +1394,6 @@ function loadProfile() {
       }
     } catch(e) {}
   } else {
-    // Default: perro
     currentAvatar = avatarFiles[0];
     document.getElementById('avatar-img').src = avatarFiles[0];
     document.querySelectorAll('.avatar-option').forEach((el, idx) => {
@@ -1553,6 +1402,31 @@ function loadProfile() {
   }
 }
 loadProfile();
+
+document.getElementById('perfil-save-btn').addEventListener('click', () => {
+  const data = {
+    nombre: document.getElementById('perfil-nombre').value,
+    preferencias: document.getElementById('perfil-preferencias').value,
+    habilidades: document.getElementById('perfil-habilidades').value,
+    tecnologias: document.getElementById('perfil-tecnologias').value,
+    avatar: currentAvatar,
+    cvName: document.getElementById('perfil-cv-name').textContent,
+  };
+  localStorage.setItem('jobquest_profile', JSON.stringify(data));
+  const msg = document.getElementById('perfil-save-msg');
+  msg.textContent = '✅ ¡Ficha guardada!';
+  playClick();
+  setTimeout(() => { msg.textContent = ''; }, 3000);
+});
+
+document.getElementById('perfil-cv').addEventListener('change', function(e) {
+  const file = this.files[0];
+  if (file) {
+    document.getElementById('perfil-cv-name').textContent = file.name;
+    playClick();
+  }
+});
+
 // ================================================================
 // 18. LOGIN
 // ================================================================
@@ -1569,7 +1443,7 @@ loginTabs.forEach(tab => {
   });
 });
 
-const sessionUser = localStorage.getItem('terrajob_user');
+const sessionUser = localStorage.getItem('jobquest_user');
 if (sessionUser) {
   loginScreen.classList.add('hidden');
   document.querySelector('.greeting-line #typed-greeting').textContent = `¡Hola, ${sessionUser}! ✨`;
@@ -1586,8 +1460,8 @@ document.getElementById('tab-ingresar').addEventListener('submit', (e) => {
     return;
   }
 
-  const savedUser = localStorage.getItem('terrajob_user');
-  const savedPass = localStorage.getItem('terrajob_pass');
+  const savedUser = localStorage.getItem('jobquest_user');
+  const savedPass = localStorage.getItem('jobquest_pass');
 
   if (savedUser === user && savedPass === pass) {
     error.textContent = '';
@@ -1613,14 +1487,14 @@ document.getElementById('tab-registrarme').addEventListener('submit', (e) => {
     return;
   }
 
-  if (localStorage.getItem('terrajob_user')) {
+  if (localStorage.getItem('jobquest_user')) {
     error.textContent = '❌ Ya existe un usuario registrado. Ingresá directamente.';
     return;
   }
 
-  localStorage.setItem('terrajob_user', user);
-  localStorage.setItem('terrajob_pass', pass);
-  localStorage.setItem('terrajob_name', name);
+  localStorage.setItem('jobquest_user', user);
+  localStorage.setItem('jobquest_pass', pass);
+  localStorage.setItem('jobquest_name', name);
   error.textContent = '✅ ¡Cuenta creada! Ahora ingresá.';
   playClick();
 });
@@ -1658,261 +1532,4 @@ document.addEventListener('click', e => {
   }
 });
 
-console.log('🐰✿ TerraJob — Tu espacio cozy para crecer profesionalmente ✿🐰');
-
-// ================================================================
-// 20. CALENDARIO PERSONALIZADO
-// ================================================================
-
-const CALENDAR_KEY = 'terrajob_calendar_events';
-
-// Obtener eventos guardados
-function getCalendarEvents() {
-  try {
-    const data = localStorage.getItem(CALENDAR_KEY);
-    return data ? JSON.parse(data) : {};
-  } catch {
-    return {};
-  }
-}
-
-// Guardar eventos
-function saveCalendarEvents(events) {
-  localStorage.setItem(CALENDAR_KEY, JSON.stringify(events));
-}
-
-// Obtener eventos de una fecha específica (YYYY-MM-DD)
-function getEventsForDate(dateStr) {
-  const events = getCalendarEvents();
-  return events[dateStr] || [];
-}
-
-// Guardar eventos de una fecha específica
-function setEventsForDate(dateStr, eventList) {
-  const events = getCalendarEvents();
-  if (eventList.length === 0) {
-    delete events[dateStr];
-  } else {
-    events[dateStr] = eventList;
-  }
-  saveCalendarEvents(events);
-}
-
-// Agregar un evento a una fecha
-function addEventToDate(dateStr, eventText) {
-  const events = getEventsForDate(dateStr);
-  if (events.length >= 5) return false;
-  if (eventText.length > 22) eventText = eventText.substring(0, 22);
-  events.push(eventText);
-  setEventsForDate(dateStr, events);
-  return true;
-}
-
-// Eliminar un evento de una fecha
-function removeEventFromDate(dateStr, index) {
-  const events = getEventsForDate(dateStr);
-  events.splice(index, 1);
-  setEventsForDate(dateStr, events);
-}
-
-// Estado del calendario
-let calendarState = {
-  year: 2026,
-  month: 6, // Julio (0-indexed: 0=Ene, 6=Jul)
-};
-
-// Nombres de meses
-const monthNames = [
-  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-];
-
-// Días de la semana (Lunes=0, Domingo=6)
-function getFirstDayOfMonth(year, month) {
-  const day = new Date(year, month, 1).getDay();
-  return day === 0 ? 6 : day - 1;
-}
-
-function getDaysInMonth(year, month) {
-  return new Date(year, month + 1, 0).getDate();
-}
-
-function formatDate(year, month, day) {
-  const m = String(month + 1).padStart(2, '0');
-  const d = String(day).padStart(2, '0');
-  return `${year}-${m}-${d}`;
-}
-
-function renderCalendar() {
-  const grid = document.getElementById('calendar-grid');
-  if (!grid) return;
-
-  const { year, month } = calendarState;
-  const firstDay = getFirstDayOfMonth(year, month);
-  const daysInMonth = getDaysInMonth(year, month);
-
-  document.getElementById('calendar-month-year').textContent = `${monthNames[month]} ${year}`;
-
-  grid.innerHTML = '';
-
-  for (let i = 0; i < firstDay; i++) {
-    const empty = document.createElement('div');
-    empty.className = 'calendar-day empty';
-    grid.appendChild(empty);
-  }
-
-  for (let day = 1; day <= daysInMonth; day++) {
-    const dateStr = formatDate(year, month, day);
-    const events = getEventsForDate(dateStr);
-    const hasEvents = events.length > 0;
-
-    const dayEl = document.createElement('div');
-    dayEl.className = `calendar-day${hasEvents ? ' has-events' : ''}`;
-    dayEl.dataset.date = dateStr;
-
-    const numEl = document.createElement('span');
-    numEl.className = 'day-number';
-    numEl.textContent = day;
-    dayEl.appendChild(numEl);
-
-    const eventsContainer = document.createElement('div');
-    eventsContainer.className = 'day-events';
-
-    const visibleEvents = events.slice(0, 5);
-    const hiddenCount = Math.max(0, events.length - 5);
-
-    visibleEvents.forEach((eventText, idx) => {
-      const eventEl = document.createElement('div');
-      eventEl.className = 'day-event';
-      eventEl.innerHTML = `
-        <span>📌 ${eventText}</span>
-        <button class="event-delete" data-index="${idx}" title="Eliminar">✕</button>
-      `;
-      eventEl.querySelector('.event-delete').addEventListener('click', (e) => {
-        e.stopPropagation();
-        const index = parseInt(e.target.dataset.index);
-        removeEventFromDate(dateStr, index);
-        renderCalendar();
-        playClick();
-      });
-      eventsContainer.appendChild(eventEl);
-    });
-
-    if (hiddenCount > 0) {
-      const moreEl = document.createElement('div');
-      moreEl.className = 'day-event';
-      moreEl.style.background = 'rgba(200,133,58,0.1)';
-      moreEl.textContent = `+${hiddenCount} más`;
-      eventsContainer.appendChild(moreEl);
-    }
-
-    dayEl.appendChild(eventsContainer);
-
-    const addBtn = document.createElement('button');
-    addBtn.className = 'day-add-btn interactive';
-    addBtn.textContent = '+';
-    addBtn.title = 'Agregar evento';
-    addBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (events.length >= 5) return;
-      document.querySelectorAll('.event-input-wrapper.active').forEach(el => {
-        el.classList.remove('active');
-      });
-      const wrapper = dayEl.querySelector('.event-input-wrapper');
-      if (wrapper) {
-        wrapper.classList.toggle('active');
-        const input = wrapper.querySelector('input');
-        if (input) {
-          input.focus();
-          input.value = '';
-        }
-      }
-    });
-    dayEl.appendChild(addBtn);
-
-    const inputWrapper = document.createElement('div');
-    inputWrapper.className = 'event-input-wrapper';
-
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.placeholder = 'Evento (máx 22)';
-    input.maxLength = 22;
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        confirmAdd();
-      }
-      if (e.key === 'Escape') {
-        inputWrapper.classList.remove('active');
-      }
-    });
-
-    const confirmBtn = document.createElement('button');
-    confirmBtn.className = 'event-confirm-btn';
-    confirmBtn.textContent = '➕';
-    confirmBtn.addEventListener('click', confirmAdd);
-
-    const cancelBtn = document.createElement('button');
-    cancelBtn.className = 'event-cancel-btn';
-    cancelBtn.textContent = '✕';
-    cancelBtn.addEventListener('click', () => {
-      inputWrapper.classList.remove('active');
-    });
-
-    function confirmAdd() {
-      const text = input.value.trim();
-      if (text && addEventToDate(dateStr, text)) {
-        renderCalendar();
-        playClick();
-      }
-      inputWrapper.classList.remove('active');
-    }
-
-    inputWrapper.appendChild(input);
-    inputWrapper.appendChild(confirmBtn);
-    inputWrapper.appendChild(cancelBtn);
-    dayEl.appendChild(inputWrapper);
-
-    grid.appendChild(dayEl);
-  }
-}
-
-// Navegación del calendario
-document.addEventListener('DOMContentLoaded', function() {
-  const prevBtn = document.getElementById('calendar-prev');
-  const nextBtn = document.getElementById('calendar-next');
-
-  if (prevBtn) {
-    prevBtn.addEventListener('click', () => {
-      calendarState.month--;
-      if (calendarState.month < 0) {
-        calendarState.month = 11;
-        calendarState.year--;
-      }
-      renderCalendar();
-      playClick();
-    });
-  }
-
-  if (nextBtn) {
-    nextBtn.addEventListener('click', () => {
-      calendarState.month++;
-      if (calendarState.month > 11) {
-        calendarState.month = 0;
-        calendarState.year++;
-      }
-      renderCalendar();
-      playClick();
-    });
-  }
-
-  renderCalendar();
-
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('.calendar-day')) {
-      document.querySelectorAll('.event-input-wrapper.active').forEach(el => {
-        el.classList.remove('active');
-      });
-    }
-  });
-});
-
+console.log('🐰✿ JobQuest — Tu espacio cozy para crecer profesionalmente ✿🐰');

@@ -126,5 +126,3 @@ Proyecto desarrollado con el objetivo de generar un impacto positivo en la exper
 ## 💡 Nuestra Visión
 
 Creemos que buscar trabajo no debería ser una experiencia solitaria ni desmotivadora. JobQuest busca acompañar a cada usuario en su recorrido profesional, ayudándolo a mantenerse enfocado, motivado y preparado para alcanzar nuevas oportunidades.
-
-Link de la página - Github pages: https://cet-programacion-asistida-con-ia-2026.github.io/proyecto-equipo8-grupoB/
